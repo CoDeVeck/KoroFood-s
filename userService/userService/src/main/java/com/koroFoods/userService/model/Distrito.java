@@ -20,5 +20,5 @@ public class Distrito {
     private Integer idDistrito;
 
     @Column(name = "NOMBRE")
-    private String noembre;
+    private String nombre;
 }
