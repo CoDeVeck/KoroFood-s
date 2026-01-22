@@ -1,6 +1,7 @@
 package com.koroFoods.userService.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.koroFoods.userService.enums.TipoDocumento;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -46,6 +46,9 @@ public class Evento {
     @Column(name = "AFORO")
     private Integer aforo;
 
+    @Column(name = "CUPOS")
+    private Integer cupos;
+
     @Column(name = "IMAGEN")
     private String imagen;
 
