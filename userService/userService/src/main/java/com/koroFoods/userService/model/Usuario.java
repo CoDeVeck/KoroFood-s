@@ -40,7 +40,7 @@ public class Usuario {
     private String clave;
 
     @Column(name = "TIPO_DOC")
-    private String tipoDoc;
+    private TipoDocumento tipoDoc;
 
     @Column(name = "NRO_DOC")
     private String nroDoc;
