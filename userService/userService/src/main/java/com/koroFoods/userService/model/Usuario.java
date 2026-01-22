@@ -1,6 +1,7 @@
 package com.koroFoods.userService.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.koroFoods.userService.enums.TipoDocumento;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,7 +41,7 @@ public class Usuario {
     private String clave;
 
     @Column(name = "TIPO_DOC")
-    private String tipoDoc;
+    private TipoDocumento tipoDoc;
 
     @Column(name = "NRO_DOC")
     private String nroDoc;
