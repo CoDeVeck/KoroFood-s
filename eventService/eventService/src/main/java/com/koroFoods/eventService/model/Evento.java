@@ -9,8 +9,7 @@ import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -27,31 +26,26 @@ public class Evento {
 
     @Column(name = "NOMBRE")
     private String nombre;
+    
     @Column(name = "DESCRIPCION")
     private String descripcion;
 
     @ManyToOne
-    @JoinColumn(name = "TIPO_TEMATICA")
+    @JoinColumn(name = "ID_TEMATICA")
     private Tematica tematica;
 
-    @Column(name = "FECHA")
-    private LocalDate fecha;
+    @Column(name = "FECHA_HORA")
+    private LocalDateTime fecha;
 
-    @Column(name = "HORA")
-    private LocalTime hora;
-
-    @Column(name = "PRECIO")
+    @Column(name = "COSTO_EVENTO")
     private BigDecimal precio;
-
-    @Column(name = "AFORO")
-    private Integer aforo;
-
-    @Column(name = "CUPOS")
-    private Integer cupos;
 
     @Column(name = "IMAGEN")
     private String imagen;
 
+    @Column(name = "ESTADO")
+    private String estado;
+    
     @JsonIgnore
     @Transient
     private MultipartFile imagenMultipart; // para la subida de imagens

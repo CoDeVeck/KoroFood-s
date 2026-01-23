@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -29,8 +29,8 @@ public class EventoMesa {
     private Integer idMesa;
 
     @Column(name = "FECHA_DESDE")
-    private LocalDate fechaDesde;
+    private LocalDateTime fechaDesde;
 
     @Column(name = "FECHA_HASTA")
-    private LocalDate fechaHasta;
+    private LocalDateTime fechaHasta;
 }
