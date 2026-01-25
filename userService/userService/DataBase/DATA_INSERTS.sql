@@ -1,15 +1,8 @@
 /*
-CREATE DATABASE mi_base
-WITH ENCODING 'UTF8'
-LC_COLLATE = 'es_PE.UTF-8'
-LC_CTYPE = 'es_PE.UTF-8';
-
 SHOW SERVER_ENCODING;
 SHOW CLIENT_ENCODING;
-
-SET CLIENT_ENCODING TO 'UTF8';
-
 */
+SET CLIENT_ENCODING TO 'UTF8';
 
 
 INSERT INTO TB_ROL (DESCRIPCION) VALUES
@@ -63,8 +56,9 @@ INSERT INTO TB_DISTRITO (NOMBRE) VALUES
 ('Villa El Salvador'),
 ('Villa María del Triunfo');
 
-INSERT INTO TB_USUARIO (NOMBRES, APE_PATERNO, APE_MATERNO, CORREO, CLAVE, TIPO_DOC, NRO_DOC, DIRECCION, ID_DISTRITO, TELEFONO, ID_ROL) VALUES
-('Carlos Alberto', 'Mendoza', 'Quispe', 'carlos.mendoza@restaurant.com', '$2a$10$abcdefghijklmnopqrstuv', 'DNI', '45678901', 'Av. Larco 1234', 21, '987654321', 1),
-('María Elena', 'Rodríguez', 'Pérez', 'maria.rodriguez@restaurant.com', '$2a$10$bcdefghijklmnopqrstuvw', 'DNI', '56789012', 'Jr. Las Flores 567', 30, '987654322', 2),
-('Juan Carlos', 'García', 'Torres', 'juan.garcia@restaurant.com', '$2a$10$cdefghijklmnopqrstuvwx', 'DNI', '67890123', 'Av. Brasil 890', 15, '987654323', 3),
-('Ana Lucía', 'Flores', 'Vásquez', 'ana.flores@email.com', '$2a$10$defghijklmnopqrstuvwxy', 'DNI', '78901234', 'Calle Los Pinos 345', 40, '987654324', 4);
+INSERT INTO TB_USUARIO (NOMBRES, APE_PATERNO, APE_MATERNO, CORREO, CLAVE, TIPO_DOC, NRO_DOC, DIRECCION, TELEFONO, ID_DISTRITO, ID_ROL) VALUES 
+('Carlos', 'Pérez', 'García', 'carlos.admin@restaurant.com', 'clave123', 'DNI', '12345678', 'Direccion 1', '987654321', 1, 1),
+('María', 'López', 'Martínez', 'maria.cliente@gmail.com', 'clave123', 'DNI', '87654321', 'Direccion 2', '912345678', 2, 2),
+('Juan', 'Rodríguez', 'Silva', 'juan.mesero@restaurant.com', 'clave123', 'DNI', '45678912', 'Direccion 3', '923456789', 3, 3),
+('Ana', 'Torres', 'Vega', 'ana.cajera@restaurant.com', 'clave123', 'DNI', '78945612', 'Direccion 4', '934567890', 1, 4),
+('Pedro', 'Sánchez', 'Ramos', 'pedro.cliente@gmail.com', 'clave123', 'DNI', '32165498', 'Direccion 5', '945678901', 4, 2);

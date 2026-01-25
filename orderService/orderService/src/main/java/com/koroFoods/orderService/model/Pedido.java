@@ -28,6 +28,9 @@ public class Pedido {
 
     @Column(name = "ID_USUARIO")
     private Integer idUsuario;
+    
+    @Column(name = "ID_RESERVA")
+    private Integer idReserva;
 
     @Column(name = "FECHA_HORA")
     private LocalDateTime fechaHora;

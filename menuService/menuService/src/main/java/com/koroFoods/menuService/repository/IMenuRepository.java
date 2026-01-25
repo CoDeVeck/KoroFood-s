@@ -1,8 +1,10 @@
 package com.koroFoods.menuService.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.awt.*;
+import com.koroFoods.menuService.model.Plato;
 
-public interface IMenuRepository extends JpaRepository<Menu,Integer> {
+@Repository
+public interface IMenuRepository extends JpaRepository<Plato,Integer> {
 }

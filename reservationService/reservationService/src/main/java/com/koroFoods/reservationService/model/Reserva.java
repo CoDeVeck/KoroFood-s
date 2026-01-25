@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -28,7 +27,14 @@ public class Reserva {
 
     @Column(name = "ID_MESA")
     private Integer idMesa;
+    
+    @Column(name = "ID_EVENTO")
+    private Integer idEvento;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TIPO_RESERVA")
+    private EstadoReserva tipoReserva;
+    
     @Column(name = "FECHA_HORA")
     private LocalDateTime fechaHora;
 
@@ -36,9 +42,9 @@ public class Reserva {
     @Column(name = "ESTADO")
     private EstadoReserva estado;
 
-    @Column(name = "MONTO")
-    private BigDecimal monto;
-
     @Column(name = "FECHA_REGISTRO")
     private LocalDateTime fechaRegistro;
+    
+    @Column(name = "OBSERVACIONES")
+    private LocalDateTime observaciones;
 }

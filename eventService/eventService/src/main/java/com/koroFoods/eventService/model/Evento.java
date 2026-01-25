@@ -38,7 +38,7 @@ public class Evento {
     private LocalDateTime fecha;
 
     @Column(name = "COSTO_EVENTO")
-    private BigDecimal precio;
+    private BigDecimal costo;
 
     @Column(name = "IMAGEN")
     private String imagen;
