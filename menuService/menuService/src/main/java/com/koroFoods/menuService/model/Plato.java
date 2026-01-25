@@ -21,23 +21,23 @@ public class Plato {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="")
+    @Column(name="ID_PLATO")
     private Integer idPlato;
 
-    @Column(name="")
+    @Column(name="NOMBRE")
     private String nombre;
 
-    @Column(name="")
+    @Column(name="PRECIO")
     private BigDecimal precio;
 
-    @Column(name="")
+    @Column(name="STOCK")
     private Integer stock;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="")
+    @Column(name="TIPO_PLATO")
     private TipoPlato tipoPlato;
 
-    @Column(name="")
+    @Column(name="IMAGEN")
     private String imagen;
 
     @JsonIgnore

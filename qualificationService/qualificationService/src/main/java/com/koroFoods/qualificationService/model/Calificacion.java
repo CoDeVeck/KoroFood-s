@@ -1,27 +1,35 @@
 package com.koroFoods.qualificationService.model;
 
+import java.time.LocalDateTime;
+
 import com.koroFoods.qualificationService.enums.EstadoResena;
 import com.koroFoods.qualificationService.enums.TipoEntidad;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "TB_RESENA")
-public class Resena {
+@Table(name = "TB_CALIFICACION")
+public class Calificacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_RESENA")
-    private Integer idResena;
+    @Column(name = "ID_CALIFICACION")
+    private Integer idCalificacion;
 
     @Column(name = "ID_USUARIO")
     private Integer idUsuario;
@@ -33,8 +41,8 @@ public class Resena {
     @Column(name = "ID_ENTIDAD")
     private Integer idEntidad;
 
-    @Column(name = "CALIFICACION")
-    private int calificacion;
+    @Column(name = "PUNTUACION")
+    private int puntuacion;
 
     @Column(name = "COMENTARIO")
     private String comentario;
