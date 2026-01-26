@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,28 +23,10 @@ public class UsuarioService  {
     private final IUsuarioRepository usuarioRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-
-
-
-
-    public PerfilUsuarioResponse obtenerPerfil(Integer idUsuario){
-        Usuario usuario = usuarioRepository.findById(idUsuario)
-                .orElseThrow(() -> new RuntimeException("Error al buscar al usuario: " + idUsuario));
-
-        PerfilUsuarioResponse perfil = new PerfilUsuarioResponse();
-
-        perfil.setIdUsuario(usuario.getIdUsuario());
-        perfil.setNombres(usuario.getNombres());
-        perfil.setApePaterno(usuario.getApePaterno());
-        perfil.setApeMaterno(usuario.getApeMaterno());
-        perfil.setCorreo(usuario.getCorreo());
-        perfil.setImagen(usuario.getImagen());
-        perfil.setDireccion(usuario.getDireccion());
-        perfil.setTelefono(usuario.getTelefono());
-        perfil.setFechaRegistro(usuario.getFechaRegistro().toString());
-
-        return perfil;
+    public Optional<Usuario> obtenerDatosCliente(String correo){
+        return  usuarioRepository.findByCorreo(correo);
     }
+
 
     public ResultadoResponse registrarUsuario(Usuario
                                                       usuario){
