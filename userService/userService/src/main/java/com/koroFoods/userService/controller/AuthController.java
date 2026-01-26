@@ -1,6 +1,8 @@
 package com.koroFoods.userService.controller;
 
 import com.koroFoods.userService.dto.request.LoginRequest;
+import com.koroFoods.userService.dto.response.ResultadoResponse;
+import com.koroFoods.userService.model.Usuario;
 import com.koroFoods.userService.service.CloudinaryService;
 import com.koroFoods.userService.service.UsuarioService;
 import com.koroFoods.userService.util.JwtUtil;
@@ -11,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,6 +53,22 @@ public class AuthController {
         } catch (Exception e) {
             System.out.println(">>> ERROR EN AUTENTICACIÓN: " + e.getMessage());
             return ResponseEntity.status(401).body(Map.of("error", "Credenciales inválidas"));
+        }
+    }
+    
+    @PostMapping(value = "/register", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> registrarUsuario(@ModelAttribute Usuario usuario){
+        try {
+            if (usuario.getImagenMultipart() != null && !usuario.getImagenMultipart().isEmpty()) {
+                String urlImagen = cloudinaryService.uploadImage(usuario.getImagenMultipart(), "KoroFoods/Users");
+                usuario.setImagen(urlImagen);
+            }
+
+            ResultadoResponse resultado = usuarioService.registrarUsuario(usuario);
+            return ResponseEntity.ok(resultado);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error registrando usuario: " + e.getMessage());
         }
     }
 }
