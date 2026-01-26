@@ -40,6 +40,7 @@ public class Usuario {
     @Column(name = "CLAVE")
     private String clave;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "TIPO_DOC")
     private TipoDocumento tipoDoc;
 
