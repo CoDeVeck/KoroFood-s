@@ -1,9 +1,29 @@
 package com.koroFoods.userService.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.koroFoods.userService.dto.ResultadoResponse;
+import com.koroFoods.userService.dto.UsuarioDtoFeign;
+import com.koroFoods.userService.service.UsuarioService;
+
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
+	
+	private final UsuarioService usuarioService;
+	
+	// Endpoint para el feign de la reseña
+	@GetMapping("/{id}")
+	public ResponseEntity<ResultadoResponse<UsuarioDtoFeign>> getUserById(@PathVariable Integer id) {
+	    ResultadoResponse<UsuarioDtoFeign> user = usuarioService.getUsuarioByIdFeign(id);
+	    return ResponseEntity.ok(user);
+	}
+
 }

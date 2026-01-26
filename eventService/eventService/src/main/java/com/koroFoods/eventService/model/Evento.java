@@ -31,7 +31,7 @@ public class Evento {
     private String descripcion;
 
     @ManyToOne
-    @JoinColumn(name = "TIPO_TEMATICA")
+    @JoinColumn(name = "ID_TEMATICA")
     private Tematica tematica;
 
     @Column(name = "FECHA")

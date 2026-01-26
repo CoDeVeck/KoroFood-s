@@ -1,5 +1,9 @@
-export const environment ={
-    production:true,
-    api_URL:"https://dominio_de_render.onrender.com"
-
-}
+export const environment = {
+  production: true,
+  apiUrls: {
+    usuarios: 'https://dominio.com/usuarios',
+    menu: 'https://dominio.com/menu',
+    eventos: 'https://dominio.com/eventos',
+    resenas: 'https://dominio.com/resenas',
+  },
+};
