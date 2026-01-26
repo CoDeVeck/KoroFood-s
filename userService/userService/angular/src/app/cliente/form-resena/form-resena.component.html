@@ -128,14 +128,31 @@
                                         </div>
                                         <div class="entidad-info">
                                             <h5 class="entidad-nombre">{{ getItemNombre(item) }}</h5>
-                                            <p class="entidad-tipo" *ngIf="getItemTipoPlato(item) as tipoPlato"> @switch
-                                                (tipoPlato) { @case ('ENT') { <i class="bi bi-egg-fried pe-2"></i>
-                                                <span>Entrada</span> } @case ('SEG') { <i
-                                                    class="fa-solid fa-utensils pe-2"></i> <span>Segundo</span> } @case
-                                                ('POS') { <i class="bi bi-cake2 pe-2"></i> <span>Postre</span> } @case
-                                                ('BEB') { <i class="bi bi-cup-straw pe-2"></i> <span>Bebida</span> }
-                                                @default { <i class="bi bi-card-text pe-2"></i> <span>{{ tipoPlato
-                                                    }}</span> } } </p>
+                                            <p class="entidad-tipo" *ngIf="getItemTipoPlato(item) as tipoPlato">
+                                                @switch (tipoPlato) {
+                                                @case ('ENT') {
+                                                <i class="bi bi-egg-fried pe-2"></i>
+                                                <span>{{ traducirTipoPlato(tipoPlato) }}</span>
+                                                }
+                                                @case ('SEG') {
+                                                <i class="fa-solid fa-utensils pe-2"></i>
+                                                <span>{{ traducirTipoPlato(tipoPlato) }}</span>
+                                                }
+                                                @case ('POS') {
+                                                <i class="bi bi-cake2 pe-2"></i>
+                                                <span>{{ traducirTipoPlato(tipoPlato) }}</span>
+                                                }
+                                                @case ('BEB') {
+                                                <i class="bi bi-cup-straw pe-2"></i>
+                                                <span>{{ traducirTipoPlato(tipoPlato) }}</span>
+                                                }
+                                                @default {
+                                                <i class="bi bi-card-text pe-2"></i>
+                                                <span>{{ traducirTipoPlato(tipoPlato) }}</span>
+                                                }
+                                                }
+                                            </p>
+
                                         </div>
                                         <div class="check-icon"
                                             *ngIf="resenaForm.get('idEntidad')?.value == getItemId(item)">
@@ -253,7 +270,6 @@
                         </form>
                     </div>
 
-                    <!-- Info Cards -->
                     <div class="info-cards mt-5">
                         <div class="row">
                             <div class="col-md-4 mb-3">
@@ -300,7 +316,11 @@
 
             <div class="modal-info">
                 <div class="modal-badge">
-                    <i class="bi" [ngClass]="isTipoPlato ? 'bi-bowl-hot-fill' : 'bi-calendar-event-fill'"></i>
+                    <i *ngIf="!isTipoPlato" class="bi bi-calendar-event-fill"></i>
+                    <svg *ngIf="isTipoPlato" xmlns="http://www.w3.org/2000/svg" width="20" height="24"
+                        fill="currentColor" class="text-white" viewBox="0 0 16 16">
+                        <path d="M2 3h12a1 1 0 0 1 1 1v1a5 5 0 0 1-5 5H6a5 5 0 0 1-5-5V4a1 1 0 0 1 1-1z" />
+                    </svg>
                     <span>{{ isTipoPlato ? 'Plato' : 'Evento' }}</span>
                 </div>
 

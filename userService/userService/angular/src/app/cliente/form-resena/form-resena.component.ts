@@ -171,11 +171,22 @@ export class FormResenaComponent {
   }
 
   getItemDescripcion(item: PlatoDto | EventoDto): string {
-    if (this.isPlato(item)) {
-      return `Tipo: ${item.tipoPlato}`;
-    }
-    return item.descripcion || 'Sin descripción disponible';
+  if (this.isPlato(item)) {
+    return `Tipo: ${this.traducirTipoPlato(item.tipoPlato)}`;
   }
+  return item.descripcion || 'Sin descripción disponible';
+}
+
+traducirTipoPlato(tipo: string): string {
+  switch (tipo) {
+    case 'ENT': return 'Entrada';
+    case 'SEG': return 'Segundo';
+    case 'POS': return 'Postre';
+    case 'BEB': return 'Bebida';
+    default: return tipo;
+  }
+}
+
 
   getItemTipoPlato(item: PlatoDto | EventoDto): string | null {
     return this.isPlato(item) ? item.tipoPlato : null;

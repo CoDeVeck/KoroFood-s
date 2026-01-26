@@ -7,8 +7,8 @@
 /* ==================== HERO SECTION ==================== */
 .resena-hero {
   position: relative;
-  background: linear-gradient(135deg, #E67E22 0%, #D35400 100%);
-  padding: 6rem 0;
+  background: rgba(0, 0, 0, 0.9);
+  padding: 9rem 0;
   overflow: hidden;
 }
 
@@ -20,8 +20,9 @@
   right: 0;
   bottom: 0;
   background-image: url('/img/banner1.jpg');
+background-repeat: no-repeat;
   background-size: cover;
-  opacity: 0.3;
+  background-position: center;  opacity: 0.3;
 }
 
 .hero-content {

@@ -3,4 +3,5 @@ export interface PlatoDto {
   nombre: string;
   tipoPlato: string;
   imagen: string;
+  precio:number;
 }

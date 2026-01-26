@@ -30,4 +30,5 @@ export class ResenaService {
       `${this.baseUrl}/usuario/${idUsuario}`
     );
   }
+  
 }

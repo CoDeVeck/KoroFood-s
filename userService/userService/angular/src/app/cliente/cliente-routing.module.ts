@@ -4,6 +4,8 @@ import { ClienteLayoutComponent } from '../layout/cliente-layout/cliente-layout.
 import { IndexComponent } from './index/index.component';
 import { ResenaComponent } from './resena/resena.component';
 import { FormResenaComponent } from './form-resena/form-resena.component';
+import { MenuComponent } from './menu/menu.component';
+import { ContactoComponent } from './contacto/contacto.component';
 
 const routes: Routes = [{
     path: '',
@@ -20,7 +22,14 @@ const routes: Routes = [{
       {
         path: 'crear-resenia', 
         component: FormResenaComponent,data: { title: 'Crear Reseña' }
-      }
+      },
+      {
+        path: 'menu', 
+        component: MenuComponent,data: { title: 'Menú' }
+      },
+      {path: 'contacto', 
+        component: ContactoComponent,data: { title: 'Contacto' }
+    }
     ],
 }];
 

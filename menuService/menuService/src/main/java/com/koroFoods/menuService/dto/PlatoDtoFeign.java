@@ -1,5 +1,7 @@
 package com.koroFoods.menuService.dto;
 
+import java.math.BigDecimal;
+
 import lombok.Data;
 
 @Data
@@ -8,4 +10,5 @@ public class PlatoDtoFeign {
     private String nombre;
     private String tipoPlato;
     private String imagen;
+    private BigDecimal precio;
 }

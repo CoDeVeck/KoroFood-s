@@ -7,8 +7,8 @@
 /* ==================== HERO SECTION ==================== */
 .resenas-hero {
   position: relative;
-  background: linear-gradient(135deg, #E67E22 0%, #D35400 100%);
-  padding: 4rem 0 3rem;
+  background: rgba(0, 0, 0, 0.9);
+  padding: 7rem 0;
   overflow: hidden;
 }
 
@@ -20,7 +20,9 @@
   right: 0;
   bottom: 0;
   background-image: url('/img/banner3.jpg');
+  background-repeat: no-repeat;
   background-size: cover;
+  background-position: center;
   opacity: 0.3;
 }
 
@@ -494,4 +496,76 @@
   border-color: #E67E22;
   color: #E67E22;
   transform: translateY(-2px);
+}
+.page-item.active .page-link {
+background: linear-gradient(135deg, #E67E22 0%, #D35400 100%);
+color: white;
+border-color: #E67E22;
+}
+.page-item.disabled .page-link {
+opacity: 0.5;
+cursor: not-allowed;
+pointer-events: none;
+}
+.pagination-info {
+font-size: 0.95rem;
+color: #6B6B6B;
+text-align: center;
+}
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 991px) {
+.resenas-grid {
+grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+gap: 1.5rem;
+}
+.filter-buttons {
+flex-direction: column;
+}
+.filter-btn {
+width: 100%;
+}
+}
+@media (max-width: 768px) {
+.hero-title {
+font-size: 2.5rem;
+}
+.hero-subtitle {
+font-size: 1.1rem;
+}
+.resenas-hero {
+padding: 3rem 0 2rem;
+}
+.stats-card {
+padding: 1.5rem;
+}
+.stats-number {
+font-size: 2rem;
+}
+.resenas-grid {
+grid-template-columns: 1fr;
+}
+}
+@media (max-width: 576px) {
+.hero-title {
+font-size: 2rem;
+}
+.btn-crear-resena {
+padding: 0.85rem 2rem;
+font-size: 1rem;
+}
+.stats-icon {
+width: 60px;
+height: 60px;
+}
+.stats-icon i {
+font-size: 1.75rem;
+}
+.pagination {
+gap: 0.3rem;
+}
+.page-link {
+min-width: 40px;
+height: 40px;
+padding: 0.5rem 0.75rem;
+}
 }
