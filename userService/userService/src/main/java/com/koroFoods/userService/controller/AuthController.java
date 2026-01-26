@@ -68,7 +68,7 @@ public class AuthController {
             return ResponseEntity.ok(resultado);
 
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error registrando usuario: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error registrando usuario: " + e.getMessage() + " " + e.getLocalizedMessage());
         }
     }
 }
