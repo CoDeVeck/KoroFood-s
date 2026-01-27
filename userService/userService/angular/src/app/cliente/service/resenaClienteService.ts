@@ -10,7 +10,7 @@ import { environment } from '../../../enviroments/enviroment';
 @Injectable({
   providedIn: 'root',
 })
-export class ResenaService {
+export class ResenaClienteService {
   private baseUrl = `${environment.apiUrls.resenas}/resena`;
 
   constructor(private http: HttpClient) {}

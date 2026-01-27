@@ -4,6 +4,7 @@ import com.koroFoods.menuService.dto.PlatoDtoFeign;
 import com.koroFoods.menuService.dto.ResultadoResponse;
 import com.koroFoods.menuService.model.Plato;
 import com.koroFoods.menuService.repository.IMenuRepository;
+
 import lombok.RequiredArgsConstructor;
 
 import java.util.Comparator;
@@ -35,6 +36,24 @@ public class MenuService {
 
 	private final IMenuRepository menuRepository;
 
+	// Método para restar el stock de los pedidos consumidos
+	public ResultadoResponse<PlatoDtoFeign> substractStockOrder(Integer idPlato, Integer cantidadVendida) {
+        Plato plato = menuRepository.findById(idPlato)
+                .orElseThrow(() -> new RuntimeException("El plato no existe"));
+        if (plato.getStock() < cantidadVendida) {
+            return ResultadoResponse.error("Stock insuficiente para el plato: " + plato.getNombre());
+        }
+        plato.setStock(plato.getStock() - cantidadVendida);
+        menuRepository.save(plato);
+        PlatoDtoFeign dto = new PlatoDtoFeign();
+        dto.setIdPlato(plato.getIdPlato());
+        dto.setNombre(plato.getNombre());
+        dto.setPrecio(plato.getPrecio());
+        dto.setStock(plato.getStock());
+
+        return ResultadoResponse.success("Stock actualizado", dto);
+    }
+    
 	// Método para el feign de la reseña
 	public ResultadoResponse<List<PlatoDtoFeign>> getAllDish() {
 		List<Plato> platos = menuRepository.findAllByTipoPlato();
@@ -58,7 +77,7 @@ public class MenuService {
 		dto.setNombre(dish.getNombre());
 		dto.setTipoPlato(dish.getTipoPlato().toString());
 		dto.setImagen(dish.getImagen());
-
+		dto.setPrecio(dish.getPrecio());
 		return ResultadoResponse.success("Plato encontrado", dto);
 	}
 

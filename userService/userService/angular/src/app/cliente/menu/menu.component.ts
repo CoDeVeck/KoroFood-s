@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { MenuService } from '../service/menuService';
 import { NgFor, NgIf } from '@angular/common';
 import { PlatoDto } from '../../shared/dto/PlatoDto';
+import { MenuClienteService } from '../service/menuClienteService';
 declare var Swiper: any;
 
 interface PlatosPorTipo {
@@ -41,7 +41,7 @@ tipoPlatoLabels: any = {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  constructor(private menuService: MenuService) {}
+  constructor(private menuService: MenuClienteService) {}
 
   ngOnInit(): void {
     this.cargarPlatos();

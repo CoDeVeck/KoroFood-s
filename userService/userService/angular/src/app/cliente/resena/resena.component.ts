@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ResenaListResponse } from '../../shared/dto/ResenaListResponse';
-import { ResenaService } from '../service/resenaService';
+import { ResenaClienteService } from '../service/resenaClienteService';
 
 @Component({
   selector: 'app-resena-list',
@@ -25,11 +25,10 @@ export class ResenaComponent implements OnInit {
   verSoloMias = false;
   idUsuarioActual = 1; // Debe venir del servicio de autenticación
 
-  // Filtro de calificación
   filtroCalificacion: number | null = null;
 
   constructor(
-    private resenaService: ResenaService,
+    private resenaService: ResenaClienteService,
     private router: Router,
   ) {}
 

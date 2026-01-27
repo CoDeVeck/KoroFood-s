@@ -5,5 +5,7 @@ export const environment = {
     menu: 'https://dominio.com/menu',
     eventos: 'https://dominio.com/eventos',
     resenas: 'https://dominio.com/resenas',
+    pedido: 'http://localhost:8086',
+    reserva: 'http://localhost:8083'
   },
 };

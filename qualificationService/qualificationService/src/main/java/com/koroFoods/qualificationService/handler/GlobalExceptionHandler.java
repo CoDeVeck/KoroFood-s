@@ -17,4 +17,13 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(ResultadoResponse.error(ex.getMessage()));
     }
+    
+    @ExceptionHandler(feign.FeignException.class)
+    public ResponseEntity<ResultadoResponse<?>> handleFeignError(feign.FeignException ex) {
+        String mensaje = ex.contentUTF8();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ResultadoResponse.error(mensaje));
+    }
 }

@@ -10,5 +10,6 @@ public class PlatoDtoFeign {
     private String nombre;
     private String tipoPlato;
     private String imagen;
+    private Integer stock;
     private BigDecimal precio;
 }

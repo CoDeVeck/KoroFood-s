@@ -4,11 +4,12 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } 
 import { PlatoDto } from '../../shared/dto/PlatoDto';
 import { EventoDto } from '../../shared/dto/EventoDto';
 import { TipoEntidad } from '../../shared/enums/tipoEntidad.enum';
-import { ResenaService } from '../service/resenaService';
-import { MenuService } from '../service/menuService';
-import { EventoService } from '../service/eventoService';
+
 import { ResenaRequest } from '../../shared/dto/ResenaRequest';
 import { AlertService } from '../../util/alert.service';
+import { ResenaClienteService } from '../service/resenaClienteService';
+import { MenuClienteService } from '../service/menuClienteService';
+import { EventoClienteService } from '../service/eventoClienteService';
 
 
 @Component({
@@ -43,9 +44,9 @@ export class FormResenaComponent {
 
   constructor(
     private fb: FormBuilder,
-    private resenaService: ResenaService,
-    private menuService: MenuService,
-    private eventoService: EventoService
+    private resenaService: ResenaClienteService,
+    private menuService: MenuClienteService,
+    private eventoService: EventoClienteService
   ) {}
 
   ngOnInit() {

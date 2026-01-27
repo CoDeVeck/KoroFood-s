@@ -6,35 +6,49 @@ import { ResenaComponent } from './resena/resena.component';
 import { FormResenaComponent } from './form-resena/form-resena.component';
 import { MenuComponent } from './menu/menu.component';
 import { ContactoComponent } from './contacto/contacto.component';
+import { ReservaComponent } from './reserva/reserva.component';
 
-const routes: Routes = [{
+const routes: Routes = [
+  {
     path: '',
     component: ClienteLayoutComponent,
-     children: [
+    children: [
       {
-        path: 'inicio', 
-        component: IndexComponent,data: { title: 'Inicio' }
+        path: 'inicio',
+        component: IndexComponent,
+        data: { title: 'Inicio' },
       },
       {
-        path: 'resenia', 
-        component: ResenaComponent,data: { title: 'Reseña' }
+        path: 'resenia',
+        component: ResenaComponent,
+        data: { title: 'Reseña' },
       },
       {
-        path: 'crear-resenia', 
-        component: FormResenaComponent,data: { title: 'Crear Reseña' }
+        path: 'crear-resenia',
+        component: FormResenaComponent,
+        data: { title: 'Crear Reseña' },
       },
       {
-        path: 'menu', 
-        component: MenuComponent,data: { title: 'Menú' }
+        path: 'menu',
+        component: MenuComponent,
+        data: { title: 'Menú' },
       },
-      {path: 'contacto', 
-        component: ContactoComponent,data: { title: 'Contacto' }
-    }
+      {
+        path: 'contacto',
+        component: ContactoComponent,
+        data: { title: 'Contacto' },
+      },
+      {
+        path: 'reserva',
+        component: ReservaComponent,
+        data: { title: 'Reserva' },
+      },
     ],
-}];
+  },
+];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class ClienteRoutingModule { }
+export class ClienteRoutingModule {}

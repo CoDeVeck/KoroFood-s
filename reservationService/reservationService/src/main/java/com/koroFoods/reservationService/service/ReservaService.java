@@ -1,12 +1,55 @@
 package com.koroFoods.reservationService.service;
 
+import com.koroFoods.reservationService.dto.ReservaDtoFeing;
+import com.koroFoods.reservationService.dto.ResultadoResponse;
+import com.koroFoods.reservationService.feign.UsuarioFeignClient;
+import com.koroFoods.reservationService.model.Reserva;
 import com.koroFoods.reservationService.repository.IReservaRepository;
+
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class ReservaService {
 
-    private final IReservaRepository reservaRepository;
+	private final IReservaRepository reservaRepository;
+	private final UsuarioFeignClient usuarioFeignClient;
+
+	public ResultadoResponse<ReservaDtoFeing> getReservationByID(Integer id) {
+	    Optional<Reserva> optionalReserva =
+	            reservaRepository.findReservaAsistidaById(id);
+
+	    if (optionalReserva.isEmpty()) {
+	        return ResultadoResponse.error(
+	            "Reserva no encontrada, intente con otro código por favor"
+	        );
+	    }
+
+	    Reserva reserva = optionalReserva.get();
+	    var usuario = usuarioFeignClient.getUsuarioById(reserva.getIdUsuario());
+
+	    if (!usuario.isValor() || usuario.getData() == null) {
+	        return ResultadoResponse.error(
+	            "El usuario con ID " + reserva.getIdUsuario() + " no existe"
+	        );
+	    }
+
+	    ReservaDtoFeing dto = new ReservaDtoFeing();
+	    dto.setIdReserva(reserva.getIdReserva());
+	    dto.setEstado(reserva.getEstado().toString());
+	    dto.setIdUsuario(reserva.getIdUsuario());
+	    dto.setMesa(reserva.getIdMesa());
+	    dto.setNombreCompletoUsuario(
+	        usuario.getData().getNombres() + " " +
+	        usuario.getData().getApePaterno() + " " +
+	        usuario.getData().getApeMaterno()
+	    );
+
+	    return ResultadoResponse.success("Reserva encontrada", dto);
+	}
+
 }

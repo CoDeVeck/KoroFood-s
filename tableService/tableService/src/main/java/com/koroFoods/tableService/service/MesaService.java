@@ -1,7 +1,11 @@
 package com.koroFoods.tableService.service;
 
+import com.koroFoods.tableService.dto.MesaDtoFeign;
+import com.koroFoods.tableService.dto.ResultadoResponse;
+import com.koroFoods.tableService.model.Mesa;
 import com.koroFoods.tableService.repository.IMesaRepository;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -9,4 +13,16 @@ import org.springframework.stereotype.Service;
 public class MesaService {
 
     private final IMesaRepository mesaRepository;
+    
+    // Métodos para el feign en order
+    public ResultadoResponse<MesaDtoFeign> getTableById(int id){
+    	Mesa mesa = mesaRepository.findById(id).orElseThrow(() -> new RuntimeException("Mesa no encontrada"));
+    	MesaDtoFeign dto = new MesaDtoFeign();
+    	dto.setIdMesa(mesa.getIdMesa());
+    	dto.setNumeroMesa(mesa.getNumeroMesa());
+    	dto.setCapacidad(mesa.getCapacidad());
+    	dto.setTipo(mesa.getTipo().toString());
+    	dto.setEstado(mesa.getEstado().toString());
+    	return ResultadoResponse.success("Mesa encontrada", dto);
+    }
 }

@@ -8,7 +8,7 @@ import { PlatoDto } from '../../shared/dto/PlatoDto';
 @Injectable({
   providedIn: 'root',
 })
-export class MenuService {
+export class MenuClienteService {
   private baseUrl = `${environment.apiUrls.menu}/menu`;
 
   constructor(private http: HttpClient) {}

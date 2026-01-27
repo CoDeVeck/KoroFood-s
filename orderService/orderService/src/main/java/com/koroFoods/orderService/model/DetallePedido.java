@@ -32,6 +32,7 @@ public class DetallePedido {
     @Column(name = "CANTIDAD")
     private Integer cantidad;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "ESTADO")
     private EstadoDetallePedido estado;
 

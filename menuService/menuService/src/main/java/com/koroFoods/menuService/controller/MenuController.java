@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,6 +27,22 @@ public class MenuController {
 
 	private final MenuService menuService;
 
+	// Endpoint para restar el stock de los pedidos consumidos
+	@PutMapping("/substract-stock/{idPlato}/{cantidadVendida}")
+    public ResponseEntity<ResultadoResponse<PlatoDtoFeign>> substractStockOrder(
+            @PathVariable Integer idPlato,
+            @PathVariable Integer cantidadVendida) {
+
+        ResultadoResponse<PlatoDtoFeign> response =
+                menuService.substractStockOrder(idPlato, cantidadVendida);
+
+        if (!response.isValor()) {
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+	
 	// Endpoint para el feign de la reseña
 	@GetMapping
 	public ResponseEntity<ResultadoResponse<List<PlatoDtoFeign>>> list(){

@@ -6,7 +6,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { ResenaListResponse } from '../../shared/dto/ResenaListResponse';
-import { ResenaService } from '../service/resenaService';
+import { ResenaClienteService } from '../service/resenaClienteService';
 declare var Swiper: any;
 
 @Component({
@@ -25,7 +25,7 @@ export class IndexComponent {
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
-    private resenaService: ResenaService
+    private resenaService: ResenaClienteService
   ) {}
 
   ngOnInit() {
