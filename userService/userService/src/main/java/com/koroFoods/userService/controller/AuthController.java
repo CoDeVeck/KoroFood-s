@@ -1,9 +1,11 @@
 package com.koroFoods.userService.controller;
 
+import com.koroFoods.userService.dto.GithubUserDto;
 import com.koroFoods.userService.dto.request.LoginRequest;
 import com.koroFoods.userService.dto.response.ResultadoResponse;
 import com.koroFoods.userService.model.Usuario;
 import com.koroFoods.userService.service.CloudinaryService;
+import com.koroFoods.userService.service.GithubService;
 import com.koroFoods.userService.service.UsuarioService;
 import com.koroFoods.userService.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final UsuarioService usuarioService;
     private final CloudinaryService cloudinaryService;
+    private final GithubService githubService;
 
 
     @PostMapping("/login")
@@ -81,6 +84,13 @@ public class AuthController {
 
         Usuario usuario = usuarioObtenido.get();
         return ResponseEntity.ok(usuario);
+    }
+
+    @PostMapping("/github")
+    public ResponseEntity<?> githubLogin(@RequestParam String code) {
+       GithubUserDto githubUserDto = githubService.loginWithGithub(code);
+
+       return  ResponseEntity.ok(githubUserDto);
     }
 
 }
