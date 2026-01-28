@@ -67,8 +67,8 @@ public class Usuario {
     @Column(name = "FECHA_REGISTRO")
     private LocalDateTime fechaRegistro;
 
-    @Column(name = "ESTADO")
-    private Boolean estado;
+    @Column(name = "ACTIVO")
+    private Boolean activo;
 
     @JsonIgnore
     @Transient

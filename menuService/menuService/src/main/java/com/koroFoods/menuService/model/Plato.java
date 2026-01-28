@@ -40,6 +40,9 @@ public class Plato {
     @Column(name="IMAGEN")
     private String imagen;
 
+    @Column(name="ACTIVO")
+    private String activo;
+
     @JsonIgnore
     @Transient
     private MultipartFile imagenMultipart; // para la subida de imagens

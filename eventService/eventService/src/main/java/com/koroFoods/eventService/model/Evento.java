@@ -34,7 +34,7 @@ public class Evento {
     @JoinColumn(name = "ID_TEMATICA")
     private Tematica tematica;
 
-    @Column(name = "FECHA_HORA")
+    @Column(name = "FECHA_EVENTO")
     private LocalDateTime fecha;
 
     @Column(name = "COSTO_EVENTO")
@@ -42,9 +42,9 @@ public class Evento {
 
     @Column(name = "IMAGEN")
     private String imagen;
-
-    @Column(name = "ESTADO")
-    private String estado;
+    
+    @Column(name="ACTIVO")
+    private String activo;
     
     @JsonIgnore
     @Transient

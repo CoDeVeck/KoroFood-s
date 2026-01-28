@@ -21,4 +21,7 @@ public class Tematica {
 
     @Column(name = "NOMBRE")
     private String nombre;
+    
+    @Column(name="ACTIVO")
+    private String activo;
 }
