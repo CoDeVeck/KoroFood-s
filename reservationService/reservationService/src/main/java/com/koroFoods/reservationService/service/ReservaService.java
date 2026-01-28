@@ -2,10 +2,12 @@ package com.koroFoods.reservationService.service;
 
 import com.koroFoods.reservationService.dto.ReservaDtoFeing;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
+import com.koroFoods.reservationService.feign.PedidoFeignClient;
 import com.koroFoods.reservationService.feign.UsuarioFeignClient;
 import com.koroFoods.reservationService.model.Reserva;
 import com.koroFoods.reservationService.repository.IReservaRepository;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
@@ -18,10 +20,10 @@ public class ReservaService {
 
 	private final IReservaRepository reservaRepository;
 	private final UsuarioFeignClient usuarioFeignClient;
-
+	private final PedidoFeignClient pedidoFeignClient;
+	
 	public ResultadoResponse<ReservaDtoFeing> getReservationByID(Integer id) {
-	    Optional<Reserva> optionalReserva =
-	            reservaRepository.findReservaAsistidaById(id);
+	    Optional<Reserva> optionalReserva = reservaRepository.findReservaAsistidaById(id);
 
 	    if (optionalReserva.isEmpty()) {
 	        return ResultadoResponse.error(
@@ -30,6 +32,23 @@ public class ReservaService {
 	    }
 
 	    Reserva reserva = optionalReserva.get();
+	    
+	    try {
+	        var pedidoResponse = pedidoFeignClient.getPedidoByReservaId(reserva.getIdReserva());
+	        
+	        if (pedidoResponse.isValor() && pedidoResponse.getData() != null) {
+	            return ResultadoResponse.error(
+	                "Esta reserva ya tiene un pedido asociado."
+	            );
+	        }
+	    } catch (FeignException.NotFound e) {
+	        
+	    } catch (Exception e) {
+	        return ResultadoResponse.error(
+	            "Error al validar el pedido de la reserva: " + e.getMessage()
+	        );
+	    }
+
 	    var usuario = usuarioFeignClient.getUsuarioById(reserva.getIdUsuario());
 
 	    if (!usuario.isValor() || usuario.getData() == null) {

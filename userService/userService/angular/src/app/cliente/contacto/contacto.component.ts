@@ -1,5 +1,6 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 interface ContactInfo {
   icon: string;
@@ -16,7 +17,7 @@ interface SocialMedia {
 }
 @Component({
   selector: 'app-contacto',
-  imports: [NgIf, NgFor],
+  imports: [NgIf, NgFor, RouterLink],
   templateUrl: './contacto.component.html',
   styleUrl: './contacto.component.css'
 })

@@ -49,4 +49,14 @@ public class PedidoController {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
 	    }
 	}
+	
+	@GetMapping("/reserva/{idReserva}")
+	public ResponseEntity<ResultadoResponse<PedidoResumenDto>> getPedidoByReservaId(@PathVariable Integer idReserva) {
+		ResultadoResponse<PedidoResumenDto> resultado = pedidoService.obtenerPedidoPorReserva(idReserva);
+		if (resultado.isValor()) {
+			return ResponseEntity.ok(resultado);
+	    } else {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+	    }
+	}
 }

@@ -7,11 +7,12 @@ import {
 } from '@angular/core';
 import { ResenaListResponse } from '../../shared/dto/ResenaListResponse';
 import { ResenaClienteService } from '../service/resenaClienteService';
+import { RouterLink } from '@angular/router';
 declare var Swiper: any;
 
 @Component({
   selector: 'app-index',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './index.component.html',
   styleUrl: './index.component.css',
   encapsulation: ViewEncapsulation.None,
@@ -25,7 +26,7 @@ export class IndexComponent {
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
-    private resenaService: ResenaClienteService
+    private resenaService: ResenaClienteService,
   ) {}
 
   ngOnInit() {
@@ -42,9 +43,12 @@ export class IndexComponent {
     this.resenaService.listarResenas().subscribe({
       next: (response) => {
         if (response.valor && response.data) {
-          this.resenas = response.data;
+          const resenasCinco = response.data.filter(
+            (r) => r.calificacion === 5,
+          );
+          this.resenas = resenasCinco.slice(0, 5);
           this.isLoading = false;
-          
+
           setTimeout(() => {
             if (isPlatformBrowser(this.platformId)) {
               this.initResenasSwiper();
@@ -56,7 +60,7 @@ export class IndexComponent {
         console.error('Error al cargar reseñas:', err);
         this.error = 'No se pudieron cargar las reseñas';
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -77,7 +81,7 @@ export class IndexComponent {
       },
       effect: 'fade',
       fadeEffect: {
-        crossFade: true
+        crossFade: true,
       },
       speed: 1000,
     });
@@ -89,7 +93,7 @@ export class IndexComponent {
       spaceBetween: 0,
       loop: true,
       speed: 800,
-      allowTouchMove: false, 
+      allowTouchMove: false,
     });
 
     this.resenasSwiper = new Swiper('.resenas-swiper', {
@@ -115,13 +119,15 @@ export class IndexComponent {
           if (this.imagesSwiper) {
             this.imagesSwiper.slideToLoop(swiper.realIndex);
           }
-        }
-      }
+        },
+      },
     });
   }
 
   getStars(calificacion: number): number[] {
-    return Array(5).fill(0).map((_, i) => i < calificacion ? 1 : 0);
+    return Array(5)
+      .fill(0)
+      .map((_, i) => (i < calificacion ? 1 : 0));
   }
 
   onImgError(event: any) {

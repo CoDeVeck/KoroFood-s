@@ -128,7 +128,7 @@ export class FormOrdenComponent implements OnInit {
     this.tiposPlato = Array.from(tipos);
   }
 
-  get platosFiltradosMetodo(): PlatoDto[] {
+  platosFiltradosMetodo(): PlatoDto[] {
     let filtrados = [...this.platos];
 
     if (this.filtroPlato) {
@@ -241,6 +241,7 @@ export class FormOrdenComponent implements OnInit {
     const pedidoRequest: PedidoRequestoDto = {
       idMesa: this.reservaEncontrada.mesa,
       idUsuario: this.reservaEncontrada.idUsuario, // luego se va cambiar por el mesero
+      idReserva: this.reservaEncontrada.idReserva,
       detalles: detalles,
     };
 
@@ -270,11 +271,17 @@ export class FormOrdenComponent implements OnInit {
     this.router.navigate(['/mesero/ordenes']);
   }
 
-  nuevaOrden(): void {
-    this.currentStep = 1;
-    this.reservaSearchId = null;
-    this.reservaEncontrada = null;
-    this.platosSeleccionados = [];
-    this.ordenCreada = null;
+  obtenerNombreTipo(tipo: string): string {
+    const tipos: { [key: string]: string } = {
+      ENT: 'Entrada',
+      SEG: 'Segundo',
+      POS: 'Postre',
+      BEB: 'Bebida',
+    };
+    return tipos[tipo] || tipo;
+  }
+
+  onImgError(event: any) {
+    event.target.src = '/img/no-imagen.jpg';
   }
 }

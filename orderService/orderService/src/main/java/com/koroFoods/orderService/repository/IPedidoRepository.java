@@ -12,10 +12,11 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface IPedidoRepository extends JpaRepository<Pedido, Integer> {
 	@Query("""
-		       SELECT p FROM Pedido p
-		       WHERE (:estado IS NULL OR p.estado = :estado)
-		         AND p.estado <> com.koroFoods.orderService.enums.EstadoPedido.PAG
-		       """)
-		List<Pedido> findByEstadoOpcional(@Param("estado") EstadoPedido estado);
+			SELECT p FROM Pedido p
+			WHERE (:estado IS NULL OR p.estado = :estado)
+			  AND p.estado <> com.koroFoods.orderService.enums.EstadoPedido.PAG
+			""")
+	List<Pedido> findByEstadoOpcional(@Param("estado") EstadoPedido estado);
 
+	Pedido findByIdReserva(Integer idReserva);
 }

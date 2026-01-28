@@ -49,6 +49,23 @@ public class PedidoService {
 
 		return ResultadoResponse.success("Listado encontrado", dtos);
 	}
+	
+	public ResultadoResponse<PedidoResumenDto> obtenerPedidoPorReserva(Integer idReserva){
+	    Pedido pedido = pedidoRepository.findByIdReserva(idReserva);
+	    
+	    if (pedido == null) {
+	        return ResultadoResponse.success("No existe pedido para esta reserva", null);
+	    }
+	    
+	    PedidoResumenDto dto = new PedidoResumenDto();
+	    dto.setIdPedido(pedido.getIdPedido());
+	    dto.setFechaHora(pedido.getFechaHora());
+	    dto.setTotal(pedido.getTotal());
+	    dto.setIdMesa(pedido.getIdMesa());
+	    dto.setEstado(pedido.getEstado());
+	    
+	    return ResultadoResponse.success("Pedido encontrado", dto);
+	}
 
 	@Transactional
 	public ResultadoResponse<Pedido> crearPedido(PedidoRequestDTO dto) {
@@ -65,6 +82,7 @@ public class PedidoService {
 		Pedido pedido = new Pedido();
 		pedido.setIdMesa(dto.getIdMesa());
 		pedido.setIdUsuario(dto.getIdUsuario());
+		pedido.setIdReserva(dto.getIdReserva());
 		pedido.setFechaHora(LocalDateTime.now());
 		pedido.setEstado(EstadoPedido.PEN);
 		pedido.setSubtotal(BigDecimal.ZERO);
