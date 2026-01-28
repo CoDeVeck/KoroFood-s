@@ -7,20 +7,18 @@ import com.koroFoods.userService.service.CloudinaryService;
 import com.koroFoods.userService.service.UsuarioService;
 import com.koroFoods.userService.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -68,7 +66,21 @@ public class AuthController {
             return ResponseEntity.ok(resultado);
 
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error registrando usuario: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error registrando usuario: " + e.getMessage() + " " + e.getLocalizedMessage());
         }
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<?>obtnerUsuario(Authentication authentication){
+        String correoCliente = authentication.getName();
+        Optional<Usuario> usuarioObtenido = usuarioService.obtenerDatosCliente(correoCliente);
+
+        if (usuarioObtenido.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+        }
+
+        Usuario usuario = usuarioObtenido.get();
+        return ResponseEntity.ok(usuario);
+    }
+
 }
