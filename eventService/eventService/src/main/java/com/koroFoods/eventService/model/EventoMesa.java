@@ -22,8 +22,9 @@ public class EventoMesa {
     @Column(name = "ID_EVENTO_MESA")
     private Integer idEventoMesa;
 
-    @Column(name = "ID_EVENTO")
-    private Integer idEvento;
+    @ManyToOne
+    @JoinColumn(name = "ID_EVENTO", nullable = false)
+    private Evento evento;
 
     @Column(name = "ID_MESA")
     private Integer idMesa;
@@ -33,4 +34,7 @@ public class EventoMesa {
 
     @Column(name = "FECHA_HASTA")
     private LocalDateTime fechaHasta;
+    
+    @Column(name="ACTIVO")
+    private String activo;
 }

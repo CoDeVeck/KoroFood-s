@@ -35,7 +35,7 @@ public class Reserva {
     @Column(name = "TIPO_RESERVA")
     private EstadoReserva tipoReserva;
     
-    @Column(name = "FECHA_HORA")
+    @Column(name = "FECHA_RESERVA")
     private LocalDateTime fechaHora;
 
     @Enumerated(EnumType.STRING)
@@ -47,4 +47,13 @@ public class Reserva {
     
     @Column(name = "OBSERVACIONES")
     private LocalDateTime observaciones;
+    
+    @Column(name = "CODIGO_VERIFICACION")
+    private String codigoVerificacion;
+    
+    @Column(name = "FECHA_EXPIRACION_CODIGO")
+    private LocalDateTime fechaExpCod;
+    
+    @Column(name = "VERIFICADO")
+    private Boolean verificado;
 }

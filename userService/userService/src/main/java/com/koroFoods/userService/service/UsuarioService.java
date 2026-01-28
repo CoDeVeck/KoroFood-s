@@ -81,7 +81,7 @@ public class UsuarioService implements UserDetailsService {
 
         usuario.setRol(rolDefindo);
         usuario.setFechaRegistro(LocalDateTime.now());
-        usuario.setEstado(true);
+        usuario.setActivo(true);
 
         usuarioRepository.save(usuario);
         resultado.setValor(true);

@@ -20,4 +20,7 @@ public class Rol {
 
     @Column(name = "DESCRIPCION")
     private String descripcion;
+    
+    @Column(name = "ACTIVO")
+    private Boolean activo;
 }

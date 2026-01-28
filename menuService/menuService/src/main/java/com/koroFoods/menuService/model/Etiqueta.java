@@ -32,6 +32,9 @@ public class Etiqueta {
 	@Column(name = "DESCRIPCION")
 	private String descripcion;
 	
+    @Column(name="ACTIVO")
+    private String activo;
+	
 	@Column(name = "FECHA_REGISTRO")
 	private LocalDateTime fechaRegistro;
 }

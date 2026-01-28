@@ -35,5 +35,8 @@ public class PlatoEtiqueta {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_ETIQUETA", nullable = false)
     private Etiqueta etiqueta;
+    
+    @Column(name="ACTIVO")
+    private String activo;
 
 }
