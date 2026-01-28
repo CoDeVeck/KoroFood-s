@@ -1,6 +1,8 @@
 package com.koroFoods.reservationService.model;
 
 import com.koroFoods.reservationService.enums.EstadoReserva;
+import com.koroFoods.reservationService.enums.TipoReserva;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,7 +35,7 @@ public class Reserva {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "TIPO_RESERVA")
-    private EstadoReserva tipoReserva;
+    private TipoReserva tipoReserva;
     
     @Column(name = "FECHA_RESERVA")
     private LocalDateTime fechaHora;
@@ -46,7 +48,7 @@ public class Reserva {
     private LocalDateTime fechaRegistro;
     
     @Column(name = "OBSERVACIONES")
-    private LocalDateTime observaciones;
+    private String observaciones;
     
     @Column(name = "CODIGO_VERIFICACION")
     private String codigoVerificacion;

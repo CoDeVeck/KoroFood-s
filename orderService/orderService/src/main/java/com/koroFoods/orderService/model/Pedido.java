@@ -37,7 +37,7 @@ public class Pedido {
 
     @Column(name = "SUBTOTAL")
     private BigDecimal subtotal;
-
+    
     @Column(name = "TOTAL")
     private BigDecimal total;
 
