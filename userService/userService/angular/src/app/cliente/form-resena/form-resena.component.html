@@ -130,19 +130,19 @@
                                             <h5 class="entidad-nombre">{{ getItemNombre(item) }}</h5>
                                             <p class="entidad-tipo" *ngIf="getItemTipoPlato(item) as tipoPlato">
                                                 @switch (tipoPlato) {
-                                                @case ('ENT') {
+                                                @case ('E') {
                                                 <i class="bi bi-egg-fried pe-2"></i>
                                                 <span>{{ traducirTipoPlato(tipoPlato) }}</span>
                                                 }
-                                                @case ('SEG') {
+                                                @case ('S') {
                                                 <i class="fa-solid fa-utensils pe-2"></i>
                                                 <span>{{ traducirTipoPlato(tipoPlato) }}</span>
                                                 }
-                                                @case ('POS') {
+                                                @case ('P') {
                                                 <i class="bi bi-cake2 pe-2"></i>
                                                 <span>{{ traducirTipoPlato(tipoPlato) }}</span>
                                                 }
-                                                @case ('BEB') {
+                                                @case ('B') {
                                                 <i class="bi bi-cup-straw pe-2"></i>
                                                 <span>{{ traducirTipoPlato(tipoPlato) }}</span>
                                                 }

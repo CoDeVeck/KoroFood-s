@@ -1,6 +1,6 @@
 package com.koroFoods.tableService.enums;
 
-public enum TipoMesa {
-    SAL,
-    EVE
+public enum Zona {
+    Z1,
+    Z2
 }

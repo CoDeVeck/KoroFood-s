@@ -418,11 +418,16 @@
 }
 
 .empty-state i {
-  font-size: 5rem;
   color: #E0E0E0;
   margin-bottom: 1.5rem;
 }
 
+.empty-state .icon-message{
+  font-size: 5rem;
+}
+.empty-state  .icon-button{
+  font-size: 1rem;
+}
 .empty-state h3 {
   font-size: 1.8rem;
   font-weight: 700;

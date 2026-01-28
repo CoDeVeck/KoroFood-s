@@ -28,16 +28,15 @@ public class Pedido {
 
     @Column(name = "ID_USUARIO")
     private Integer idUsuario;
+    
+    @Column(name = "ID_RESERVA")
+    private Integer idReserva;
 
     @Column(name = "FECHA_HORA")
     private LocalDateTime fechaHora;
 
     @Column(name = "SUBTOTAL")
     private BigDecimal subtotal;
-
-    // Agregado para validad si una reserva ya tiene pedido
-    @Column(name = "ID_RESERVA")
-    private Integer idReserva;
     
     @Column(name = "TOTAL")
     private BigDecimal total;

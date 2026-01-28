@@ -25,14 +25,12 @@ export class OrdenesComponent implements OnInit, OnDestroy {
   // Cache para contadores
   contadores: { [key: string]: number } = {
     'todos': 0,
-    'PEN': 0,
-    'PRO': 0
+    'EP': 0
   };
   
   filterTabs: FilterTab[] = [
     { label: 'Todos', value: 'todos' },
-    { label: 'Pendiente', value: 'PEN' },
-    { label: 'Entregado', value: 'PRO' }
+    { label: 'En Proceso', value: 'EP' }
   ];
 
   private refreshSubscription?: Subscription;
@@ -60,13 +58,11 @@ export class OrdenesComponent implements OnInit, OnDestroy {
     // Carga todos los contadores en paralelo
     forkJoin({
       todos: this.pedidoService.listarPedidos(),
-      pendientes: this.pedidoService.listarPedidos('PEN'),
-      entregados: this.pedidoService.listarPedidos('PRO')
+      pendientes: this.pedidoService.listarPedidos('EP')
     }).subscribe({
       next: (results) => {
         this.contadores['todos'] = results.todos.data?.length || 0;
-        this.contadores['PEN'] = results.pendientes.data?.length || 0;
-        this.contadores['PRO'] = results.entregados.data?.length || 0;
+        this.contadores['EP'] = results.pendientes.data?.length || 0;
       },
       error: (err) => {
         console.error('Error al cargar contadores:', err);
@@ -112,16 +108,14 @@ export class OrdenesComponent implements OnInit, OnDestroy {
 
   getEstadoClass(estado: string): string {
     const estadoMap: { [key: string]: string } = {
-      'PEN': 'estado-pendiente',
-      'PRO': 'estado-entregado'
+      'EP': 'estado-pendiente'
     };
     return estadoMap[estado] || 'estado-default';
   }
 
   getEstadoLabel(estado: string): string {
     const estadoLabels: { [key: string]: string } = {
-      'PEN': 'Pendiente',
-      'PRO': 'Entregado'
+      'EP': 'En Proceso'
     };
     return estadoLabels[estado] || estado;
   }

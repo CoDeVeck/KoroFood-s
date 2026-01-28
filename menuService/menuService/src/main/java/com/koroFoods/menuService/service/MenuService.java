@@ -353,13 +353,13 @@ public class MenuService {
 
 	private String traducirTipoPlato(String tipo) {
 		switch (tipo) {
-		case "ENT":
+		case "E":
 			return "Entrada";
-		case "SEG":
+		case "S":
 			return "Segundo";
-		case "POS":
+		case "P":
 			return "Postre";
-		case "BEB":
+		case "B":
 			return "Bebida";
 		default:
 			return tipo;
@@ -368,13 +368,13 @@ public class MenuService {
 
 	private int ordenTipo(String tipo) {
 		switch (tipo) {
-		case "ENT":
+		case "E":
 			return 1;
-		case "SEG":
+		case "S":
 			return 2;
-		case "POS":
+		case "P":
 			return 3;
-		case "BEB":
+		case "B":
 			return 4;
 		default:
 			return 99;

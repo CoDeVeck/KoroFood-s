@@ -165,14 +165,14 @@
 
       <!-- Empty State -->
       <div *ngIf="!isLoading && !error && resenasFiltradas.length === 0" class="empty-state">
-        <i class="bi bi-chat-left-text"></i>
+        <i class="bi bi-chat-left-text icon-message"></i>
         <h3>No hay reseñas</h3>
         <p *ngIf="verSoloMias">Aún no has creado ninguna reseña</p>
         <p *ngIf="!verSoloMias && filtroCalificacion !== null">
           No hay reseñas con {{ filtroCalificacion }} estrella(s)
         </p>
         <button class="btn-crear-resena-alt" (click)="irACrearResena()">
-          <i class="bi bi-plus-circle-fill me-2"></i>
+          <i class="bi bi-plus-circle-fill me-2 icon-button"></i>
           Crear Mi Primera Reseña
         </button>
       </div>

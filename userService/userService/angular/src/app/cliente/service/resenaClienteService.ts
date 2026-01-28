@@ -11,7 +11,7 @@ import { environment } from '../../../enviroments/enviroment';
   providedIn: 'root',
 })
 export class ResenaClienteService {
-  private baseUrl = `${environment.apiUrls.resenas}/resena`;
+  private baseUrl = `${environment.apiUrls.resenas}/calificacion`;
 
   constructor(private http: HttpClient) {}
 

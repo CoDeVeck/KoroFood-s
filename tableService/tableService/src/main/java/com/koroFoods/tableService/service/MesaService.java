@@ -15,13 +15,13 @@ public class MesaService {
     private final IMesaRepository mesaRepository;
     
     // Métodos para el feign en order
-    public ResultadoResponse<MesaDtoFeign> getTableById(int id){
+    public ResultadoResponse<MesaDtoFeign> getTableById(Integer id){
     	Mesa mesa = mesaRepository.findById(id).orElseThrow(() -> new RuntimeException("Mesa no encontrada"));
     	MesaDtoFeign dto = new MesaDtoFeign();
     	dto.setIdMesa(mesa.getIdMesa());
     	dto.setNumeroMesa(mesa.getNumeroMesa());
     	dto.setCapacidad(mesa.getCapacidad());
-    	dto.setTipo(mesa.getTipo().toString());
+    	dto.setTipo(mesa.getZona().toString());
     	dto.setEstado(mesa.getEstado().toString());
     	return ResultadoResponse.success("Mesa encontrada", dto);
     }

@@ -197,13 +197,13 @@ export class FormResenaComponent {
 
   traducirTipoPlato(tipo: string): string {
     switch (tipo) {
-      case 'ENT':
+      case 'E':
         return 'Entrada';
-      case 'SEG':
+      case 'S':
         return 'Segundo';
-      case 'POS':
+      case 'P':
         return 'Postre';
-      case 'BEB':
+      case 'B':
         return 'Bebida';
       default:
         return tipo;
@@ -241,7 +241,7 @@ export class FormResenaComponent {
       error: (error) => {
         console.error('Error al crear reseña:', error);
         const msg =
-          error.error?.message ||
+          error.error?.mensaje ||
           'Ocurrió un error al enviar tu reseña. Por favor, intenta nuevamente.';
         AlertService.error(msg);
         this.isSubmitting = false;

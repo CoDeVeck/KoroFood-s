@@ -22,8 +22,8 @@ public class ReservaService {
 	private final UsuarioFeignClient usuarioFeignClient;
 	private final PedidoFeignClient pedidoFeignClient;
 	
-	public ResultadoResponse<ReservaDtoFeing> getReservationByID(Integer id) {
-	    Optional<Reserva> optionalReserva = reservaRepository.findReservaAsistidaById(id);
+	public ResultadoResponse<ReservaDtoFeing> getReservationByID(String codigo) {
+	    Optional<Reserva> optionalReserva = reservaRepository.findReservaAsistidaById(codigo);
 
 	    if (optionalReserva.isEmpty()) {
 	        return ResultadoResponse.error(

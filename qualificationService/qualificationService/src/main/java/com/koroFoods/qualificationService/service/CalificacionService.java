@@ -4,18 +4,18 @@ import com.koroFoods.qualificationService.dto.ResenaListResponse;
 import com.koroFoods.qualificationService.dto.ResenaRequest;
 import com.koroFoods.qualificationService.dto.ResultadoResponse;
 import com.koroFoods.qualificationService.enums.EstadoResena;
+import com.koroFoods.qualificationService.enums.TipoEntidad;
 import com.koroFoods.qualificationService.feign.EventoFeignClient;
 import com.koroFoods.qualificationService.feign.PlatoFeignClient;
 import com.koroFoods.qualificationService.feign.UsuarioFeign;
 import com.koroFoods.qualificationService.feign.UsuarioFeignClient;
-import com.koroFoods.qualificationService.model.Resena;
-import com.koroFoods.qualificationService.repository.IResenaRepository;
+import com.koroFoods.qualificationService.model.Calificacion;
+import com.koroFoods.qualificationService.repository.ICalificacionRepository;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,14 +23,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class ResenaService {
-    private final IResenaRepository resenaRepository;
+public class CalificacionService {
+    private final ICalificacionRepository resenaRepository;
     private final PlatoFeignClient platoFeignClient;
     private final EventoFeignClient eventoFeignClient;
     private final UsuarioFeignClient usuarioFeignClient;
     
     public ResultadoResponse<List<ResenaListResponse>> listarResenas() {
-        List<Resena> list = resenaRepository.findAll();
+        List<Calificacion> list = resenaRepository.findAll();
         
         List<ResenaListResponse> listResponse = list.stream()
             .map(this::convertirAResenaListResponse)
@@ -40,7 +40,7 @@ public class ResenaService {
     }
     
     public ResultadoResponse<List<ResenaListResponse>> obtenerResenasPorUsuario(Integer idUsuario) {
-        List<Resena> resenas = resenaRepository.findByIdUsuario(idUsuario);
+        List<Calificacion> resenas = resenaRepository.findByIdUsuario(idUsuario);
         
         if (resenas.isEmpty()) {
             return ResultadoResponse.error("No se encontraron reseñas para el usuario");
@@ -53,7 +53,7 @@ public class ResenaService {
         return ResultadoResponse.success("Reseñas del usuario listadas correctamente", listResponse);
     }
     
-    public ResultadoResponse<Resena> crearResena(ResenaRequest req) {
+    public ResultadoResponse<Calificacion> crearResena(ResenaRequest req) {
         try {
             var usuario = usuarioFeignClient.getUsuarioById(req.getIdUsuario());
         } catch (FeignException.NotFound e) {
@@ -83,12 +83,21 @@ public class ResenaService {
                 }
             }
         }
-
-        Resena r = new Resena();
+        boolean yaExiste = resenaRepository.existsByIdUsuarioAndTipoEntidadAndIdEntidad(
+                req.getIdUsuario(),
+                req.getTipoEntidad(),
+                req.getIdEntidad()
+        );
+        
+        if (yaExiste) {
+            return ResultadoResponse.error("Ya enviaste una calificación sobre este " +
+                    (req.getTipoEntidad() == TipoEntidad.PLATO ? "plato" : "evento"));
+        }
+        Calificacion r = new Calificacion();
         r.setIdUsuario(req.getIdUsuario());
         r.setTipoEntidad(req.getTipoEntidad());
         r.setIdEntidad(req.getIdEntidad());
-        r.setCalificacion(req.getCalificacion());
+        r.setPuntuacion(req.getCalificacion());
         r.setComentario(req.getComentario());
         r.setFechaRegistro(LocalDateTime.now());
         r.setEstado(EstadoResena.ACT);
@@ -99,12 +108,12 @@ public class ResenaService {
     }
 
     // Método para mapear el listado de las reseñas
-    private ResenaListResponse convertirAResenaListResponse(Resena resena) {
+    private ResenaListResponse convertirAResenaListResponse(Calificacion resena) {
         ResenaListResponse response = new ResenaListResponse();
-        response.setIdResena(resena.getIdResena());
+        response.setIdResena(resena.getIdCalificacion());
         response.setIdUsuario(resena.getIdUsuario());
         response.setIdEntidad(resena.getIdEntidad());
-        response.setCalificacion(resena.getCalificacion());
+        response.setCalificacion(resena.getPuntuacion());
         response.setComentario(resena.getComentario());
 
         try {

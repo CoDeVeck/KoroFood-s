@@ -41,7 +41,7 @@ interface PlatoSeleccionado {
 export class FormOrdenComponent implements OnInit {
   currentStep = 1;
 
-  reservaSearchId: number | null = null;
+  reservaSearchId: string | null = null;
   reservaEncontrada: ReservaDto | null = null;
   searching = false;
   searchError: string | null = null;
@@ -273,10 +273,10 @@ export class FormOrdenComponent implements OnInit {
 
   obtenerNombreTipo(tipo: string): string {
     const tipos: { [key: string]: string } = {
-      ENT: 'Entrada',
-      SEG: 'Segundo',
-      POS: 'Postre',
-      BEB: 'Bebida',
+      E: 'Entrada',
+      S: 'Segundo',
+      P: 'Postre',
+      B: 'Bebida',
     };
     return tipos[tipo] || tipo;
   }

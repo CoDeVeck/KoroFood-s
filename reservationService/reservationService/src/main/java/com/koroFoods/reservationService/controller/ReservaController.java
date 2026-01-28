@@ -19,9 +19,9 @@ import lombok.RequiredArgsConstructor;
 public class ReservaController {
 	private final ReservaService reservaService;
 
-	@GetMapping("/{id}")
-	public ResponseEntity<ResultadoResponse<ReservaDtoFeing>> getreservationhById(@PathVariable Integer id) {
-		ResultadoResponse<ReservaDtoFeing> resultado = reservaService.getReservationByID(id);
+	@GetMapping("/{codigo}")
+	public ResponseEntity<ResultadoResponse<ReservaDtoFeing>> getreservationhById(@PathVariable String codigo) {
+		ResultadoResponse<ReservaDtoFeing> resultado = reservaService.getReservationByID(codigo);
 		if (resultado.isValor()) {
 			return ResponseEntity.status(HttpStatus.OK).body(resultado);
 		} else {

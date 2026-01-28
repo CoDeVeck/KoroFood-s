@@ -20,7 +20,7 @@ public class MesaController {
 	private final MesaService mesaService;
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<ResultadoResponse<MesaDtoFeign>> getTablehById(@PathVariable int id) {
+	public ResponseEntity<ResultadoResponse<MesaDtoFeign>> getTablehById(@PathVariable Integer id) {
 		ResultadoResponse<MesaDtoFeign> table = mesaService.getTableById(id);
 		return ResponseEntity.ok(table);
 	}

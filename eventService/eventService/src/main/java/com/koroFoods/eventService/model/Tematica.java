@@ -19,6 +19,9 @@ public class Tematica {
     @Column(name = "ID_TEMATICA")
     private Integer idTematica;
 
-    @Column(name = "DESCRIPCION")
-    private String descripcion;
+    @Column(name = "NOMBRE")
+    private String nombre;
+    
+    @Column(name="ACTIVO")
+    private String activo;
 }

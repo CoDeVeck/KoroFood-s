@@ -1,7 +1,8 @@
 package com.koroFoods.paymentService.model;
 
 import com.koroFoods.paymentService.enums.EstadoPago;
-import com.koroFoods.paymentService.enums.MetodoPago;
+import com.koroFoods.paymentService.enums.TipoPago;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,18 +33,24 @@ public class Pago {
 
     @Column(name = "ID_USUARIO")
     private Integer idUsuario;
-
-    @Column(name = "FECHA_HORA")
-    private LocalDateTime fechaHora;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TIPO_PAGO")
+    private TipoPago tipoPago;
 
     @Column(name = "MONTO")
     private BigDecimal monto;
-
-    @Enumerated(EnumType.STRING)
+    
     @Column(name = "METODO_PAGO")
-    private MetodoPago metodoPago;
+    private String metodoPago;
+    
+    @Column(name = "FECHA_PAGO")
+    private LocalDateTime fechaPago;;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ESTADO")
     private EstadoPago estado;
+    
+    @Column(name = "OBSERVACIONES")
+    private String observaciones;
 }

@@ -22,13 +22,13 @@ export class MenuComponent implements OnInit {
   isLoading = false;
   
 tipoPlatoLabels: any = {
-  ENT: 'Entradas',
-  SEG: 'Platos Principales',
-  POS: 'Postres',
-  BEB: 'Bebidas'
+  E: 'Entradas',
+  S: 'Platos Principales',
+  P: 'Postres',
+  B: 'Bebidas'
 };
 
-  tiposPlato: string[] = ['Todos', 'ENT', 'SEG', 'POS', 'BEB'];
+  tiposPlato: string[] = ['Todos', 'E', 'S', 'P', 'B'];
 
   showScrollButton = false;
 

@@ -13,9 +13,9 @@ export class ReservaMeseroService {
 
   constructor(private http: HttpClient) {}
 
-  getReservationById(id: number): Observable<ResultadoResponse<ReservaDto>> {
+  getReservationById(codigo: String): Observable<ResultadoResponse<ReservaDto>> {
     return this.http.get<ResultadoResponse<ReservaDto>>(
-      `${this.baseUrl}/${id}`,
+      `${this.baseUrl}/${codigo}`,
     );
   }
 }

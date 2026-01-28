@@ -26,10 +26,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class PedidoService {
-
 	private final IPedidoRepository pedidoRepository;
 	private final IDetallePedidoRepository detallePedidoRepository;
-
 	private final MesaFeignClient mesaFeignClient;
 	private final UsuarioFeignClient usuarioFeignClient;
 	private final PlatoFeignClient platoFeignClient;
@@ -84,7 +82,7 @@ public class PedidoService {
 		pedido.setIdUsuario(dto.getIdUsuario());
 		pedido.setIdReserva(dto.getIdReserva());
 		pedido.setFechaHora(LocalDateTime.now());
-		pedido.setEstado(EstadoPedido.PEN);
+		pedido.setEstado(EstadoPedido.EP);
 		pedido.setSubtotal(BigDecimal.ZERO);
 		pedido.setTotal(BigDecimal.ZERO);
 
