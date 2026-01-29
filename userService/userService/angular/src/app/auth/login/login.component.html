@@ -321,6 +321,7 @@
               Registrate en <strong>KORO-FOOD'S</strong>
             </h2>
 
+            <!-- FORM PARA EL REGISTRIO-->
             <form
               class="auth-form"
               (ngSubmit)="onSignUp()"
@@ -664,25 +665,33 @@
               Bienvenido a <strong>KORO-FOOD'S</strong>
             </h2>
 
-            <form class="auth-form" (ngSubmit)="onLogin()" #loginForm="ngForm">
+            <!-- FORM PARA EL LOGIN-->
+
+            <form
+              [formGroup]="loginForm"
+              class="auth-form"
+              (ngSubmit)="onLogin()"
+            >
+              <!--EMAIL-->
               <div class="form-group">
                 <input
                   type="email"
                   class="form-input"
                   placeholder="Correo Electronico"
-                  [(ngModel)]="loginData.email"
-                  name="loginEmail"
+                  formControlName="correo"
+                  name="correo"
                   required
                 />
               </div>
 
+              <!--PASSWORD-->
               <div class="form-group">
                 <input
                   [type]="showLoginPassword ? 'text' : 'password'"
                   class="form-input"
                   placeholder="Clave"
-                  [(ngModel)]="loginData.password"
-                  name="loginPassword"
+                  formControlName="clave"
+                  name="clave"
                   required
                 />
                 <button
@@ -751,7 +760,7 @@
                 <label class="remember-me">
                   <input
                     type="checkbox"
-                    [(ngModel)]="loginData.rememberMe"
+                    --[(ngModel)]="loginData.rememberMe"
                     name="rememberMe"
                   />
                   <span>Recordar</span>
