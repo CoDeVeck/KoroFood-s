@@ -44,7 +44,7 @@ public class UsuarioService  {
         }
 
         Rol rolDefinido = new Rol();
-        rolDefinido.setIdRol(2);
+        rolDefinido.setIdRol(4);
 
         usuario.setClave(bCryptPasswordEncoder.encode(usuario.getClave()));
         usuario.setRol(rolDefinido);
