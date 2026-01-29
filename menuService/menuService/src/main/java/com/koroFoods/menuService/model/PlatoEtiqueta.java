@@ -37,6 +37,6 @@ public class PlatoEtiqueta {
     private Etiqueta etiqueta;
     
     @Column(name="ACTIVO")
-    private String activo;
+    private Boolean activo;
 
 }

@@ -5,13 +5,13 @@ import { ResenaRequest } from '../../shared/dto/ResenaRequest';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 import { Resena } from '../../shared/model/resena.model';
 import { ResenaListResponse } from '../../shared/dto/ResenaListResponse';
-import { enviroment } from '../../../enviroments/enviroment';
+import { environment } from '../../../enviroments/enviroment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ResenaClienteService {
-  private baseUrl = `${enviroment.apiUrls.resenas}/calificacion`;
+  private baseUrl = `${environment.apiUrls.resenas}/calificacion`;
 
   constructor(private http: HttpClient) {}
 

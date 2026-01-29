@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
-import { enviroment } from '../../../enviroments/enviroment';
+import { environment } from '../../../enviroments/enviroment';
 import { EventoDto } from '../../shared/dto/EventoDto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class EventoClienteService {
-  private baseUrl = `${enviroment.apiUrls.eventos}/evento/feign`;
+  private baseUrl = `${environment.apiUrls.eventos}/evento/feign`;
 
   constructor(private http: HttpClient) {}
   listarEventos(): Observable<ResultadoResponse<EventoDto[]>> {

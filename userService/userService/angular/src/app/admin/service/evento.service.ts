@@ -4,15 +4,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { enviroment } from '../../../enviroments/enviroment';
+import { environment } from '../../../enviroments/enviroment';
 import { EventoResponse, EventoRequest, TematicaResponse } from '../models/evento.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EventoService {
-  private apiUrl = `${enviroment.apiUrls.eventos}/eventos`;
-  private tematicaUrl = `${enviroment.apiUrls.eventos}/tematicas`;
+  private apiUrl = `${environment.apiUrls.eventos}/eventos`;
+  private tematicaUrl = `${environment.apiUrls.eventos}/tematicas`;
 
   constructor(private http: HttpClient) {}
 
