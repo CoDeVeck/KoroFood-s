@@ -3,6 +3,7 @@ package com.koroFoods.userService.service;
 import com.koroFoods.userService.dto.ResultadoResponse;
 import com.koroFoods.userService.dto.UsuarioDtoFeign;
 import com.koroFoods.userService.dto.request.UpdatePasswordRequest;
+import com.koroFoods.userService.dto.response.PerfilClienteResponse;
 import com.koroFoods.userService.model.Distrito;
 import com.koroFoods.userService.model.Rol;
 import com.koroFoods.userService.model.Usuario;
@@ -105,5 +106,9 @@ public class UsuarioService  {
 
     }
 
+    public PerfilClienteResponse obtenerPerfilDetallado (Integer id ){
+
+        return usuarioRepository.obtenerPerfil(id);
+    }
 
 }
