@@ -11,6 +11,7 @@ public class EventoFeignReserva {
     private String nombre;
     private String descripcion;
     private String tematica;
-    private LocalDateTime fecha;
+    private LocalDateTime fechaInicio;
+    private LocalDateTime fechaFin;
     private Integer aforo;
 }

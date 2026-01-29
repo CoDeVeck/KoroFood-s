@@ -44,12 +44,13 @@ public class EventoService {
     
     @Transactional
     public EventResponse crear(EventResquest request) {
-        validarFechaFutura(request.getFecha());
+        validarFechaFutura(request.getFechaInicio());
 
         Evento evento = new Evento();
         evento.setNombre(request.getNombre());
         evento.setDescripcion(request.getDescripcion());
-        evento.setFecha(request.getFecha());
+        evento.setFechaInicio(request.getFechaInicio());
+        evento.setFechaFin(request.getFechaFin());
         evento.setCosto(request.getCosto());
         evento.setImagen(request.getImagen());
         evento.setActivo(true);
@@ -104,11 +105,12 @@ public class EventoService {
         Evento evento = eventoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
 
-        validarFechaFutura(request.getFecha());
+        validarFechaFutura(request.getFechaInicio());
 
         evento.setNombre(request.getNombre());
         evento.setDescripcion(request.getDescripcion());
-        evento.setFecha(request.getFecha());
+        evento.setFechaInicio(request.getFechaInicio());
+        evento.setFechaFin(request.getFechaFin());
         evento.setCosto(request.getCosto());
         evento.setImagen(request.getImagen());
 
@@ -154,7 +156,8 @@ public class EventoService {
                 .nombre(evento.getNombre())
                 .descripcion(evento.getDescripcion())
                 .tematica(tematicaResponse)
-                .fecha(evento.getFecha())
+                .fechaInicio(evento.getFechaInicio())
+                .fechaFin(evento.getFechaFin())
                 .costo(evento.getCosto())
                 .imagen(evento.getImagen())
                 .activo(evento.getActivo())
@@ -207,7 +210,8 @@ public class EventoService {
         dto.setNombre(evento.getNombre());
         dto.setDescripcion(evento.getDescripcion());
         dto.setTematica(evento.getTematica() != null ? evento.getTematica().getNombre() : null);
-        dto.setFecha(evento.getFecha());
+        dto.setFechaInicio(evento.getFechaInicio());
+        dto.setFechaFin(evento.getFechaFin());
         dto.setAforo(calcularAforoEvento(evento.getIdEvento()));
 
         return dto;

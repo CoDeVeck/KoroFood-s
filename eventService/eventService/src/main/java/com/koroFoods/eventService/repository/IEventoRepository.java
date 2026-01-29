@@ -19,7 +19,7 @@ public interface IEventoRepository extends JpaRepository<Evento, Integer> {
 
 	List<Evento> findByTematica_IdTematicaAndActivoTrue(Integer idTematica);
 
-	@Query("SELECT e FROM Evento e WHERE e.fecha >= :fechaActual AND e.activo = true")
+	@Query("SELECT e FROM Evento e WHERE e.fechaInicio >= :fechaActual AND e.activo = true")
 	List<Evento> findEventosFuturos(LocalDateTime fechaActual);
 
 }

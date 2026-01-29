@@ -34,8 +34,11 @@ public class Evento {
     @JoinColumn(name = "ID_TEMATICA")
     private Tematica tematica;
 
-    @Column(name = "FECHA_EVENTO")
-    private LocalDateTime fecha;
+    @Column(name = "FECHA_INICIO")
+    private LocalDateTime fechaInicio;
+    
+    @Column(name = "FECHA_FIN")
+    private LocalDateTime fechaFin;
 
     @Column(name = "COSTO_EVENTO")
     private BigDecimal costo;

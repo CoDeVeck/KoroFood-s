@@ -21,9 +21,13 @@ public class EventResquest {
 
 	private Integer idTematica;
 
-	@NotNull(message = "La fecha del evento es obligatoria")
+	@NotNull(message = "La fecha de inicio del evento es obligatoria")
 	
-	private LocalDateTime fecha;
+	private LocalDateTime fechaInicio;
+	
+	@NotNull(message = "La fecha de fin del evento es obligatoria")
+	
+	private LocalDateTime fechaFin;
 
 	@NotNull(message = "El costo es obligatorio")
 	@DecimalMin(value = "0.01", inclusive = false, message = "El costo debe ser mayor a 0")
