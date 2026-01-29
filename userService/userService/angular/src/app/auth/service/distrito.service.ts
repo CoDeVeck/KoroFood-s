@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { environment } from '@envs/enviroment';
+import { enviroment } from '@envs/enviroment';
 import { Distrito } from '../../shared/model/distrito.model';
 import { Observable } from 'rxjs';
 
@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class DistritoService {
-  private url = `${environment.apiUrls.usuarios}/distrito`;
+  private url = `${enviroment.apiUrls.usuarios}/distrito`;
   constructor(private http: HttpClient) {}
 
   listarDistritos(): Observable<Distrito[]> {

@@ -7,6 +7,7 @@ import { FormResenaComponent } from './form-resena/form-resena.component';
 import { MenuComponent } from './menu/menu.component';
 import { ContactoComponent } from './contacto/contacto.component';
 import { ReservaComponent } from './reserva/reserva.component';
+import { PerfilComponent } from './perfil/perfil.component';
 
 const routes: Routes = [
   {
@@ -42,6 +43,11 @@ const routes: Routes = [
         path: 'reserva',
         component: ReservaComponent,
         data: { title: 'Reserva' },
+      },
+      {
+        path: 'perfil',
+        component: PerfilComponent,
+        data: { title: 'Perfil' },
       },
     ],
   },

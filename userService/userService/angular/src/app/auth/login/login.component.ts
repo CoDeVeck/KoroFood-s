@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormsModule,
@@ -8,9 +8,13 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { AlertIziToast } from '../../util/iziToastAlert.service';
+import {
+  GoogleSigninButtonModule,
+  SocialAuthService,
+  SocialUser,
+} from '@abacritt/angularx-social-login';
 
 //servicios a consumir
-
 import { DistritoService } from '../service/distrito.service';
 import { AuthService } from '../service/auth.service';
 
@@ -21,18 +25,19 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../cliente/service/user.service';
 import { Usuario } from '../../shared/model/usuario.model';
 import { ResultadoResponse } from '../../shared/response/resultadoResponse.models';
-
-interface SignupData {
-  fullName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
+import { enviroment } from '@envs/enviroment';
+import { TipoDocumento } from '../../shared/enums/tipoDocumento.enum';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    GoogleSigninButtonModule,
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
@@ -48,14 +53,17 @@ export class LoginComponent implements OnInit {
   showConfirmPassword: boolean = false;
   showLoginPassword: boolean = false;
 
-  constructor(
-    private distritoService: DistritoService,
-    private authService: AuthService,
-    private userService: UserService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private formBuilder: FormBuilder,
-  ) {
+  private authStateSubscription?: Subscription;
+
+  private distritoService = inject(DistritoService);
+  private socialAuth = inject(AuthService); // incluye el login/registro y login con GitHub
+  private authService = inject(SocialAuthService); // servicio para autenticación con Google
+  private userService = inject(UserService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private formBuilder = inject(FormBuilder);
+
+  constructor() {
     this.initForm();
 
     this.loginForm = this.formBuilder.group({
@@ -66,6 +74,87 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarDistritos();
+
+    try {
+      if (!this.authService) {
+        console.error(' SocialAuthService no disponible');
+        return;
+      }
+
+      console.log('SocialAuthService disponible');
+
+      this.authStateSubscription = this.authService.authState.subscribe({
+        next: (socialUser: SocialUser | null) => {
+          if (socialUser) {
+            const usuario: Usuario = {
+              nombres: socialUser.name,
+              apePaterno: '',
+              apeMaterno: '',
+              clave: '',
+              telefono: '',
+              tipoDoc: TipoDocumento.CDX,
+              nroDoc: '',
+              direccion: '',
+              correo: socialUser.email,
+              imagen: socialUser.photoUrl,
+              distrito: {
+                idDistrito: 0,
+              },
+            };
+
+            this.socialAuth.login(usuario).subscribe({
+              next: () => {
+                console.log('Login con Google exitoso');
+                this.router.navigate(['/']);
+              },
+              error: (err) => {
+                console.error('Error en login:', err);
+              },
+            });
+          }
+        },
+        error: (err) => {
+          console.error('Error en authState:', err);
+        },
+      });
+    } catch (error) {
+      console.error('Error al suscribirse a authState:', error);
+    }
+
+    const code = this.route.snapshot.queryParamMap.get('code');
+
+    if (code) {
+      this.socialAuth.loginWithGithub(code).subscribe({
+        next: (dto) => {
+          const user: Usuario = {
+            nombres: dto.name,
+            apePaterno: '',
+            apeMaterno: '',
+            clave: '',
+            telefono: '',
+            tipoDoc: TipoDocumento.CDX,
+            nroDoc: '',
+            direccion: '',
+            correo: dto.email,
+            imagen: dto.avatar,
+            distrito: {
+              idDistrito: 0,
+            },
+          };
+
+          this.socialAuth.login(user);
+          this.router.navigate(['/']);
+        },
+        error: () => this.router.navigate(['/login']),
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    // ✅ Limpia la suscripción
+    if (this.authStateSubscription) {
+      this.authStateSubscription.unsubscribe();
+    }
   }
 
   private initForm(): void {
@@ -177,7 +266,7 @@ export class LoginComponent implements OnInit {
 
     console.log('Datos de registro:', usuario);
 
-    this.authService.register(usuario).subscribe({
+    this.socialAuth.register(usuario).subscribe({
       next: (resultado: ResultadoResponse) => {
         this.isLoginMode = false;
 
@@ -234,14 +323,14 @@ export class LoginComponent implements OnInit {
     console.log('Datos enviados:', this.loginForm.value);
 
     if (this.loginForm.valid) {
-      this.authService.login(this.loginForm.value).subscribe({
+      this.socialAuth.login(this.loginForm.value).subscribe({
         next: (response: any) => {
           console.log('Respuesta login:', response);
           const token = response.token;
-          this.authService.saveToken(token);
+          this.socialAuth.saveToken(token);
           console.log('Token guardado: ', token);
 
-          this.authService.getUsuario().subscribe({
+          this.socialAuth.getUsuario().subscribe({
             next: (usuario) => {
               this.userService.setUser(usuario);
               console.log('Usuario logueado: ', usuario);
@@ -292,22 +381,27 @@ export class LoginComponent implements OnInit {
     }
   }
 
+  verificarLoggin(): Boolean {
+    return this.socialAuth.isLoggedIn();
+  }
+
   //AUTENTICACION CON GOOGLE
   onGoogleAuth(): void {
     console.log('Google authentication initiated');
-
-    //autenticacion con google
 
     alert('Autenticación con Google en proceso...');
   }
 
   //AUTENTICACION CON GITHUB
-  onGithubAuth(): void {
+  onGithubAuth() {
     console.log('GitHub authentication initiated');
+    const { githubClientId, githubRedirectUri } = enviroment;
 
-    //autenticacion con gituh
-
-    alert('Autenticación con GitHub en proceso...');
+    window.location.href =
+      `https://github.com/login/oauth/authorize` +
+      `?client_id=${githubClientId}` +
+      `&scope=user:email` +
+      `&redirect_uri=${githubRedirectUri}`;
   }
 
   //Implmentar metodo para recuperar contraseña

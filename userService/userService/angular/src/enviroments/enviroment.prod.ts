@@ -1,4 +1,4 @@
-export const environment = {
+export const enviroment = {
   production: true,
   apiUrls: {
     usuarios: 'https://dominio.com/usuarios',
@@ -8,4 +8,6 @@ export const environment = {
     pedido: 'https://dominio.com/pedido',
     reserva: 'https://dominio.com/reserva',
   },
+  githubClientId: 'API_KEY_PROD',
+  githubRedirectUri: 'https://localhost:4200/login',
 };

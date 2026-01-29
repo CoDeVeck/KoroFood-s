@@ -533,7 +533,12 @@
             </div>
 
             <div class="social-auth-buttons">
-              <button type="button" class="btn-social" (click)="onGoogleAuth()">
+              <asl-google-signin-button
+                type="standard"
+                size="large"
+                theme="outline"
+                class="btn-social"
+              >
                 <svg
                   width="20"
                   height="20"
@@ -559,7 +564,7 @@
                   />
                 </svg>
                 Google
-              </button>
+              </asl-google-signin-button>
 
               <button type="button" class="btn-social" (click)="onGithubAuth()">
                 <svg
@@ -728,7 +733,13 @@
             </div>
 
             <div class="social-auth-buttons">
-              <button type="button" class="btn-social" (click)="onGoogleAuth()">
+              <asl-google-signin-button
+                type="standard"
+                size="medium"
+                theme="outline"
+                text="signin_with"
+                class="btn-social"
+              >
                 <svg
                   width="20"
                   height="20"
@@ -753,8 +764,7 @@
                     fill="#EA4335"
                   />
                 </svg>
-                Google
-              </button>
+              </asl-google-signin-button>
 
               <button type="button" class="btn-social" (click)="onGithubAuth()">
                 <svg
