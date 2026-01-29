@@ -27,6 +27,6 @@ export const routes: Routes = [
         (m) => m.RecepcionistaModule,
       ),
   },
-  { path: '', redirectTo: 'cliente/index', pathMatch: 'full' },
+  { path: '', redirectTo: 'cliente/inicio', pathMatch: 'full' },
   { path: '**', redirectTo: 'auth/login' },
 ];

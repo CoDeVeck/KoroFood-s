@@ -18,26 +18,6 @@ const routes: Routes = [
     component: RegisterComponent,
     data: { title: 'Registrarse ' },
   },
-  {
-    path: 'cliente/index',
-    component: ClienteRoutingModule,
-    data: { title: 'Cliente' },
-  },
-  {
-    path: 'admin/dashboard',
-    component: AdminRoutingModule,
-    data: { title: 'Admin Dashboard' },
-  },
-  {
-    path: 'mesero/panel',
-    component: MeseroRoutingModule,
-    data: { title: 'Mesero Panel' },
-  },
-  {
-    path: 'recepcionista/panel',
-    component: RecepcionistaRoutingModule,
-    data: { title: 'Recepcionista Panel' },
-  },
 ];
 
 @NgModule({

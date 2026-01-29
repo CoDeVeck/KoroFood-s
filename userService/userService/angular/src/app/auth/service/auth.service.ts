@@ -27,9 +27,27 @@ export class AuthService {
   }
 
   register(usuario: Usuario): Observable<ResultadoResponse> {
-    return this.http.post<ResultadoResponse>(this.registerUrl, usuario, {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    const formData = new FormData();
+
+    formData.append('nombres', usuario.nombres);
+    formData.append('apePaterno', usuario.apePaterno);
+    formData.append('apeMaterno', usuario.apeMaterno);
+    formData.append('correo', usuario.correo);
+    formData.append('clave', usuario.clave);
+    formData.append('tipoDoc', usuario.tipoDoc);
+    formData.append('nroDoc', usuario.nroDoc);
+    formData.append('direccion', usuario.direccion);
+    formData.append('telefono', usuario.telefono);
+    formData.append(
+      'distrito.idDistrito',
+      usuario.distrito.idDistrito.toString(),
+    );
+
+    if (usuario.imagenMultipart) {
+      formData.append('imagenMultipart', usuario.imagenMultipart);
+    }
+
+    return this.http.post<ResultadoResponse>(this.registerUrl, formData);
   }
 
   getUsuario(): Observable<any> {
