@@ -21,6 +21,7 @@ public class ReservaService {
 	private final IReservaRepository reservaRepository;
 	private final UsuarioFeignClient usuarioFeignClient;
 	private final PedidoFeignClient pedidoFeignClient;
+
 	
 	public ResultadoResponse<ReservaDtoFeing> getReservationByID(String codigo) {
 	    Optional<Reserva> optionalReserva = reservaRepository.findReservaAsistidaById(codigo);
@@ -70,5 +71,30 @@ public class ReservaService {
 
 	    return ResultadoResponse.success("Reserva encontrada", dto);
 	}
+	/*
+	public ResultadoResponse<Reserva> registrarReserva(Reserva req) {
+		Reserva reg = new Reserva();
+	
+		var usuario = usuarioFeignClient.getUsuarioById(req.getIdUsuario());
 
+	    if (!usuario.isValor() || usuario.getData() == null) {
+	        return ResultadoResponse.error(
+	            "El usuario con ID " + req.getIdUsuario() + " no existe"
+	        );
+	    }
+	    
+	    
+	    
+		reg.setIdReserva(null);
+		reg.setIdUsuario(req.getIdUsuario());
+		reg.setIdMesa(req.getIdMesa());
+		
+		if (reg.getIdEvento().equals(null)) {
+			reg.setIdEvento(null);
+		} else {
+			reg.setIdEvento(req.getIdEvento());
+		}
+		
+	}
+	*/
 }

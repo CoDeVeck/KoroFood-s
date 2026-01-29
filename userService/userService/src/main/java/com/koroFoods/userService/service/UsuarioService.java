@@ -70,6 +70,7 @@ public class UsuarioService  {
         dto.setApePaterno(usuario.getApePaterno());
         dto.setApeMaterno(usuario.getApeMaterno());
         dto.setCorreo(usuario.getCorreo());
+        dto.setTelefono(usuario.getTelefono());
         dto.setImagen(usuario.getImagen());
 
         return ResultadoResponse.success("Usuario encontrado", dto);

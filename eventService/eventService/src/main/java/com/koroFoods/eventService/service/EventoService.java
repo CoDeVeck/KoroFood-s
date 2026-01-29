@@ -5,12 +5,17 @@ package com.koroFoods.eventService.service;
 import com.koroFoods.eventService.dtos.EventResponse;
 import com.koroFoods.eventService.dtos.EventResquest;
 import com.koroFoods.eventService.dtos.EventoDtoFeign;
+import com.koroFoods.eventService.dtos.EventoFeignReserva;
 import com.koroFoods.eventService.dtos.ResultadoResponse;
 import com.koroFoods.eventService.dtos.TematicResponse;
 import com.koroFoods.eventService.exception.BusinessException;
 import com.koroFoods.eventService.exception.ResourceNotFoundException;
+import com.koroFoods.eventService.feign.IMesaFeignClient;
+import com.koroFoods.eventService.feign.MesaFeign;
 import com.koroFoods.eventService.model.Evento;
+import com.koroFoods.eventService.model.EventoMesa;
 import com.koroFoods.eventService.model.Tematica;
+import com.koroFoods.eventService.repository.IEventoMesaRepository;
 import com.koroFoods.eventService.repository.IEventoRepository;
 import com.koroFoods.eventService.repository.ITematicaRepository;
 
@@ -32,14 +37,20 @@ public class EventoService {
     
     private final ITematicaRepository tematicaRepository;
     
+    private final IEventoMesaRepository eventoMesaRepository;
+    
+    private final IMesaFeignClient mesaClient;
+    
+    
     @Transactional
     public EventResponse crear(EventResquest request) {
-        validarFechaFutura(request.getFecha());
+        validarFechaFutura(request.getFechaInicio());
 
         Evento evento = new Evento();
         evento.setNombre(request.getNombre());
         evento.setDescripcion(request.getDescripcion());
-        evento.setFecha(request.getFecha());
+        evento.setFechaInicio(request.getFechaInicio());
+        evento.setFechaFin(request.getFechaFin());
         evento.setCosto(request.getCosto());
         evento.setImagen(request.getImagen());
         evento.setActivo(true);
@@ -94,11 +105,12 @@ public class EventoService {
         Evento evento = eventoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
 
-        validarFechaFutura(request.getFecha());
+        validarFechaFutura(request.getFechaInicio());
 
         evento.setNombre(request.getNombre());
         evento.setDescripcion(request.getDescripcion());
-        evento.setFecha(request.getFecha());
+        evento.setFechaInicio(request.getFechaInicio());
+        evento.setFechaFin(request.getFechaFin());
         evento.setCosto(request.getCosto());
         evento.setImagen(request.getImagen());
 
@@ -144,7 +156,8 @@ public class EventoService {
                 .nombre(evento.getNombre())
                 .descripcion(evento.getDescripcion())
                 .tematica(tematicaResponse)
-                .fecha(evento.getFecha())
+                .fechaInicio(evento.getFechaInicio())
+                .fechaFin(evento.getFechaFin())
                 .costo(evento.getCosto())
                 .imagen(evento.getImagen())
                 .activo(evento.getActivo())
@@ -176,6 +189,55 @@ public class EventoService {
     	
     	return ResultadoResponse.success("Evento encontrado", dto);
 
+    }
+    
+    
+    // Para la reserva
+    
+    @Transactional(readOnly = true)
+    public ResultadoResponse<EventoFeignReserva> buscarEventoParaReserva(Integer id) {
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
+        
+        EventoFeignReserva dto = mapearAEventoFeignReserva(evento);
+        
+        return ResultadoResponse.success("Evento encontrado exitosamente", dto);
+    }
+
+    private EventoFeignReserva mapearAEventoFeignReserva(Evento evento) {
+        EventoFeignReserva dto = new EventoFeignReserva();
+        dto.setIdEvento(evento.getIdEvento());
+        dto.setNombre(evento.getNombre());
+        dto.setDescripcion(evento.getDescripcion());
+        dto.setTematica(evento.getTematica() != null ? evento.getTematica().getNombre() : null);
+        dto.setFechaInicio(evento.getFechaInicio());
+        dto.setFechaFin(evento.getFechaFin());
+        dto.setAforo(calcularAforoEvento(evento.getIdEvento()));
+
+        return dto;
+    }
+    
+    public Integer calcularAforoEvento(Integer idEvento) {
+        List<EventoMesa> eventoMesas = eventoMesaRepository
+            .findByEvento_IdEventoAndActivoTrue(idEvento);
+
+        if (eventoMesas.isEmpty()) {
+            return 0;
+        }
+
+        List<Integer> idsMesas = eventoMesas.stream()
+            .map(EventoMesa::getIdMesa)
+            .collect(Collectors.toList());
+
+        ResultadoResponse<List<MesaFeign>> response = mesaClient.obtenerMesasPorIds(idsMesas);
+
+        if (!response.isValor() || response.getData() == null) {
+            throw new BusinessException("No se pudo obtener información de las mesas para calcular el aforo");
+        }
+
+        return response.getData().stream()
+            .mapToInt(MesaFeign::getCapacidad)
+            .sum();
     }
     
 }

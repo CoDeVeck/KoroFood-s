@@ -44,11 +44,11 @@ public class SecurityConfig {
 
 				.csrf(crsf -> crsf.disable())
 				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(auth -> auth
+				/*.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/auth/**").permitAll()
 						.requestMatchers("/cliente/index").permitAll()
 						.requestMatchers("/distrito/list").permitAll()
-						.anyRequest().authenticated())
+						.anyRequest().authenticated())*/
 				.authorizeHttpRequests(auth -> auth.anyRequest().permitAll() // 🔥 TODO PERMITIDO
 				);
 		return httpSecurity.build();

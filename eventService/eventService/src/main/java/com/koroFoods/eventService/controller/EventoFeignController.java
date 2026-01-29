@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.koroFoods.eventService.dtos.EventoDtoFeign;
+import com.koroFoods.eventService.dtos.EventoFeignReserva;
 import com.koroFoods.eventService.dtos.ResultadoResponse;
 import com.koroFoods.eventService.service.EventoService;
 
@@ -38,4 +39,12 @@ public class EventoFeignController {
 		ResultadoResponse<EventoDtoFeign> event = eventoService.getEventById(id);
 		return ResponseEntity.ok(event);
 	}
+	
+	@GetMapping("/validar/{id}")
+	public ResponseEntity<ResultadoResponse<EventoFeignReserva>> obtenerEventoValidado(@PathVariable Integer id) {
+		ResultadoResponse<EventoFeignReserva> evento = eventoService.buscarEventoParaReserva(id);
+		return ResponseEntity.ok(evento);
+	}
+	
+	
 }

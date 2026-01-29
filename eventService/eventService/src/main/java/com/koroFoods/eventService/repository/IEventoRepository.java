@@ -11,14 +11,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface IEventoRepository extends JpaRepository<Evento,Integer> {
-	
-	 List<Evento> findByActivoTrue();
+public interface IEventoRepository extends JpaRepository<Evento, Integer> {
 
-	    Optional<Evento> findByIdEventoAndActivoTrue(Integer id);
+	List<Evento> findByActivoTrue();
 
-	    List<Evento> findByTematica_IdTematicaAndActivoTrue(Integer idTematica);
+	Optional<Evento> findByIdEventoAndActivoTrue(Integer id);
 
-	    @Query("SELECT e FROM Evento e WHERE e.fecha >= :fechaActual AND e.activo = true")
-	    List<Evento> findEventosFuturos(LocalDateTime fechaActual);
+	List<Evento> findByTematica_IdTematicaAndActivoTrue(Integer idTematica);
+
+	@Query("SELECT e FROM Evento e WHERE e.fechaInicio >= :fechaActual AND e.activo = true")
+	List<Evento> findEventosFuturos(LocalDateTime fechaActual);
+
 }
