@@ -1,4 +1,11 @@
 export const enviroment = {
   production: true,
-  api_URL: 'https://dominio_de_render.onrender.com',
+  apiUrls: {
+    usuarios: 'https://dominio.com/usuarios',
+    menu: 'https://dominio.com/menu',
+    eventos: 'https://dominio.com/eventos',
+    resenas: 'https://dominio.com/resenas',
+    pedido: 'http://localhost:8086',
+    reserva: 'http://localhost:8083'
+  },
 };

@@ -41,7 +41,7 @@ public class Plato {
     private String imagen;
 
     @Column(name="ACTIVO")
-    private String activo;
+    private Boolean activo;
 
     @JsonIgnore
     @Transient
