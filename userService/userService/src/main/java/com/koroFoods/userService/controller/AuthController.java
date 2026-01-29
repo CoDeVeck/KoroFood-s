@@ -95,7 +95,7 @@ public class AuthController {
         return ResponseEntity.ok(usuario);
     }
 
-    @PostMapping("/github/{code}")
+    @PostMapping("/github")
     public ResponseEntity<?> githubLogin(@RequestParam String code) {
         GithubUserDto githubUserDto = githubService.loginWithGithub(code);
 

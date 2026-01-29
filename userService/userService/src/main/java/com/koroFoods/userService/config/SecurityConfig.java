@@ -45,6 +45,7 @@ public class SecurityConfig {
 				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/github").permitAll()
 						.requestMatchers("/cliente/index").permitAll()
 						.requestMatchers("/distrito/list").permitAll()
 						.anyRequest().authenticated())
