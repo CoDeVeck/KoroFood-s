@@ -1,4 +1,4 @@
-export const environment = {
+export const enviroment = {
   production: true,
   apiUrls: {
     usuarios: 'https://dominio.com/usuarios',

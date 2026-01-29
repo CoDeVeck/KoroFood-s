@@ -1,4 +1,4 @@
-export const environment = {
+export const enviroment = {
   production: false,
   apiUrls: {
     usuarios: 'http://localhost:8081',

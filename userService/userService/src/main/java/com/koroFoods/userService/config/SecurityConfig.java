@@ -18,7 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-	//private final JwtFilter jwtFilter;
+	// private final JwtFilter jwtFilter;
 	private final UserDetailsService userDetailsService;
 
 	@Bean
@@ -37,20 +37,38 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+		httpSecurity
+				.cors(cors -> cors.disable())
+
+				.csrf(crsf -> crsf.disable())
+				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/auth/**").permitAll()
+						.requestMatchers("/cliente/index").permitAll()
+						.requestMatchers("/distrito/list").permitAll()
+						.anyRequest().authenticated())
+				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+		return httpSecurity.build();
+	}
+
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+		return authConfig.getAuthenticationManager();
+	}
+
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.cors(cors -> cors.disable())
 
 				.csrf(crsf -> crsf.disable())
 				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				// Descomentar esto para las rutas
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/auth/**").permitAll()
-//                        .requestMatchers("/cliente/index").permitAll()
-//                        .anyRequest().authenticated()
-//                ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-//        return httpSecurity.build();
-				// Esto hace que las rutas sean libres
-				.authorizeHttpRequests(auth -> auth.anyRequest().permitAll() // 🔥 TODO PERMITIDO
-				);
+
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/auth/**").permitAll()
+						.requestMatchers("/cliente/index").permitAll()
+						.anyRequest().authenticated())
+				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+				.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
 		return httpSecurity.build();
 	}
