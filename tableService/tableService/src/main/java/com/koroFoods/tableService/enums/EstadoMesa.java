@@ -4,6 +4,5 @@ public enum EstadoMesa {
 
 	LIBRE,
 	ASIGNADA,
-	OCUPADA,
-	MANTENIMIENTO
+	OCUPADA
 }
