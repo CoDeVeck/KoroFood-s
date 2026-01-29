@@ -18,7 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-	//private final JwtFilter jwtFilter;
+	// private final JwtFilter jwtFilter;
 	private final UserDetailsService userDetailsService;
 
 	@Bean
@@ -59,5 +59,8 @@ public class SecurityConfig {
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();
 	}
+
+
+
 
 }

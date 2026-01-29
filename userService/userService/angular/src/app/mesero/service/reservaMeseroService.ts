@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
-import { environment } from '../../../enviroments/enviroment';
+import { enviroment } from '../../../enviroments/enviroment';
 import { ReservaDto } from '../../shared/dto/ReservaDto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReservaMeseroService {
-  private baseUrl = `${environment.apiUrls.reserva}/reserva/feign`;
+  private baseUrl = `${enviroment.apiUrls.reserva}/reserva/feign`;
 
   constructor(private http: HttpClient) {}
 

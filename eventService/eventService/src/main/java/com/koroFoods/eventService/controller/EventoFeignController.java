@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.koroFoods.eventService.dto.EventoDtoFeign;
-import com.koroFoods.eventService.dto.ResultadoResponse;
+import com.koroFoods.eventService.dtos.EventoDtoFeign;
+import com.koroFoods.eventService.dtos.ResultadoResponse;
 import com.koroFoods.eventService.service.EventoService;
 
 import lombok.RequiredArgsConstructor;

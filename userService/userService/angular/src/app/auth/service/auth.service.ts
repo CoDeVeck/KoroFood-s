@@ -5,7 +5,7 @@ import { HttpParams } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';
 
 // Entornos para el despliegue de docker
-import { environment } from '@envs/environment';
+import { enviroment } from '@envs/enviroment';
 import { ResultadoResponse } from '../../shared/response/resultadoResponse.models';
 import { Usuario } from '../../shared/model/usuario.model';
 
@@ -13,9 +13,9 @@ import { Usuario } from '../../shared/model/usuario.model';
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/auth/login`;
-  private registerUrl = `${environment.api_URL}/auth/register`;
-  private userUrl = `${environment.api_URL}/auth/me`;
+  private apiUrl = `${enviroment.api_URL}/auth/login`;
+  private registerUrl = `${enviroment.api_URL}/auth/register`;
+  private userUrl = `${enviroment.api_URL}/auth/me`;
   constructor(private http: HttpClient) {}
 
   login(credentials: { email: string; password: string }): Observable<any> {

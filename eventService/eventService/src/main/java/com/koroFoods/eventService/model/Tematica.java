@@ -23,5 +23,5 @@ public class Tematica {
     private String nombre;
     
     @Column(name="ACTIVO")
-    private String activo;
+    private Boolean activo;
 }

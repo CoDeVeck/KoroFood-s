@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../enviroments/enviroment';
+import { enviroment } from '../../../enviroments/enviroment';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 import { PedidoResumenDto } from '../../shared/dto/PedidoResumenDto';
 import { PedidoRequestoDto } from '../../shared/dto/PedidoRequestDto';
@@ -11,7 +11,7 @@ import { Pedido } from '../../shared/model/pedido.model';
   providedIn: 'root',
 })
 export class PedidoMeseroService {
-  private baseUrl = `${environment.apiUrls.pedido}/pedido`;
+  private baseUrl = `${enviroment.apiUrls.pedido}/pedido`;
 
   constructor(private http: HttpClient) {}
 

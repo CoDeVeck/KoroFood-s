@@ -1,0 +1,86 @@
+
+
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>Gestión de Eventos</h3>
+    <a routerLink="/admin/eventos/nuevo" class="btn btn-primary">
+      <i class="bi bi-plus-circle"></i> Nuevo Evento
+    </a>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = ''" aria-label="Close"></button>
+  </div>
+
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Tabla de eventos -->
+  <div *ngIf="!loading" class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Temática</th>
+              <th>Fecha</th>
+              <th>Costo</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let evento of eventos">
+              <td>{{ evento.idEvento }}</td>
+              <td>{{ evento.nombre }}</td>
+              <td>{{ evento.descripcion || '-' }}</td>
+              <td>
+                <span *ngIf="evento.tematica" class="badge bg-info">
+                  {{ evento.tematica.nombre }}
+                </span>
+                <span *ngIf="!evento.tematica" class="text-muted">Sin temática</span>
+              </td>
+              <td>{{ formatearFecha(evento.fecha) }}</td>
+              <td>{{ formatearCosto(evento.costo) }}</td>
+              <td>
+                <span [class]="evento.activo ? 'badge bg-success' : 'badge bg-secondary'">
+                  {{ evento.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group" role="group">
+                  <a 
+                    [routerLink]="['/admin/eventos/editar', evento.idEvento]" 
+                    class="btn btn-sm btn-warning"
+                    title="Editar">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <button 
+                    (click)="confirmarEliminar(evento)" 
+                    class="btn btn-sm btn-danger"
+                    title="Eliminar">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="eventos.length === 0">
+              <td colspan="8" class="text-center text-muted">
+                No hay eventos registrados
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
