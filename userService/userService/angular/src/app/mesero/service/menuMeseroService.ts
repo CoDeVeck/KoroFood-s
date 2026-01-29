@@ -9,7 +9,7 @@ import { PlatoDto } from '../../shared/dto/PlatoDto';
   providedIn: 'root',
 })
 export class MenuMeseroService {
-  private baseUrl = `${environment.apiUrls.menu}/menu`;
+  private baseUrl = `${environment.apiUrls.menu}/menu/feign`;
 
   constructor(private http: HttpClient) {}
   listarPlatos(): Observable<ResultadoResponse<PlatoDto[]>> {

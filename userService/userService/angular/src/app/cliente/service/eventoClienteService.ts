@@ -9,7 +9,7 @@ import { EventoDto } from '../../shared/dto/EventoDto';
   providedIn: 'root',
 })
 export class EventoClienteService {
-  private baseUrl = `${environment.apiUrls.eventos}/evento`;
+  private baseUrl = `${environment.apiUrls.eventos}/evento/feign`;
 
   constructor(private http: HttpClient) {}
   listarEventos(): Observable<ResultadoResponse<EventoDto[]>> {

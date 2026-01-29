@@ -26,40 +26,6 @@ import lombok.RequiredArgsConstructor;
 public class MenuController {
 
 	private final MenuService menuService;
-
-	// Endpoint para restar el stock de los pedidos consumidos
-	@PutMapping("/substract-stock/{idPlato}/{cantidadVendida}")
-    public ResponseEntity<ResultadoResponse<PlatoDtoFeign>> substractStockOrder(
-            @PathVariable Integer idPlato,
-            @PathVariable Integer cantidadVendida) {
-
-        ResultadoResponse<PlatoDtoFeign> response =
-                menuService.substractStockOrder(idPlato, cantidadVendida);
-
-        if (!response.isValor()) {
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        return ResponseEntity.ok(response);
-    }
-	
-	// Endpoint para el feign de la reseña
-	@GetMapping
-	public ResponseEntity<ResultadoResponse<List<PlatoDtoFeign>>> list(){
-		ResultadoResponse<List<PlatoDtoFeign>> resultado = menuService.getAllDish();
-		
-		if(resultado.isValor()) {
-			return ResponseEntity.status(HttpStatus.OK).body(resultado);
-		}else {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
-	    }
-	}
-	
-	@GetMapping("/{id}")
-	public ResponseEntity<ResultadoResponse<PlatoDtoFeign>> getDishById(@PathVariable Integer id) {
-		ResultadoResponse<PlatoDtoFeign> dish = menuService.getDishById(id);
-		return ResponseEntity.ok(dish);
-	}
 	
 	@GetMapping("/pdf")
 	public ResponseEntity<byte[]> downloadMenuPdf() {

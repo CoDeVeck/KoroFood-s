@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import com.koroFoods.orderService.dto.ResultadoResponse;
 
 
-@FeignClient(name = "plato-service", url = "http://localhost:8087/menu")
+@FeignClient(name = "plato-service", url = "http://localhost:8087/menu/feign")
 public interface PlatoFeignClient {
 	@GetMapping("/{id}")
     ResultadoResponse<PlatoFeign> getDishById(@PathVariable Integer id);

@@ -9,7 +9,8 @@ import { PlatoDto } from '../../shared/dto/PlatoDto';
   providedIn: 'root',
 })
 export class MenuClienteService {
-  private baseUrl = `${environment.apiUrls.menu}/menu`;
+  private baseUrl = `${environment.apiUrls.menu}/menu/feign`;
+  private baseUrlService = `${environment.apiUrls.menu}/menu`;
 
   constructor(private http: HttpClient) {}
   listarPlatos(): Observable<ResultadoResponse<PlatoDto[]>> {
@@ -17,7 +18,7 @@ export class MenuClienteService {
   }
 
   descargarMenuPdf(): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/pdf`, {
+    return this.http.get(`${this.baseUrlService}/pdf`, {
       responseType: 'blob',
     });
   }

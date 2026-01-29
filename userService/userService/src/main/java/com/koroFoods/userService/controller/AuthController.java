@@ -37,13 +37,6 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final CloudinaryService cloudinaryService;
-
-    // Endpoint para el feign de la reseña
- 	@GetMapping("/{id}")
- 	public ResponseEntity<ResultadoResponse<UsuarioDtoFeign>> getUserById(@PathVariable Integer id) {
- 	    ResultadoResponse<UsuarioDtoFeign> user = usuarioService.getUsuarioByIdFeign(id);
- 	    return ResponseEntity.ok(user);
- 	}
  	
     @PostMapping("/login")
     public ResponseEntity<?>loginUsuario(@RequestBody LoginRequest loginRequest){

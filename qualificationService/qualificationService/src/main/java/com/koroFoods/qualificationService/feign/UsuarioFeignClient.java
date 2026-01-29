@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.koroFoods.qualificationService.dto.ResultadoResponse;
 
-@FeignClient(name = "user-service", url = "http://localhost:8081/auth")
+@FeignClient(name = "user-service", url = "http://localhost:8081/user/feign")
 public interface UsuarioFeignClient {
 	@GetMapping("/{id}")
     ResultadoResponse<UsuarioFeign> getUsuarioById(@PathVariable Integer id);
