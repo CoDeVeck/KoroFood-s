@@ -2,6 +2,8 @@ package com.koroFoods.userService.service;
 
 import com.koroFoods.userService.dto.ResultadoResponse;
 import com.koroFoods.userService.dto.UsuarioDtoFeign;
+import com.koroFoods.userService.dto.request.UpdatePasswordRequest;
+import com.koroFoods.userService.model.Distrito;
 import com.koroFoods.userService.model.Rol;
 import com.koroFoods.userService.model.Usuario;
 import com.koroFoods.userService.repository.IUsuarioRepository;
@@ -44,7 +46,7 @@ public class UsuarioService  {
         }
 
         Rol rolDefinido = new Rol();
-        rolDefinido.setIdRol(2);
+        rolDefinido.setIdRol(4);
 
         usuario.setClave(bCryptPasswordEncoder.encode(usuario.getClave()));
         usuario.setRol(rolDefinido);
@@ -72,4 +74,36 @@ public class UsuarioService  {
 
         return ResultadoResponse.success("Usuario encontrado", dto);
     }
+
+
+    public void actualizarPassword(UpdatePasswordRequest request, Integer id){
+
+        Usuario usuarioEncontrado = usuarioRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("Usuario no encontrado")
+        );
+
+        if (!bCryptPasswordEncoder.matches(
+                request.getPasswordActual(),
+                usuarioEncontrado.getClave()
+        )){
+            throw new RuntimeException("La contraseña actual es incorrecto");
+        };
+
+        if (bCryptPasswordEncoder.matches(
+                request.getPasswordNuevo(),
+                usuarioEncontrado.getClave()
+        )){
+            throw new RuntimeException("La contraseña nueva no puede ser igual a la anterior");
+        }
+
+
+        usuarioEncontrado.setClave(
+                bCryptPasswordEncoder.encode(request.getPasswordNuevo())
+        );
+
+        usuarioRepository.save(usuarioEncontrado);
+
+    }
+
+
 }

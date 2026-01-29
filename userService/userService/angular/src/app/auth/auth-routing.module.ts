@@ -11,32 +11,12 @@ const routes: Routes = [
   {
     path: 'login',
     component: LoginComponent,
-    data: { title: 'Iniciar Sesión ' },
+    data: { title: 'Iniciar Sesión' },
   },
   {
     path: 'register',
     component: RegisterComponent,
     data: { title: 'Registrarse ' },
-  },
-  {
-    path: 'cliente/index',
-    component: ClienteRoutingModule,
-    data: { title: 'Cliente' },
-  },
-  {
-    path: 'admin/dashboard',
-    component: AdminRoutingModule,
-    data: { title: 'Admin Dashboard' },
-  },
-  {
-    path: 'mesero/panel',
-    component: MeseroRoutingModule,
-    data: { title: 'Mesero Panel' },
-  },
-  {
-    path: 'recepcionista/panel',
-    component: RecepcionistaRoutingModule,
-    data: { title: 'Recepcionista Panel' },
   },
 ];
 

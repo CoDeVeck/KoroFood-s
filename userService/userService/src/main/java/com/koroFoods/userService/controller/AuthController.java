@@ -54,7 +54,7 @@ public class AuthController {
                     .collect(Collectors.toList());
 
             String token = jwtUtil.generateToken(loginRequest.getCorreo(), roles);
-            return ResponseEntity.ok(Map.of("Token: ", token));
+            return ResponseEntity.ok(Map.of("token", token));
         } catch (Exception e) {
             System.out.println(">>> ERROR EN AUTENTICACIÓN: " + e.getMessage());
             return ResponseEntity.status(401).body(Map.of("error", "Credenciales inválidas"));

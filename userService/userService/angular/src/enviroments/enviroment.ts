@@ -1,4 +1,4 @@
-export const enviroment = {
+export const environment = {
   production: false,
   apiUrls: {
     usuarios: 'http://localhost:8081',
@@ -6,6 +6,6 @@ export const enviroment = {
     eventos: 'http://localhost:8088',
     resenas: 'http://localhost:8084',
     pedido: 'http://localhost:8086',
-    reserva: 'http://localhost:8083'
+    reserva: 'http://localhost:8083',
   },
 };
