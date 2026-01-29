@@ -321,7 +321,9 @@
               Registrate en <strong>KORO-FOOD'S</strong>
             </h2>
 
+            <!-- FORM PARA EL REGISTRIO-->
             <form
+              [formGroup]="registerForm"
               class="auth-form"
               (ngSubmit)="onSignUp()"
               #signupForm="ngForm"
@@ -331,8 +333,8 @@
                   type="text"
                   class="form-input"
                   placeholder="Nombre Completo"
-                  [(ngModel)]="signupData.fullName"
-                  name="fullName"
+                  formControlName="nombres"
+                  name="nombres"
                   required
                 />
               </div>
@@ -342,8 +344,8 @@
                   type="text"
                   class="form-input"
                   placeholder="Apellido Paterno"
-                  [(ngModel)]="signupData.fullName"
-                  name="fullName"
+                  formControlName="apePaterno"
+                  name="apePaterno"
                   required
                 />
               </div>
@@ -353,8 +355,8 @@
                   type="text"
                   class="form-input"
                   placeholder="Apellido Materno"
-                  [(ngModel)]="signupData.fullName"
-                  name="fullName"
+                  formControlName="apeMaterno"
+                  name="apeMaterno"
                   required
                 />
               </div>
@@ -362,8 +364,8 @@
               <div class="form-group">
                 <select
                   class="form-input form-select"
-                  --[(ngModel)]="signupData.country"
-                  name="country"
+                  formControlName="tipoDoc"
+                  name="tipoDoc"
                   required
                 >
                   <option value="" disabled selected>Tipo de Documento</option>
@@ -379,8 +381,8 @@
                   type="text"
                   class="form-input"
                   placeholder="Documento de Identidad"
-                  [(ngModel)]="signupData.fullName"
-                  name="fullName"
+                  formControlName="nroDoc"
+                  name="nroDoc"
                   required
                 />
               </div>
@@ -390,8 +392,8 @@
                   type="text"
                   class="form-input"
                   placeholder="Direccion"
-                  [(ngModel)]="signupData.fullName"
-                  name="fullName"
+                  formControlName="direccion"
+                  name="direccion"
                   required
                 />
               </div>
@@ -401,8 +403,8 @@
                   type="text"
                   class="form-input"
                   placeholder="Telefono"
-                  [(ngModel)]="signupData.fullName"
-                  name="fullName"
+                  formControlName="telefono"
+                  name="telefono"
                   required
                 />
               </div>
@@ -410,16 +412,16 @@
               <div class="form-group">
                 <select
                   class="form-input form-select"
-                  --[(ngModel)]="signupData.country"
-                  name="country"
+                  formControlName="idDistrito"
+                  name="idDistrito"
                   required
                 >
                   <option value="" disabled selected>Distrito</option>
                   <option
-                    --*ngFor="let dis of distritos"
-                    --[value]="dis.idDistrito"
+                    *ngFor="let dis of distritos"
+                    [value]="dis.idDistrito"
                   >
-                    <!--{{ dis.nombre }}-->
+                    {{ dis.nombre }}
                   </option>
                 </select>
               </div>
@@ -429,8 +431,8 @@
                   type="email"
                   class="form-input"
                   placeholder="Correo Electronico"
-                  [(ngModel)]="signupData.email"
-                  name="signupEmail"
+                  formControlName="correo"
+                  name="correo"
                   required
                 />
               </div>
@@ -440,8 +442,8 @@
                   [type]="showPassword ? 'text' : 'password'"
                   class="form-input"
                   placeholder="Clave"
-                  [(ngModel)]="signupData.password"
-                  name="signupPassword"
+                  formControlName="clave"
+                  name="clave"
                   required
                 />
                 <button
@@ -474,77 +476,6 @@
                   </svg>
                   <svg
                     *ngIf="showPassword"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M10 4C4.5 4 2 10 2 10s2.5 6 8 6 8-6 8-6-2.5-6-8-6z"
-                      stroke="#999"
-                      stroke-width="1.5"
-                      fill="none"
-                    />
-                    <circle
-                      cx="10"
-                      cy="10"
-                      r="3"
-                      stroke="#999"
-                      stroke-width="1.5"
-                      fill="none"
-                    />
-                    <line
-                      x1="3"
-                      y1="3"
-                      x2="17"
-                      y2="17"
-                      stroke="#999"
-                      stroke-width="1.5"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              <div class="form-group">
-                <input
-                  [type]="showConfirmPassword ? 'text' : 'password'"
-                  class="form-input"
-                  placeholder="Confirmar Clave"
-                  [(ngModel)]="signupData.confirmPassword"
-                  name="confirmPassword"
-                  required
-                />
-                <button
-                  type="button"
-                  class="toggle-password"
-                  (click)="toggleConfirmPassword()"
-                >
-                  <svg
-                    *ngIf="!showConfirmPassword"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M10 4C4.5 4 2 10 2 10s2.5 6 8 6 8-6 8-6-2.5-6-8-6z"
-                      stroke="#999"
-                      stroke-width="1.5"
-                      fill="none"
-                    />
-                    <circle
-                      cx="10"
-                      cy="10"
-                      r="3"
-                      stroke="#999"
-                      stroke-width="1.5"
-                      fill="none"
-                    />
-                  </svg>
-                  <svg
-                    *ngIf="showConfirmPassword"
                     width="20"
                     height="20"
                     viewBox="0 0 20 20"
@@ -664,25 +595,33 @@
               Bienvenido a <strong>KORO-FOOD'S</strong>
             </h2>
 
-            <form class="auth-form" (ngSubmit)="onLogin()" #loginForm="ngForm">
+            <!-- FORM PARA EL LOGIN-->
+
+            <form
+              [formGroup]="loginForm"
+              class="auth-form"
+              (ngSubmit)="onLogin()"
+            >
+              <!--EMAIL-->
               <div class="form-group">
                 <input
                   type="email"
                   class="form-input"
                   placeholder="Correo Electronico"
-                  [(ngModel)]="loginData.email"
-                  name="loginEmail"
+                  formControlName="correo"
+                  name="correo"
                   required
                 />
               </div>
 
+              <!--PASSWORD-->
               <div class="form-group">
                 <input
                   [type]="showLoginPassword ? 'text' : 'password'"
                   class="form-input"
                   placeholder="Clave"
-                  [(ngModel)]="loginData.password"
-                  name="loginPassword"
+                  formControlName="clave"
+                  name="clave"
                   required
                 />
                 <button
@@ -751,7 +690,7 @@
                 <label class="remember-me">
                   <input
                     type="checkbox"
-                    [(ngModel)]="loginData.rememberMe"
+                    --[(ngModel)]="loginData.rememberMe"
                     name="rememberMe"
                   />
                   <span>Recordar</span>
