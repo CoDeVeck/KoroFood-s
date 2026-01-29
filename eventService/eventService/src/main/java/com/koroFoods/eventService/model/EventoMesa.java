@@ -36,5 +36,5 @@ public class EventoMesa {
     private LocalDateTime fechaHasta;
     
     @Column(name="ACTIVO")
-    private String activo;
+    private Boolean activo;
 }

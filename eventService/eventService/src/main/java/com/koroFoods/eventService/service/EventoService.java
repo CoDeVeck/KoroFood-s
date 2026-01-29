@@ -1,20 +1,155 @@
 package com.koroFoods.eventService.service;
 
-import com.koroFoods.eventService.dto.EventoDtoFeign;
-import com.koroFoods.eventService.dto.ResultadoResponse;
+
+
+import com.koroFoods.eventService.dtos.EventResponse;
+import com.koroFoods.eventService.dtos.EventResquest;
+import com.koroFoods.eventService.dtos.EventoDtoFeign;
+import com.koroFoods.eventService.dtos.ResultadoResponse;
+import com.koroFoods.eventService.dtos.TematicResponse;
+import com.koroFoods.eventService.exception.BusinessException;
+import com.koroFoods.eventService.exception.ResourceNotFoundException;
 import com.koroFoods.eventService.model.Evento;
+import com.koroFoods.eventService.model.Tematica;
 import com.koroFoods.eventService.repository.IEventoRepository;
+import com.koroFoods.eventService.repository.ITematicaRepository;
+
 import lombok.RequiredArgsConstructor;
 
+
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class EventoService {
 
     private final IEventoRepository eventoRepository;
+    
+    private final ITematicaRepository tematicaRepository;
+    
+    @Transactional
+    public EventResponse crear(EventResquest request) {
+        validarFechaFutura(request.getFecha());
+
+        Evento evento = new Evento();
+        evento.setNombre(request.getNombre());
+        evento.setDescripcion(request.getDescripcion());
+        evento.setFecha(request.getFecha());
+        evento.setCosto(request.getCosto());
+        evento.setImagen(request.getImagen());
+        evento.setActivo(true);
+
+        if (request.getIdTematica() != null) {
+            Tematica tematica = tematicaRepository.findByIdTematicaAndActivoTrue(request.getIdTematica())
+                    .orElseThrow(() -> new ResourceNotFoundException("Temática no encontrada con ID: " + request.getIdTematica()));
+            evento.setTematica(tematica);
+        }
+
+        Evento guardado = eventoRepository.save(evento);
+        return mapearAResponse(guardado);
+    }
+
+    @Transactional(readOnly = true)
+    public List<EventResponse> listarTodos() {
+        return eventoRepository.findAll().stream()
+                .map(this::mapearAResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<EventResponse> listarActivos() {
+        return eventoRepository.findByActivoTrue().stream()
+                .map(this::mapearAResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<EventResponse> listarEventosFuturos() {
+        return eventoRepository.findEventosFuturos(LocalDateTime.now()).stream()
+                .map(this::mapearAResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<EventResponse> listarPorTematica(Integer idTematica) {
+        return eventoRepository.findByTematica_IdTematicaAndActivoTrue(idTematica).stream()
+                .map(this::mapearAResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public EventResponse buscarPorId(Integer id) {
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
+        return mapearAResponse(evento);
+    }
+
+    @Transactional
+    public EventResponse actualizar(Integer id, EventResquest request) {
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
+
+        validarFechaFutura(request.getFecha());
+
+        evento.setNombre(request.getNombre());
+        evento.setDescripcion(request.getDescripcion());
+        evento.setFecha(request.getFecha());
+        evento.setCosto(request.getCosto());
+        evento.setImagen(request.getImagen());
+
+        if (request.getIdTematica() != null) {
+            Tematica tematica = tematicaRepository.findByIdTematicaAndActivoTrue(request.getIdTematica())
+                    .orElseThrow(() -> new ResourceNotFoundException("Temática no encontrada con ID: " + request.getIdTematica()));
+            evento.setTematica(tematica);
+        } else {
+            evento.setTematica(null);
+        }
+
+        Evento actualizado = eventoRepository.save(evento);
+        return mapearAResponse(actualizado);
+    }
+
+    @Transactional
+    public void eliminar(Integer id) {
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
+        
+        evento.setActivo(false);
+        eventoRepository.save(evento);
+    }
+
+    private void validarFechaFutura(LocalDateTime fecha) {
+        if (fecha.isBefore(LocalDateTime.now())) {
+            throw new BusinessException("La fecha del evento debe ser futura");
+        }
+    }
+
+    private EventResponse mapearAResponse(Evento evento) {
+        TematicResponse tematicaResponse = null;
+        if (evento.getTematica() != null) {
+            tematicaResponse = TematicResponse.builder()
+                    .idTematica(evento.getTematica().getIdTematica())
+                    .nombre(evento.getTematica().getNombre())
+                    .activo(evento.getTematica().getActivo())
+                    .build();
+        }
+
+        return EventResponse.builder()
+                .idEvento(evento.getIdEvento())
+                .nombre(evento.getNombre())
+                .descripcion(evento.getDescripcion())
+                .tematica(tematicaResponse)
+                .fecha(evento.getFecha())
+                .costo(evento.getCosto())
+                .imagen(evento.getImagen())
+                .activo(evento.getActivo())
+                .build();
+    }
     
     public ResultadoResponse<List<EventoDtoFeign>> getAllEvents() {
         List<Evento> eventos = eventoRepository.findAll(); 
@@ -40,5 +175,7 @@ public class EventoService {
     	dto.setImagen(evento.getImagen());
     	
     	return ResultadoResponse.success("Evento encontrado", dto);
+
     }
+    
 }

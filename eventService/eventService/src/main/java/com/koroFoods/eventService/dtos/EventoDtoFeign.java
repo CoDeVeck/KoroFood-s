@@ -1,4 +1,4 @@
-package com.koroFoods.eventService.dto;
+package com.koroFoods.eventService.dtos;
 
 import lombok.Data;
 
