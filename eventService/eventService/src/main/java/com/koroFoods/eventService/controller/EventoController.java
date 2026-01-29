@@ -2,8 +2,6 @@ package com.koroFoods.eventService.controller;
 
 import java.util.List;
 
-
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.koroFoods.eventService.dto.EventoDtoFeign;
-import com.koroFoods.eventService.dto.ResultadoResponse;
 import com.koroFoods.eventService.dtos.EventResponse;
 import com.koroFoods.eventService.dtos.EventResquest;
+import com.koroFoods.eventService.dtos.EventoDtoFeign;
+import com.koroFoods.eventService.dtos.ResultadoResponse;
 import com.koroFoods.eventService.service.EventoService;
 
 
@@ -83,22 +81,20 @@ public class EventoController {
 	}
 	
 	// Endpoint para el feign de la reseña
-		@GetMapping
-		public ResponseEntity<ResultadoResponse<List<EventoDtoFeign>>> list(){
-			ResultadoResponse<List<EventoDtoFeign>> resultado = eventoService.getAllEvents();
-			
-			if(resultado.isValor()) {
-				return ResponseEntity.status(HttpStatus.OK).body(resultado);
-			}else {
-		        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
-		    }
-		}
-		
-		@GetMapping("/{id}")
-		public ResponseEntity<ResultadoResponse<EventoDtoFeign>> getEventhById(@PathVariable Integer id) {
-			ResultadoResponse<EventoDtoFeign> event = eventoService.getEventById(id);
-			return ResponseEntity.ok(event);
-
-		}
+	/*
+	 * @GetMapping public ResponseEntity<ResultadoResponse<List<EventoDtoFeign>>>
+	 * list(){ ResultadoResponse<List<EventoDtoFeign>> resultado =
+	 * eventoService.getAllEvents();
+	 * 
+	 * if(resultado.isValor()) { return
+	 * ResponseEntity.status(HttpStatus.OK).body(resultado); }else { return
+	 * ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado); } }
+	 * 
+	 * @GetMapping("/{id}") public ResponseEntity<ResultadoResponse<EventoDtoFeign>>
+	 * getEventhById(@PathVariable Integer id) { ResultadoResponse<EventoDtoFeign>
+	 * event = eventoService.getEventById(id); return ResponseEntity.ok(event);
+	 * 
+	 * }
+	 */
 	
 }

@@ -4,13 +4,13 @@ package com.koroFoods.eventService.service;
 
 import com.koroFoods.eventService.dtos.EventResponse;
 import com.koroFoods.eventService.dtos.EventResquest;
+import com.koroFoods.eventService.dtos.EventoDtoFeign;
+import com.koroFoods.eventService.dtos.ResultadoResponse;
 import com.koroFoods.eventService.dtos.TematicResponse;
 import com.koroFoods.eventService.exception.BusinessException;
 import com.koroFoods.eventService.exception.ResourceNotFoundException;
 import com.koroFoods.eventService.model.Evento;
 import com.koroFoods.eventService.model.Tematica;
-import com.koroFoods.eventService.dto.EventoDtoFeign;
-import com.koroFoods.eventService.dto.ResultadoResponse;
 import com.koroFoods.eventService.repository.IEventoRepository;
 import com.koroFoods.eventService.repository.ITematicaRepository;
 
