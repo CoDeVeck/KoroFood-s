@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.koroFoods.reservationService.dto.ResultadoResponse;
 
-@FeignClient(name = "pedido-service", url = "http://localhost:8086/pedido")
+@FeignClient(name = "pedido-service", url = "http://localhost:8086/pedido/feign")
 public interface PedidoFeignClient {
     
     @GetMapping("/reserva/{idReserva}")

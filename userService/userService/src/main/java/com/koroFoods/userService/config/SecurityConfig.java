@@ -39,7 +39,8 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity
-				.cors(cors -> {})
+				.cors(cors -> {
+				})
 
 				.csrf(crsf -> crsf.disable())
 				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -48,7 +49,8 @@ public class SecurityConfig {
 						.requestMatchers("/cliente/index").permitAll()
 						.requestMatchers("/distrito/list").permitAll()
 						.anyRequest().authenticated())
-				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+				.authorizeHttpRequests(auth -> auth.anyRequest().permitAll() // 🔥 TODO PERMITIDO
+				);
 		return httpSecurity.build();
 	}
 
@@ -56,7 +58,5 @@ public class SecurityConfig {
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();
 	}
-
-
 
 }

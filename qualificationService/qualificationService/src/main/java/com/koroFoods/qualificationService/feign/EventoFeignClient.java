@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.koroFoods.qualificationService.dto.ResultadoResponse;
 
-@FeignClient(name = "event-service", url = "http://localhost:8088/evento")
+@FeignClient(name = "event-service", url = "http://localhost:8088/evento/feign")
 public interface EventoFeignClient {
 	@GetMapping("/{id}")
     ResultadoResponse<EventoFeign> getEventById(@PathVariable Integer id);

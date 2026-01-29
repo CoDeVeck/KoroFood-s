@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.koroFoods.userService.dto.ResultadoResponse;
-import com.koroFoods.userService.dto.UsuarioDtoFeign;
 
 @RestController
 @RequestMapping("/auth")
@@ -40,14 +39,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final CloudinaryService cloudinaryService;
     private final GithubService githubService;
-
-    // Endpoint para el feign de la reseña
-    @GetMapping("/{id}")
-    public ResponseEntity<ResultadoResponse<UsuarioDtoFeign>> getUserById(@PathVariable Integer id) {
-        ResultadoResponse<UsuarioDtoFeign> user = usuarioService.getUsuarioByIdFeign(id);
-        return ResponseEntity.ok(user);
-    }
-
+    
     @PostMapping("/login")
     public ResponseEntity<?> loginUsuario(@RequestBody LoginRequest loginRequest) {
 

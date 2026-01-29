@@ -2,14 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
-import { environment } from '../../../enviroments/enviroment';
+import { enviroment } from '../../../enviroments/enviroment';
 import { PlatoDto } from '../../shared/dto/PlatoDto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MenuClienteService {
-  private baseUrl = `${environment.apiUrls.menu}/menu`;
+  private baseUrl = `${enviroment.apiUrls.menu}/menu/feign`;
+  private baseUrlService = `${enviroment.apiUrls.menu}/menu`;
 
   constructor(private http: HttpClient) {}
   listarPlatos(): Observable<ResultadoResponse<PlatoDto[]>> {
@@ -17,7 +18,7 @@ export class MenuClienteService {
   }
 
   descargarMenuPdf(): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/pdf`, {
+    return this.http.get(`${this.baseUrlService}/pdf`, {
       responseType: 'blob',
     });
   }
