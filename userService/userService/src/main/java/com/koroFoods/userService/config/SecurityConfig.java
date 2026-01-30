@@ -39,20 +39,21 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity
-				.cors(cors -> {} )
+				.cors(cors -> {
+				})
 
 				.csrf(crsf -> crsf.disable())
 				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/auth/github").permitAll()
-                        .requestMatchers("/auth/google").permitAll()
+						.requestMatchers("/auth/github").permitAll()
+						.requestMatchers("/auth/google").permitAll()
 						.requestMatchers("/cliente/index").permitAll()
 						.requestMatchers("/distrito/list").permitAll()
+
 						.requestMatchers("/auth/social/register").permitAll()
 						.anyRequest().authenticated())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
+				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 		return httpSecurity.build();
 	}
 

@@ -16,7 +16,8 @@ public class EventResponse {
     private String nombre;
     private String descripcion;
     private TematicResponse tematica;
-    private LocalDateTime fecha;
+    private LocalDateTime fechaInicio;
+    private LocalDateTime fechaFin;
     private BigDecimal costo;
     private String imagen;
     private Boolean activo;

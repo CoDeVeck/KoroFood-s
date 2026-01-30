@@ -10,4 +10,5 @@ public class UsuarioFeign {
     private String apeMaterno;
     private String correo;
     private String imagen;
+    private String telefono;
 }

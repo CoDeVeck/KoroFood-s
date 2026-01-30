@@ -1,11 +1,12 @@
-package com.koroFoods.tableService.dto;
+package com.koroFoods.eventService.feign;
+
 import lombok.Data;
 
 @Data
-public class MesaDtoFeign {
+public class MesaFeign {
     private Integer idMesa;
     private int numeroMesa;
     private int capacidad;
-    private String tipo; // zona
+    private String tipo;
     private String estado;
 }
