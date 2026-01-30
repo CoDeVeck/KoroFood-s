@@ -60,7 +60,7 @@ public class Usuario {
     @JoinColumn(name = "ID_DISTRITO")
     private Distrito distrito;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_ROL")
     private Rol rol;
 
