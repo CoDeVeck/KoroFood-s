@@ -197,7 +197,61 @@
                 class="toggle-password"
                 (click)="togglePassword()"
               >
-                {{ showPassword ? "🙈" : "👁️" }}
+                <svg
+                  *ngIf="showPassword"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10 4C4.5 4 2 10 2 10s2.5 6 8 6 8-6 8-6-2.5-6-8-6z"
+                    stroke="#999"
+                    stroke-width="1.5"
+                    fill="none"
+                  />
+                  <circle
+                    cx="10"
+                    cy="10"
+                    r="3"
+                    stroke="#999"
+                    stroke-width="1.5"
+                    fill="none"
+                  />
+                  <line
+                    x1="3"
+                    y1="3"
+                    x2="17"
+                    y2="17"
+                    stroke="#999"
+                    stroke-width="1.5"
+                  />
+                </svg>
+
+                <svg
+                  *ngIf="!showPassword"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10 4C4.5 4 2 10 2 10s2.5 6 8 6 8-6 8-6-2.5-6-8-6z"
+                    stroke="#999"
+                    stroke-width="1.5"
+                    fill="none"
+                  />
+                  <circle
+                    cx="10"
+                    cy="10"
+                    r="3"
+                    stroke="#999"
+                    stroke-width="1.5"
+                    fill="none"
+                  />
+                </svg>
               </button>
             </div>
             <div class="error-message" *ngIf="isFieldInvalid('clave')">
