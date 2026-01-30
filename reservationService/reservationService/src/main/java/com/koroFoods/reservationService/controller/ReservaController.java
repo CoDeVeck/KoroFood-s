@@ -6,10 +6,13 @@ import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
 import com.koroFoods.reservationService.service.ReservaService;
 
@@ -42,5 +45,13 @@ public class ReservaController {
 
 		return ResultadoResponse.success("Slots disponibles obtenidos", slots);
 	}
+	
+
+    @PostMapping("/registro")
+    public ResultadoResponse<Integer> registrarReserva(
+            @RequestBody ReservaRequest request
+    ) {
+        return reservaService.registrarReserva(request);
+    }
 
 }

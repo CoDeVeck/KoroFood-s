@@ -1,7 +1,10 @@
 package com.koroFoods.reservationService.service;
 
 import com.koroFoods.reservationService.dto.ReservaDtoFeing;
+import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
+import com.koroFoods.reservationService.enums.EstadoReserva;
+import com.koroFoods.reservationService.enums.TipoReserva;
 import com.koroFoods.reservationService.feign.EventoFeignClient;
 import com.koroFoods.reservationService.feign.PedidoFeignClient;
 import com.koroFoods.reservationService.feign.UsuarioFeignClient;
@@ -27,6 +30,66 @@ public class ReservaService {
 	private final PedidoFeignClient pedidoFeignClient;
 
 	private final EventoFeignClient eventoFeignClient;
+	
+	public ResultadoResponse<Integer> registrarReserva(ReservaRequest request) {
+
+        boolean esEvento = request.getIdEvento() != null;
+
+        LocalDateTime inicio = request.getFechaHora();
+        LocalDateTime fin = inicio.plusHours(esEvento ? 3 : 2);
+
+        if (esEvento) {
+            ResultadoResponse<Boolean> response =
+                    eventoFeignClient.validarHorariosParaReservaConEvento(
+                            request.getIdMesa(),
+                            request.getIdEvento(),
+                            inicio,
+                            fin
+                    );
+
+            if (!response.isValor() || !Boolean.TRUE.equals(response.getData())) {
+                return ResultadoResponse.error(
+                        "La mesa no está asignada al evento seleccionado"
+                );
+            }
+            
+            
+        }
+
+        boolean ocupada = reservaRepository.existeSolapamientoReserva(
+                request.getIdMesa(),
+                inicio,
+                fin
+        );
+
+        if (ocupada) {
+            return ResultadoResponse.error(
+                    "La mesa ya se encuentra reservada en el horario seleccionado"
+            );
+        }
+
+        Reserva reserva = new Reserva();
+        reserva.setIdUsuario(request.getIdUsuario());
+        reserva.setIdMesa(request.getIdMesa());
+        reserva.setIdEvento(request.getIdEvento());
+        reserva.setTipoReserva(
+        	    reserva.getIdEvento() != null 
+        	        ? TipoReserva.ESPECIAL 
+        	        : TipoReserva.SIMPLE
+        	);
+        reserva.setFechaHora(inicio);
+        reserva.setEstado(EstadoReserva.PENDIENTE);
+        reserva.setFechaRegistro(LocalDateTime.now());
+        reserva.setObservaciones(request.getObservaciones());
+        reserva.setVerificado(false);
+
+        reservaRepository.save(reserva);
+
+        return ResultadoResponse.success(
+                "Reserva registrada correctamente. Pendiente de pago.",
+                reserva.getIdReserva()
+        );
+    }
 
 	public ResultadoResponse<ReservaDtoFeing> getReservationByID(String codigo) {
 		Optional<Reserva> optionalReserva = reservaRepository.findReservaAsistidaById(codigo);
@@ -142,24 +205,4 @@ public class ReservaService {
 		return reservaRepository.existeSolapamientoReserva(idMesa, fechaInicio, fechaInicio.plusHours(duracion));
 	}
 
-	/*
-	 * public ResultadoResponse<Reserva> registrarReserva(Reserva req) { Reserva reg
-	 * = new Reserva();
-	 * 
-	 * var usuario = usuarioFeignClient.getUsuarioById(req.getIdUsuario());
-	 * 
-	 * if (!usuario.isValor() || usuario.getData() == null) { return
-	 * ResultadoResponse.error( "El usuario con ID " + req.getIdUsuario() +
-	 * " no existe" ); }
-	 * 
-	 * 
-	 * 
-	 * reg.setIdReserva(null); reg.setIdUsuario(req.getIdUsuario());
-	 * reg.setIdMesa(req.getIdMesa());
-	 * 
-	 * if (reg.getIdEvento().equals(null)) { reg.setIdEvento(null); } else {
-	 * reg.setIdEvento(req.getIdEvento()); }
-	 * 
-	 * }
-	 */
 }
