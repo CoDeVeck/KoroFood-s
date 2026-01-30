@@ -3,4 +3,10 @@ import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+  .then(() => {
+    console.log('Aplicación iniciada correctamente');
+  })
+  .catch((err) => {
+    console.error('Error al iniciar aplicación:', err);
+    console.error('Stack trace:', err.stack);
+  });

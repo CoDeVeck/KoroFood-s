@@ -1,4 +1,4 @@
-export const environment = {
+export const enviroment = {
   production: false,
   apiUrls: {
     usuarios: 'http://localhost:8081',
@@ -8,4 +8,6 @@ export const environment = {
     pedido: 'http://localhost:8086',
     reserva: 'http://localhost:8083',
   },
+  githubClientId: 'Ov23liywDIDTbcViyzqf',
+  githubRedirectUri: 'https://localhost:4200/auth/login',
 };

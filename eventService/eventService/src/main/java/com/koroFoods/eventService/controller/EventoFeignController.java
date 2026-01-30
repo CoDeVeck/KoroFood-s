@@ -1,17 +1,24 @@
 package com.koroFoods.eventService.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.koroFoods.eventService.dtos.EventTableResponse;
+import com.koroFoods.eventService.dtos.EventoConMesaDto;
 import com.koroFoods.eventService.dtos.EventoDtoFeign;
 import com.koroFoods.eventService.dtos.EventoFeignReserva;
 import com.koroFoods.eventService.dtos.ResultadoResponse;
+import com.koroFoods.eventService.service.EventoMesaService;
 import com.koroFoods.eventService.service.EventoService;
 
 import lombok.RequiredArgsConstructor;
@@ -21,30 +28,49 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EventoFeignController {
 	private final EventoService eventoService;
+	private final EventoMesaService eventoMesaService;
 
 	// Endpoint para el feign de la reseña
 	@GetMapping
-	public ResponseEntity<ResultadoResponse<List<EventoDtoFeign>>> list(){
+	public ResponseEntity<ResultadoResponse<List<EventoDtoFeign>>> list() {
 		ResultadoResponse<List<EventoDtoFeign>> resultado = eventoService.getAllEvents();
-		
-		if(resultado.isValor()) {
+
+		if (resultado.isValor()) {
 			return ResponseEntity.status(HttpStatus.OK).body(resultado);
-		}else {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
-	    }
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+		}
 	}
-	
+
 	@GetMapping("/{id}")
 	public ResponseEntity<ResultadoResponse<EventoDtoFeign>> getEventhById(@PathVariable Integer id) {
 		ResultadoResponse<EventoDtoFeign> event = eventoService.getEventById(id);
 		return ResponseEntity.ok(event);
 	}
 	
+	
+	
+
 	@GetMapping("/validar/{id}")
 	public ResponseEntity<ResultadoResponse<EventoFeignReserva>> obtenerEventoValidado(@PathVariable Integer id) {
 		ResultadoResponse<EventoFeignReserva> evento = eventoService.buscarEventoParaReserva(id);
 		return ResponseEntity.ok(evento);
 	}
+
+	@GetMapping("/ocupaciones")
+	public ResultadoResponse<Boolean> validarOcupacion(@RequestParam Integer mesaId, @RequestParam Integer eventoId,
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime desde,
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime hasta) {
+
+		boolean asignada = eventoMesaService.mesaAsignadaAlEvento(mesaId, eventoId, desde, hasta);
+
+		return ResultadoResponse.success("Validación realizada", asignada);
+	}
 	
-	
+    @GetMapping("/mesas/{idEvento}")
+    public ResponseEntity<List<EventoConMesaDto>> listarPorEvento(@PathVariable Integer idEvento) {
+        List<EventoConMesaDto> eventoMesas = eventoMesaService.listarMesasPorEventoParaReserva(idEvento);
+        return ResponseEntity.ok(eventoMesas);
+    }
+
 }
