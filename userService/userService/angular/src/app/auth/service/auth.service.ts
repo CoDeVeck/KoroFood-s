@@ -1,32 +1,58 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, tap } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';
 
 // Entornos para el despliegue de docker
-import { environment } from '@envs/enviroment';
-import { ResultadoResponse } from '../../shared/response/resultadoResponse.models';
+import { enviroment } from '@envs/enviroment';
+import { ResultadoResponseSinEntidad } from '../../shared/response/resultadoResponse.models';
 import { Usuario } from '../../shared/model/usuario.model';
+import { RegistroSocialRequest } from '../../shared/request/registroSocialRequest.model';
+import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
+import { SocialRegisterData } from '../../shared/dto/socialRegisterData.model';
+
+//Datos de prueba
+export interface GithubUser {
+  name: string;
+  email: string;
+  avatar: string;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrls.usuarios}/auth/login`;
-  private registerUrl = `${environment.apiUrls.usuarios}/auth/register`;
-  private userUrl = `${environment.apiUrls.usuarios}/auth/me`;
-  constructor(private http: HttpClient) {}
+  private apiUrl = `${enviroment.apiUrls.usuarios}/auth/login`;
+  private registerUrl = `${enviroment.apiUrls.usuarios}/auth/register`;
+  private userUrl = `${enviroment.apiUrls.usuarios}/auth/me`;
+  private completarRegistroUrl = `${enviroment.apiUrls.usuarios}/auth/social/register`;
 
-  login(credentials: { correo: string; clave: string }): Observable<any> {
-    console.log('Login payload:', credentials);
-
-    return this.http.post<{ token: string }>(this.apiUrl, credentials, {
-      headers: { 'Content-Type': 'application/json' },
-    });
+  constructor(private http: HttpClient) {
+    console.log(' API URL:', this.apiUrl);
   }
 
-  register(usuario: Usuario): Observable<ResultadoResponse> {
+  login(
+    credentials: { correo: string; clave: string } | Usuario,
+  ): Observable<any> {
+    return this.http
+      .post<{ token: string }>(this.apiUrl, credentials, {
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .pipe(
+        tap((response) => {
+          console.log('Login exitoso, respuesta:', response);
+        }),
+        catchError((error) => {
+          console.error(' Error en login:', error);
+          throw error;
+        }),
+      );
+  }
+
+  register(usuario: Usuario): Observable<ResultadoResponseSinEntidad> {
+    console.log('Usuario a registrar:', usuario);
+
     const formData = new FormData();
 
     formData.append('nombres', usuario.nombres);
@@ -47,42 +73,102 @@ export class AuthService {
       formData.append('imagenMultipart', usuario.imagenMultipart);
     }
 
-    return this.http.post<ResultadoResponse>(this.registerUrl, formData);
+    return this.http
+      .post<ResultadoResponseSinEntidad>(this.registerUrl, formData)
+      .pipe(
+        tap((response) => {
+          console.log('Registro exitoso, respuesta:', response);
+        }),
+        catchError((error) => {
+          console.error('Error en registro:', error);
+          throw error;
+        }),
+      );
   }
 
   getUsuario(): Observable<any> {
     const token = this.getToken();
-    if (!token) throw new Error('No token found');
 
-    return this.http.get(this.userUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    if (!token) {
+      console.error('No hay token disponible');
+      throw new Error('No token found');
+    }
+
+    return this.http
+      .get(this.userUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .pipe(
+        tap((response) => {
+          console.log('Usuario obtenido:', response);
+        }),
+        catchError((error) => {
+          console.error('Error al obtener usuario:', error);
+          throw error;
+        }),
+      );
   }
 
   saveToken(token: string): void {
     localStorage.setItem('auth_token', token);
+    console.log('Token guardado en localStorage');
   }
 
   getToken(): string | null {
-    return localStorage.getItem('auth_token');
+    const token = localStorage.getItem('auth_token');
+    return token;
   }
 
   getRolesFromToken(): string[] {
     const token = this.getToken();
+
     if (!token) {
       return [];
     }
-    const decoded: any = jwtDecode(token);
-    return decoded.roles || [];
+
+    try {
+      const decoded: any = jwtDecode(token);
+      console.log('Token decodificado:', decoded);
+      const roles = decoded.roles || [];
+      return roles;
+    } catch (error) {
+      console.error('Error al decodificar token:', error);
+      return [];
+    }
   }
 
   isLoggedIn(): boolean {
-    return this.getToken() !== null;
+    const loggedIn = this.getToken() !== null;
+    return loggedIn;
   }
 
   logout(): void {
     localStorage.removeItem('auth_token');
+  }
+
+  completarRegistroSocial(
+    request: RegistroSocialRequest,
+  ): Observable<ResultadoResponse<SocialRegisterData>> {
+    console.log('Completando registro social:', request);
+
+    return this.http
+      .post<ResultadoResponse<SocialRegisterData>>(
+        this.completarRegistroUrl,
+        request,
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      )
+      .pipe(
+        tap((response) => {
+          console.log('Registro social completado:', response);
+        }),
+        catchError((error) => {
+          console.error('Error completando registro:', error);
+          throw error;
+        }),
+      );
   }
 }

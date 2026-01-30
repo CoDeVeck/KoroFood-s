@@ -1,18 +1,27 @@
 package com.koroFoods.userService.service;
 
 import com.koroFoods.userService.dto.ResultadoResponse;
+import com.koroFoods.userService.dto.SocialUserDataDto;
 import com.koroFoods.userService.dto.UsuarioDtoFeign;
+import com.koroFoods.userService.dto.request.RegistroSocialRequest;
 import com.koroFoods.userService.dto.request.UpdatePasswordRequest;
+import com.koroFoods.userService.dto.response.PerfilClienteResponse;
+import com.koroFoods.userService.dto.response.SocialAuthResponse;
 import com.koroFoods.userService.model.Distrito;
 import com.koroFoods.userService.model.Rol;
 import com.koroFoods.userService.model.Usuario;
 import com.koroFoods.userService.repository.IUsuarioRepository;
+import com.koroFoods.userService.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +29,7 @@ public class UsuarioService  {
 
     private final IUsuarioRepository usuarioRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final JwtUtil jwtUtil;
 
     public Optional<Usuario> obtenerDatosCliente(String correo){
         return  usuarioRepository.findByCorreo(correo);
@@ -106,5 +116,120 @@ public class UsuarioService  {
 
     }
 
+    public PerfilClienteResponse obtenerPerfilDetallado (Integer id ){
+
+        return usuarioRepository.obtenerPerfil(id);
+    }
+
+
+    public SocialAuthResponse verificarUsuarioRegistrado(
+            String nombre,
+            String email,
+            String avatar,
+            String provider
+    ){
+
+        Optional<Usuario> usuarioEncontado = usuarioRepository.findByCorreo(email);
+
+        //Usuario  encontrado genera token y finaliza la validacion
+        if (usuarioEncontado.isPresent()){
+
+            Usuario usuario = usuarioEncontado.get();
+
+            List<String> roles = List.of(usuario.getRol().getDescripcion());
+            String token = jwtUtil.generateToken( email ,roles);
+
+            SocialAuthResponse response = new SocialAuthResponse();
+            response.setUsuarioExistente(true);
+            response.setToken(token);
+            response.setSocialUserDataDto(null);
+            response.setTempToken(null);
+
+            return response;
+
+        }
+        //Si no existe un usurio q intenta logearse o registrarse con github tiene q completar el registro
+        //con los datos que esta respondiendo ya sea google/github
+        else{
+
+            String tempToken =  generarTokenTemporal(email, nombre, avatar, provider);
+
+            SocialUserDataDto userData = new SocialUserDataDto();
+            userData.setNombre(nombre);
+            userData.setEmail(email);
+            userData.setAvatar(avatar);
+            userData.setProvider(provider);
+
+            SocialAuthResponse response = new SocialAuthResponse();
+            response.setUsuarioExistente(false);
+            response.setToken(null);
+            response.setTempToken(tempToken);
+            response.setSocialUserDataDto(userData);
+
+            return response;
+        }
+    }
+
+    public ResultadoResponse<?> registraUsuarioSocial(RegistroSocialRequest request){
+        try {
+
+            if (usuarioRepository.findByCorreo(request.getCorreo()).isPresent()){
+                return ResultadoResponse.error("El correo ya esta registrado intente otro");
+            }
+
+            if (usuarioRepository.findByTelefono(request.getTelefono()).isPresent()) {
+                return ResultadoResponse.error("El teléfono ya está registrado");
+            }
+
+            if (usuarioRepository.findByNroDoc(request.getNroDoc()).isPresent()) {
+                return ResultadoResponse.error("El número de documento ya está registrado");
+            }
+
+            Usuario nuevoUsuario = new Usuario();
+
+            nuevoUsuario.setNombres(request.getNombres());
+            nuevoUsuario.setImagen(request.getImagen());
+
+            nuevoUsuario.setApePaterno(request.getApePaterno());
+            nuevoUsuario.setApeMaterno(request.getApeMaterno());
+            nuevoUsuario.setCorreo(request.getCorreo());
+            nuevoUsuario.setTipoDoc(request.getTipoDocumento());
+            nuevoUsuario.setNroDoc(request.getNroDoc());
+            nuevoUsuario.setTelefono(request.getTelefono());
+            nuevoUsuario.setDireccion(request.getDireccion());
+
+            Distrito distritoEncontrado = new Distrito();
+            distritoEncontrado.setIdDistrito(request.getIdDistrito());
+            nuevoUsuario.setDistrito(distritoEncontrado);
+
+            Rol rolPorDefeto = new Rol();
+            rolPorDefeto.setIdRol(4);
+            nuevoUsuario.setRol(rolPorDefeto);
+
+            nuevoUsuario.setClave(bCryptPasswordEncoder.encode(request.getClave()));
+
+            nuevoUsuario.setFechaRegistro(LocalDateTime.now());
+            nuevoUsuario.setActivo(true);
+
+            Usuario usuarioGuardado = usuarioRepository.save(nuevoUsuario);
+
+            List<String> roles = List.of(usuarioGuardado.getRol().getDescripcion());
+            String token = jwtUtil.generateToken(request.getCorreo(), roles);
+
+            return ResultadoResponse.success(
+                    "Usuario registrado exitosamente",
+                    Map.of("token", token, "usuario", usuarioGuardado)
+            );
+
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al completar el registro: " + e);
+        }
+    }
+
+
+    public String generarTokenTemporal(String email, String nombre, String avatar, String provider){
+        return UUID.randomUUID().toString() + ":" + email + ":" + provider;
+    }
 
 }

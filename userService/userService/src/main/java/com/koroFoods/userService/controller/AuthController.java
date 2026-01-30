@@ -2,6 +2,10 @@ package com.koroFoods.userService.controller;
 
 import com.koroFoods.userService.dto.GithubUserDto;
 
+import com.koroFoods.userService.dto.GoogleUserDto;
+import com.koroFoods.userService.dto.request.RegistroSocialRequest;
+import com.koroFoods.userService.dto.response.SocialAuthResponse;
+import com.koroFoods.userService.service.GoogleService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,7 +43,9 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final CloudinaryService cloudinaryService;
     private final GithubService githubService;
-    
+    private final GoogleService googleService;
+
+
     @PostMapping("/login")
     public ResponseEntity<?> loginUsuario(@RequestBody LoginRequest loginRequest) {
 
@@ -95,11 +101,75 @@ public class AuthController {
         return ResponseEntity.ok(usuario);
     }
 
+    //Login/Register con Github
     @PostMapping("/github")
     public ResponseEntity<?> githubLogin(@RequestParam String code) {
-        GithubUserDto githubUserDto = githubService.loginWithGithub(code);
+        try{
+            GithubUserDto githubUserDto = githubService.loginWithGithub(code);
 
-        return ResponseEntity.ok(githubUserDto);
+            SocialAuthResponse response = usuarioService.verificarUsuarioRegistrado(
+                    githubUserDto.getName(),
+                    githubUserDto.getEmail(),
+                    githubUserDto.getAvatar(),
+                    "github"
+            );
+            System.out.println("✅ [CONTROLLER] Response generado: " + response);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(Map.of("¡Error' ", "Error en autenticación GitHub: " + e.getMessage()));
+        }
+    }
+
+    //Login/Register con Google
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> payload){
+        try {
+
+            String idToken = payload.get("idToken");
+
+            if (idToken == null || idToken.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Token de Google requerido"));
+            }
+
+            GoogleUserDto googleUserDto = googleService.verifyGoogleToken(idToken);
+
+
+            SocialAuthResponse response = usuarioService.verificarUsuarioRegistrado(
+                    googleUserDto.getName(),
+                    googleUserDto.getEmail(),
+                    googleUserDto.getAvatar(),
+                    "google"
+            );
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(Map.of("¡Error' ", "Error en autenticación Google: " + e.getMessage()));
+        }
+    }
+
+    //Registrar el cliente completo ya sea con google o con GitHub
+    @PostMapping("/social/register")
+    public ResponseEntity<?>registrarSocialGitHubGoogle(
+            @RequestBody RegistroSocialRequest request
+            ){
+        try {
+            ResultadoResponse<?> resultado = usuarioService.registraUsuarioSocial(request);
+
+            if (resultado.isValor()) {
+                return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(ResultadoResponse.error("Error completando registro: " + e.getMessage()));
+        }
     }
 
 }
