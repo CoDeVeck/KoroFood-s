@@ -3,16 +3,16 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { environment } from '../../../enviroments/enviroment';
+import { enviroment } from '../../../enviroments/enviroment';
 import { PlatoResponse, PlatoRequest, EtiquetaResponse, EtiquetaRequest, PlatoEtiquetaRequest } from '../models/plato.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PlatoService {
-  private apiUrl = `${environment.apiUrls.menu}/platos`;
-  private etiquetaUrl = `${environment.apiUrls.menu}/etiquetas`;
-  private platoEtiquetaUrl = `${environment.apiUrls.menu}/plato-etiquetas`;
+  private apiUrl = `${enviroment.apiUrls.menu}/platos`;
+  private etiquetaUrl = `${enviroment.apiUrls.menu}/etiquetas`;
+  private platoEtiquetaUrl = `${enviroment.apiUrls.menu}/plato-etiquetas`;
 
   constructor(private http: HttpClient) {}
 

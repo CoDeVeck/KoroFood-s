@@ -7,6 +7,7 @@ export const enviroment = {
     resenas: 'http://localhost:8084',
     pedido: 'http://localhost:8086',
     reserva: 'http://localhost:8083',
+    mesa: 'http://localhost:8082',
   },
   githubClientId: 'Ov23liywDIDTbcViyzqf',
   githubRedirectUri: 'https://localhost:4200/auth/login',
