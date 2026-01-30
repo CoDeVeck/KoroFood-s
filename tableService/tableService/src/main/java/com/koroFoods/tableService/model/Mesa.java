@@ -35,4 +35,7 @@ public class Mesa {
     @Enumerated(EnumType.STRING)
     @Column(name = "ESTADO")
     private EstadoMesa estado;
+    
+    @Column(name = "ACTIVO")
+    private Boolean activo;
 }

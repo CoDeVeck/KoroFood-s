@@ -77,4 +77,6 @@ public class EventoMesaController {
         eventoMesaService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+
+    
 }

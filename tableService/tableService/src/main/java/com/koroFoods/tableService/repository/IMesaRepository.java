@@ -1,6 +1,5 @@
 package com.koroFoods.tableService.repository;
 
-import com.koroFoods.tableService.enums.EstadoMesa;
 import com.koroFoods.tableService.enums.Zona;
 import com.koroFoods.tableService.model.Mesa;
 
@@ -15,6 +14,6 @@ import org.springframework.stereotype.Repository;
 public interface IMesaRepository extends JpaRepository<Mesa, Integer> {
 	
 
-	List<Mesa> findByZonaAndEstadoNot(Zona zona, EstadoMesa estado);
+	List<Mesa> findByZonaAndActivoTrue(Zona zona);
 
 }

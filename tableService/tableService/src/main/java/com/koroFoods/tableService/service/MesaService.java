@@ -29,7 +29,7 @@ public class MesaService {
 
     public ResultadoResponse<List<MesaDtoFeign>> obtenerMesasPorZona(Zona zona) {
 
-        List<MesaDtoFeign> mesas = mesaRepository.findByZonaAndEstadoNot(zona, EstadoMesa.MANTENIMIENTO)
+        List<MesaDtoFeign> mesas = mesaRepository.findByZonaAndActivoTrue(zona)
                 .stream()
                 .map(this::convertirAMesaFeign)
                 .toList();

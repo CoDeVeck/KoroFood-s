@@ -3,8 +3,12 @@ package com.koroFoods.eventService.service;
 import com.koroFoods.eventService.dtos.EventResponse;
 import com.koroFoods.eventService.dtos.EventTableRequest;
 import com.koroFoods.eventService.dtos.EventTableResponse;
+import com.koroFoods.eventService.dtos.EventoConMesaDto;
+import com.koroFoods.eventService.dtos.ResultadoResponse;
 import com.koroFoods.eventService.exception.BusinessException;
 import com.koroFoods.eventService.exception.ResourceNotFoundException;
+import com.koroFoods.eventService.feign.IMesaFeignClient;
+import com.koroFoods.eventService.feign.MesaFeign;
 import com.koroFoods.eventService.model.Evento;
 import com.koroFoods.eventService.model.EventoMesa;
 import com.koroFoods.eventService.repository.IEventoMesaRepository;
@@ -12,7 +16,9 @@ import com.koroFoods.eventService.repository.IEventoRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -25,6 +31,8 @@ public class EventoMesaService {
     private final IEventoMesaRepository eventoMesaRepository;
     
     private final IEventoRepository eventoRepository;
+    private final IMesaFeignClient mesaFeignClient;
+    
     private final EventoService eventoService;
     
     @Transactional
@@ -129,6 +137,62 @@ public class EventoMesaService {
         }
     }
 
+    //Reserva
+    
+    public boolean mesaAsignadaAlEvento(
+            Integer idMesa,
+            Integer idEvento,
+            LocalDateTime desde,
+            LocalDateTime hasta
+    ) {
+        return eventoMesaRepository.mesaAsignadaAlEvento(
+                idMesa, idEvento, desde, hasta
+        );
+    }
+    
+    public List<EventoConMesaDto> listarMesasPorEventoParaReserva(Integer idEvento) {
+        List<EventoMesa> eventosMesas = eventoMesaRepository
+                .findByEvento_IdEventoAndActivoTrue(idEvento);
+        
+        EventResponse eventoResponse = eventoService.buscarPorId(idEvento);
+        
+        return eventosMesas.stream()
+                .map(eventoMesa -> {
+                    ResultadoResponse<MesaFeign> mesaResponse = 
+                            mesaFeignClient.obtenerMesaPorId(eventoMesa.getIdMesa());
+                    
+                    if (mesaResponse != null && mesaResponse.getData() != null) {
+                        return mapearEventoMesaReserva(eventoMesa, eventoResponse, mesaResponse.getData());
+                    }
+                    
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private EventoConMesaDto mapearEventoMesaReserva(
+            EventoMesa eventoMesa, 
+            EventResponse eventoResponse, 
+            MesaFeign mesa) {
+        
+        return EventoConMesaDto.builder()
+                .idEventoMesa(eventoMesa.getIdEventoMesa())
+                .nombre(eventoResponse.getNombre())
+                .descripcion(eventoResponse.getDescripcion())
+                .tematica(eventoResponse.getTematica().getNombre())
+                .fechaInicio(eventoResponse.getFechaInicio())
+                .fechaFin(eventoResponse.getFechaFin())
+                .imagen(eventoResponse.getImagen())
+                .idMesa(mesa.getIdMesa())
+                .numeroMesa(mesa.getNumeroMesa())
+                .capacidad(mesa.getCapacidad())
+                .zona(mesa.getTipo())
+                .activo(eventoResponse.getActivo())
+                .build();
+    }
+    
+    
     private EventTableResponse mapearAResponse(EventoMesa eventoMesa) {
         EventResponse eventoResponse = eventoService.buscarPorId(eventoMesa.getEvento().getIdEvento());
 
@@ -141,4 +205,5 @@ public class EventoMesaService {
                 .activo(eventoMesa.getActivo())
                 .build();
     }
+    
 }

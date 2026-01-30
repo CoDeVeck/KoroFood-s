@@ -14,7 +14,7 @@ import com.koroFoods.eventService.dtos.ResultadoResponse;
 @FeignClient(name = "mesas", url = "http://localhost:8082/mesa/feign")
 public interface IMesaFeignClient {
 
-	@GetMapping("{/id}")
+	@GetMapping("/{id}")
 	ResultadoResponse<MesaFeign> obtenerMesaPorId(@PathVariable Integer id);
 	
     @PostMapping("/por-ids")
