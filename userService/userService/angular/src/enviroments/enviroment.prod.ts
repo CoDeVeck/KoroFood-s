@@ -8,6 +8,6 @@ export const enviroment = {
     pedido: 'https://dominio.com/pedido',
     reserva: 'https://dominio.com/reserva',
   },
-  githubClientId: 'API_KEY_PROD',
-  githubRedirectUri: 'https://localhost:4200/login',
+  githubClientId: 'Ov23liywDIDTbcViyzqf',
+  githubRedirectUri: 'https://localhost:4200/auth/login',
 };

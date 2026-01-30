@@ -1,4 +1,4 @@
-export interface ResultadoResponse {
+export interface ResultadoResponseSinEntidad {
   valor: boolean;
   mensaje: string;
 }

@@ -14,9 +14,13 @@ import {
   SocialUser,
 } from '@abacritt/angularx-social-login';
 
+import { RegisterComponent } from '../register/register.component';
+
 //servicios a consumir
 import { DistritoService } from '../service/distrito.service';
 import { AuthService } from '../service/auth.service';
+import { GithubService } from '../service/github.service';
+import { GoogleService } from '../service/google.service';
 
 //modelos a utilizar
 
@@ -24,10 +28,24 @@ import { Distrito } from '../../shared/model/distrito.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../cliente/service/user.service';
 import { Usuario } from '../../shared/model/usuario.model';
-import { ResultadoResponse } from '../../shared/response/resultadoResponse.models';
+
 import { enviroment } from '@envs/enviroment';
 import { TipoDocumento } from '../../shared/enums/tipoDocumento.enum';
 import { Subscription } from 'rxjs';
+
+//Request a utilizar
+import { RegistroSocialRequest } from '../../shared/request/registroSocialRequest.model';
+
+//DtoS a utulizar
+import { GoogleDto } from '../../shared/dto/googleDto.model';
+import { GitHubDto } from '../../shared/dto/githubDto.model';
+import { SocialUserDataDto } from '../../shared/dto/socialUserDataDto.model';
+
+//Response a utulizar
+import { SocialAuthResponse } from '../../shared/response/socialAuthResponse.model';
+import { ResultadoResponse } from '../../shared/dto/ResultadoResponse'; //Con entidad
+import { ResultadoResponseSinEntidad } from '../../shared/response/resultadoResponse.models'; //sin entidad
+import { SocialRegisterData } from '../../shared/dto/socialRegisterData.model';
 
 @Component({
   selector: 'app-login',
@@ -37,26 +55,38 @@ import { Subscription } from 'rxjs';
     FormsModule,
     ReactiveFormsModule,
     GoogleSigninButtonModule,
+    RegisterComponent,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
 export class LoginComponent implements OnInit {
+  //Formularios tanto como Login y registro
+
   registerForm!: FormGroup; //para el formulario de registro
   loginForm!: FormGroup; // para el formulario de login
+  sociaLoginRegisterForm!: FormGroup;
+
   distritos: Distrito[] = [];
   errorMessage: string = '';
   successMessage: string = '';
   isLoginMode: boolean = true;
 
+  showSocialRegisterModal: boolean = false;
+
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
   showLoginPassword: boolean = false;
 
-  private authStateSubscription?: Subscription;
+  tempSocialData: SocialUserDataDto | null = null;
+  tempToken: string | null = null;
 
+  //Inyeccion d servicios
+  private authStateSubscription?: Subscription;
   private distritoService = inject(DistritoService);
-  private socialAuth = inject(AuthService); // incluye el login/registro y login con GitHub
+  private socialAuth = inject(AuthService); // incluye el login/registro
+  private gitHubService = inject(GithubService); //login/register github
+  private googleService = inject(GoogleService); //login/register google
   private authService = inject(SocialAuthService); // servicio para autenticación con Google
   private userService = inject(UserService);
   private router = inject(Router);
@@ -64,100 +94,23 @@ export class LoginComponent implements OnInit {
   private formBuilder = inject(FormBuilder);
 
   constructor() {
-    this.initForm();
-
-    this.loginForm = this.formBuilder.group({
-      correo: ['', [Validators.required, Validators.email]],
-      clave: ['', [Validators.required]],
-    });
+    this.initForms();
   }
 
   ngOnInit(): void {
     this.cargarDistritos();
-
-    try {
-      if (!this.authService) {
-        console.error(' SocialAuthService no disponible');
-        return;
-      }
-
-      console.log('SocialAuthService disponible');
-
-      this.authStateSubscription = this.authService.authState.subscribe({
-        next: (socialUser: SocialUser | null) => {
-          if (socialUser) {
-            const usuario: Usuario = {
-              nombres: socialUser.name,
-              apePaterno: '',
-              apeMaterno: '',
-              clave: '',
-              telefono: '',
-              tipoDoc: TipoDocumento.CDX,
-              nroDoc: '',
-              direccion: '',
-              correo: socialUser.email,
-              imagen: socialUser.photoUrl,
-              distrito: {
-                idDistrito: 0,
-              },
-            };
-
-            this.socialAuth.login(usuario).subscribe({
-              next: () => {
-                console.log('Login con Google exitoso');
-                this.router.navigate(['/']);
-              },
-              error: (err) => {
-                console.error('Error en login:', err);
-              },
-            });
-          }
-        },
-        error: (err) => {
-          console.error('Error en authState:', err);
-        },
-      });
-    } catch (error) {
-      console.error('Error al suscribirse a authState:', error);
-    }
-
-    const code = this.route.snapshot.queryParamMap.get('code');
-
-    if (code) {
-      this.socialAuth.loginWithGithub(code).subscribe({
-        next: (dto) => {
-          const user: Usuario = {
-            nombres: dto.name,
-            apePaterno: '',
-            apeMaterno: '',
-            clave: '',
-            telefono: '',
-            tipoDoc: TipoDocumento.CDX,
-            nroDoc: '',
-            direccion: '',
-            correo: dto.email,
-            imagen: dto.avatar,
-            distrito: {
-              idDistrito: 0,
-            },
-          };
-
-          this.socialAuth.login(user);
-          this.router.navigate(['/']);
-        },
-        error: () => this.router.navigate(['/login']),
-      });
-    }
+    this.setupGoogleAuth();
+    this.setupGithubAuth();
   }
 
   ngOnDestroy(): void {
-    // ✅ Limpia la suscripción
     if (this.authStateSubscription) {
       this.authStateSubscription.unsubscribe();
     }
   }
 
-  private initForm(): void {
+  private initForms(): void {
+    //Formulario del registro
     this.registerForm = this.formBuilder.group({
       nombres: [
         '',
@@ -201,6 +154,45 @@ export class LoginComponent implements OnInit {
       idDistrito: ['', [Validators.required]],
       telefono: ['', [Validators.required, Validators.pattern(/^[0-9]{9}$/)]],
     });
+
+    //Formulario del Login
+    this.loginForm = this.formBuilder.group({
+      correo: ['', [Validators.required, Validators.email]],
+      clave: ['', Validators.required],
+    });
+
+    // Formulario para completar registro social
+    this.sociaLoginRegisterForm = this.formBuilder.group({
+      apePaterno: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(50),
+        ],
+      ],
+      apeMaterno: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(50),
+        ],
+      ],
+      tipoDoc: ['', Validators.required],
+      nroDoc: ['', [Validators.required, Validators.pattern(/^[0-9]{8}$/)]],
+      direccion: ['', [Validators.required, Validators.maxLength(50)]],
+      idDistrito: ['', Validators.required],
+      telefono: ['', [Validators.required, Validators.pattern(/^[0-9]{9}$/)]],
+      clave: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6),
+          Validators.maxLength(225),
+        ],
+      ],
+    });
   }
 
   cargarDistritos(): void {
@@ -211,6 +203,178 @@ export class LoginComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar distritos:', error);
+      },
+    });
+  }
+
+  //--------------------GOOGLE LOGIN / REGISTER -------------------------------
+
+  private setupGoogleAuth(): void {
+    try {
+      if (!this.authService) {
+        console.error('SocialAuthService no disponible');
+        return;
+      }
+
+      this.authStateSubscription = this.authService.authState.subscribe({
+        next: (socialUser: SocialUser | null) => {
+          if (socialUser) {
+            console.log('👤 Usuario Google detectado:', socialUser);
+
+            // Obtener el idToken
+            const idToken = (socialUser as any).idToken;
+
+            if (!idToken) {
+              console.error('No se pudo obtener idToken de Google');
+              AlertIziToast.error('Error', 'No se pudo autenticar con Google');
+              return;
+            }
+
+            // Enviar al backend
+            this.handleGoogleLogin(idToken);
+          }
+        },
+        error: (err) => {
+          console.error('Error en authState:', err);
+        },
+      });
+    } catch (error) {
+      console.error('Error al configurar Google Auth:', error);
+    }
+  }
+
+  private handleGoogleLogin(idToken: string): void {
+    this.googleService.loginWithGoogle(idToken).subscribe({
+      next: (response: SocialAuthResponse) => {
+        console.log('Google login:', response);
+        this.procesarRespuestaSocial(response);
+      },
+      error: (err) => {
+        console.error('Error en Google login:', err);
+        AlertIziToast.error('Error', 'No se pudo autenticar con Google');
+      },
+    });
+  }
+
+  onGoogleAuth(): void {
+    console.log('Google authentication initiated');
+
+    alert('Autenticación con Google en proceso...');
+  }
+
+  //--------------------GITHUB LOGIN / REGISTER -------------------------------
+
+  private setupGithubAuth(): void {
+    const code = this.route.snapshot.queryParamMap.get('code');
+
+    if (code) {
+      console.log('Código GitHub detectado:', code);
+      this.handleGithubLogin(code);
+    }
+  }
+
+  private handleGithubLogin(code: string): void {
+    this.gitHubService.loginWithGithub(code).subscribe({
+      next: (response: SocialAuthResponse) => {
+        console.log('Respuesta de GitHub login:', response);
+        this.procesarRespuestaSocial(response);
+      },
+      error: (err) => {
+        console.error('Error en GitHub login:', err);
+        AlertIziToast.error('Error', 'No se pudo autenticar con GitHub');
+        this.router.navigate(['/auth/login']);
+      },
+    });
+  }
+
+  onGithubAuth() {
+    console.log('GitHub authentication initiated');
+    const { githubClientId, githubRedirectUri } = enviroment;
+
+    window.location.href =
+      `https://github.com/login/oauth/authorize` +
+      `?client_id=${githubClientId}` +
+      `&scope=user:email` +
+      `&redirect_uri=${githubRedirectUri}`;
+  }
+
+  private procesarRespuestaSocial(response: SocialAuthResponse): void {
+    if (response.usuarioExistente) {
+      console.log('Usuario existente, iniciando sesión...');
+      this.socialAuth.saveToken(response.token!);
+      this.completarLoginYRedirigir();
+    } else {
+      console.log('Usuario nuevo, mostrar formulario...');
+      this.tempSocialData = response.socialUserDataDto;
+      this.tempToken = response.tempToken;
+      this.showSocialRegisterModal = true;
+    }
+  }
+
+  handleCompletarRegistro(request: RegistroSocialRequest): void {
+    this.socialAuth.completarRegistroSocial(request).subscribe({
+      next: (resultado: ResultadoResponse<SocialRegisterData>) => {
+        if (resultado.valor) {
+          AlertIziToast.success('¡Registro exitoso!', 'Bienvenido a KoroFoods');
+
+          const data: any = resultado.data;
+          this.socialAuth.saveToken(data.token);
+
+          this.showSocialRegisterModal = false;
+
+          this.completarLoginYRedirigir();
+        } else {
+          AlertIziToast.error(
+            'Error',
+            resultado.mensaje || 'No se pudo completar el registro',
+          );
+        }
+      },
+      error: (error) => {
+        console.error('Error completando registro:', error);
+        AlertIziToast.error(
+          'Error',
+          error.error?.mensaje || 'Error al completar el registro',
+        );
+      },
+    });
+  }
+
+  cerrarModalSocial(): void {
+    this.showSocialRegisterModal = false;
+    this.tempSocialData = null;
+    this.tempToken = null;
+  }
+
+  // ========== COMPLETAR LOGIN Y REDIRIGIR ==========
+  private completarLoginYRedirigir(): void {
+    this.socialAuth.getUsuario().subscribe({
+      next: (usuario) => {
+        this.userService.setUser(usuario);
+        const descripcion = usuario.rol.descripcion;
+
+        AlertIziToast.success('¡Bienvenido!', `Hola ${usuario.nombres}`);
+
+        switch (descripcion) {
+          case 'A':
+            this.router.navigate(['/admin']);
+            break;
+          case 'C':
+            this.router.navigate(['/cliente']);
+            break;
+          case 'R':
+            this.router.navigate(['/recepcionista']);
+            break;
+          case 'M':
+            this.router.navigate(['/mesero']);
+            break;
+          default:
+            this.router.navigate(['/auth/login']);
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error al obtener usuario:', error);
+        AlertIziToast.error('Error', 'No se pudo obtener datos del usuario');
       },
     });
   }
@@ -235,18 +399,34 @@ export class LoginComponent implements OnInit {
     this.isLoginMode = false;
   }
 
-  //REGISTRO DE UNA CUENTA NUEVA
-  onSignUp(): void {
-    if (this.registerForm.invalid) {
-      this.validateSignupForm();
+  //LOGIN CON CORREO Y CONTRASEÑA
+  onLogin(): void {
+    console.log('Formulario login válido?', this.loginForm.valid);
+    console.log('Datos enviados:', this.loginForm.value);
 
-      this.errorMessage = 'Completar todos los campos correctamente.';
+    if (this.loginForm.invalid) {
+      AlertIziToast.error('Error', 'Por favor completa todos los campos');
       return;
     }
 
-    this.isLoginMode = true;
-    this.errorMessage = '';
-    this.successMessage = 'Registro exitoso. Por favor, inicia sesión.';
+    this.socialAuth.login(this.loginForm.value).subscribe({
+      next: (response: any) => {
+        this.socialAuth.saveToken(response.token);
+        this.completarLoginYRedirigir();
+      },
+      error: (error) => {
+        console.error('Error LOGIN:', error);
+        AlertIziToast.error('Error', 'Correo o contraseña incorrectos');
+      },
+    });
+  }
+
+  //REGISTRO DE UNA CUENTA NUEVA
+  onSignUp(): void {
+    if (this.registerForm.invalid) {
+      AlertIziToast.error('Error', 'Completar todos los campos correctamente');
+      return;
+    }
 
     const formValue = this.registerForm.value;
     const usuario: Usuario = {
@@ -264,144 +444,36 @@ export class LoginComponent implements OnInit {
       telefono: formValue.telefono,
     };
 
-    console.log('Datos de registro:', usuario);
-
     this.socialAuth.register(usuario).subscribe({
-      next: (resultado: ResultadoResponse) => {
-        this.isLoginMode = false;
-
+      next: (resultado: ResultadoResponseSinEntidad) => {
         if (resultado.valor) {
           AlertIziToast.success(
-            'Registro Exitoso!',
-            'Por favor, inicia sesión con tus credenciales.',
+            '¡Registro Exitoso!',
+            'Por favor, inicia sesión',
           );
           this.registerForm.reset();
-
           setTimeout(() => {
             this.isLoginMode = true;
           }, 1000);
         } else {
           AlertIziToast.error(
-            'Error en el Registro',
-            resultado.mensaje || 'No se pudo registrar el usuario.',
+            'Error',
+            resultado.mensaje || 'No se pudo registrar',
           );
         }
       },
       error: (error) => {
-        this.isLoginMode = false;
-        console.error('Error en el registro:', error);
-
-        if (error.status === 400) {
-          AlertIziToast.error(
-            'Error en el Registro',
-            error.error?.mensaje || 'Datos inválidos proporcionados.',
-          );
-        } else if (error.status === 409) {
-          AlertIziToast.error(
-            'Error en el registro',
-            error.error?.mensaje || 'El correo ya está registrado.',
-          );
-        } else if (error.status === 500) {
-          AlertIziToast.error(
-            'Error en el registro',
-            'Error del servidor. Intenta nuevamente más tarde.',
-          );
-        } else {
-          AlertIziToast.error(
-            'Error en el registro',
-            error.error?.mensaje ||
-              'Error al registrar usuario. Intenta nuevamente.',
-          );
-        }
+        console.error('❌ Error en registro:', error);
+        AlertIziToast.error(
+          'Error',
+          error.error?.mensaje || 'Error al registrar',
+        );
       },
     });
   }
 
-  //LOGIN CON CORREO Y CONTRASEÑA
-  onLogin(): void {
-    console.log('Formulario login válido?', this.loginForm.valid);
-    console.log('Datos enviados:', this.loginForm.value);
-
-    if (this.loginForm.valid) {
-      this.socialAuth.login(this.loginForm.value).subscribe({
-        next: (response: any) => {
-          console.log('Respuesta login:', response);
-          const token = response.token;
-          this.socialAuth.saveToken(token);
-          console.log('Token guardado: ', token);
-
-          this.socialAuth.getUsuario().subscribe({
-            next: (usuario) => {
-              this.userService.setUser(usuario);
-              console.log('Usuario logueado: ', usuario);
-
-              const rolUsuario = this.userService.getRol();
-              console.log('Rol del usuario: ', rolUsuario);
-              const descripcion = usuario.rol.descripcion;
-              console.log('Descripción del rol: ', descripcion);
-              AlertIziToast.success(
-                'Login Exitoso!',
-                `Bienvendido ${usuario.nombres}!`,
-              );
-              switch (descripcion) {
-                case 'A':
-                  this.router.navigate(['/admin']);
-                  break;
-                case 'C':
-                  this.router.navigate(['/cliente']);
-                  break;
-                case 'R':
-                  this.router.navigate(['/recepcionista']);
-                  break;
-                case 'M':
-                  this.router.navigate(['/mesero']);
-                  break;
-                default:
-                  this.router.navigate(['/auth/login']);
-              }
-            },
-
-            error: (error) => {
-              console.error('Error al obtener el usuario: ', error);
-              AlertIziToast.error(
-                'Error al obtener datos del usuario',
-                'Error de Autenticación',
-              );
-            },
-          });
-        },
-        error: (error) => {
-          console.error('Error LOGIN:', error);
-          console.error('Status:', error.status);
-          console.error('Body:', error.error);
-          this.errorMessage = 'Correo o contraseña incorrectos.';
-          AlertIziToast.error(this.errorMessage, 'Error de Autenticación');
-        },
-      });
-    }
-  }
-
   verificarLoggin(): Boolean {
     return this.socialAuth.isLoggedIn();
-  }
-
-  //AUTENTICACION CON GOOGLE
-  onGoogleAuth(): void {
-    console.log('Google authentication initiated');
-
-    alert('Autenticación con Google en proceso...');
-  }
-
-  //AUTENTICACION CON GITHUB
-  onGithubAuth() {
-    console.log('GitHub authentication initiated');
-    const { githubClientId, githubRedirectUri } = enviroment;
-
-    window.location.href =
-      `https://github.com/login/oauth/authorize` +
-      `?client_id=${githubClientId}` +
-      `&scope=user:email` +
-      `&redirect_uri=${githubRedirectUri}`;
   }
 
   //Implmentar metodo para recuperar contraseña

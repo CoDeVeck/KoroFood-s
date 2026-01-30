@@ -9,5 +9,5 @@ export const enviroment = {
     reserva: 'http://localhost:8083',
   },
   githubClientId: 'Ov23liywDIDTbcViyzqf',
-  githubRedirectUri: 'https://localhost:4200/login',
+  githubRedirectUri: 'https://localhost:4200/auth/login',
 };

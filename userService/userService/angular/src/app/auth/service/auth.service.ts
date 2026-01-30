@@ -6,8 +6,11 @@ import { jwtDecode } from 'jwt-decode';
 
 // Entornos para el despliegue de docker
 import { enviroment } from '@envs/enviroment';
-import { ResultadoResponse } from '../../shared/response/resultadoResponse.models';
+import { ResultadoResponseSinEntidad } from '../../shared/response/resultadoResponse.models';
 import { Usuario } from '../../shared/model/usuario.model';
+import { RegistroSocialRequest } from '../../shared/request/registroSocialRequest.model';
+import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
+import { SocialRegisterData } from '../../shared/dto/socialRegisterData.model';
 
 //Datos de prueba
 export interface GithubUser {
@@ -19,93 +22,14 @@ export interface GithubUser {
 @Injectable({
   providedIn: 'root',
 })
-/*
 export class AuthService {
   private apiUrl = `${enviroment.apiUrls.usuarios}/auth/login`;
   private registerUrl = `${enviroment.apiUrls.usuarios}/auth/register`;
   private userUrl = `${enviroment.apiUrls.usuarios}/auth/me`;
-  constructor(private http: HttpClient) {}
-
-  login(credentials: { correo: string; clave: string }): Observable<any> {
-    console.log('Login payload:', credentials);
-
-    return this.http.post<{ token: string }>(this.apiUrl, credentials, {
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  register(usuario: Usuario): Observable<ResultadoResponse> {
-    const formData = new FormData();
-
-    formData.append('nombres', usuario.nombres);
-    formData.append('apePaterno', usuario.apePaterno);
-    formData.append('apeMaterno', usuario.apeMaterno);
-    formData.append('correo', usuario.correo);
-    formData.append('clave', usuario.clave);
-    formData.append('tipoDoc', usuario.tipoDoc);
-    formData.append('nroDoc', usuario.nroDoc);
-    formData.append('direccion', usuario.direccion);
-    formData.append('telefono', usuario.telefono);
-    formData.append(
-      'distrito.idDistrito',
-      usuario.distrito.idDistrito.toString(),
-    );
-
-    if (usuario.imagenMultipart) {
-      formData.append('imagenMultipart', usuario.imagenMultipart);
-    }
-
-    return this.http.post<ResultadoResponse>(this.registerUrl, formData);
-  }
-
-  loginWithGithub(code: string): Observable<GithubUser> {
-    return this.http.post<GithubUser>(`${this.apiUrl}/github?code=${code}`, {});
-  }
-
-  getUsuario(): Observable<any> {
-    const token = this.getToken();
-    if (!token) throw new Error('No token found');
-
-    return this.http.get(this.userUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  }
-
-  saveToken(token: string): void {
-    localStorage.setItem('auth_token', token);
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem('auth_token');
-  }
-
-  getRolesFromToken(): string[] {
-    const token = this.getToken();
-    if (!token) {
-      return [];
-    }
-    const decoded: any = jwtDecode(token);
-    return decoded.roles || [];
-  }
-
-  isLoggedIn(): boolean {
-    return this.getToken() !== null;
-  }
-
-  logout(): void {
-    localStorage.removeItem('auth_token');
-  }
-}*/
-export class AuthService {
-  private apiUrl = `${enviroment.apiUrls.usuarios}/auth/login`;
-  private registerUrl = `${enviroment.apiUrls.usuarios}/auth/register`;
-  private userUrl = `${enviroment.apiUrls.usuarios}/auth/me`;
+  private completarRegistroUrl = `${enviroment.apiUrls.usuarios}/auth/social/register`;
 
   constructor(private http: HttpClient) {
-    console.log('🔧 [AUTH SERVICE] Inicializado');
-    console.log('🔧 [AUTH SERVICE] API URL:', this.apiUrl);
+    console.log(' API URL:', this.apiUrl);
   }
 
   login(
@@ -126,7 +50,7 @@ export class AuthService {
       );
   }
 
-  register(usuario: Usuario): Observable<ResultadoResponse> {
+  register(usuario: Usuario): Observable<ResultadoResponseSinEntidad> {
     console.log('Usuario a registrar:', usuario);
 
     const formData = new FormData();
@@ -149,28 +73,14 @@ export class AuthService {
       formData.append('imagenMultipart', usuario.imagenMultipart);
     }
 
-    return this.http.post<ResultadoResponse>(this.registerUrl, formData).pipe(
-      tap((response) => {
-        console.log('Registro exitoso, respuesta:', response);
-      }),
-      catchError((error) => {
-        console.error('Error en registro:', error);
-        throw error;
-      }),
-    );
-  }
-
-  loginWithGithub(code: string): Observable<GithubUser> {
-    console.log('Código:', code);
-
     return this.http
-      .post<GithubUser>(`${this.apiUrl}/github?code=${code}`, {})
+      .post<ResultadoResponseSinEntidad>(this.registerUrl, formData)
       .pipe(
         tap((response) => {
-          console.log(' Login con GitHub exitoso:', response);
+          console.log('Registro exitoso, respuesta:', response);
         }),
         catchError((error) => {
-          console.error('Error en login con GitHub:', error);
+          console.error('Error en registro:', error);
           throw error;
         }),
       );
@@ -236,5 +146,29 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('auth_token');
+  }
+
+  completarRegistroSocial(
+    request: RegistroSocialRequest,
+  ): Observable<ResultadoResponse<SocialRegisterData>> {
+    console.log('Completando registro social:', request);
+
+    return this.http
+      .post<ResultadoResponse<SocialRegisterData>>(
+        this.completarRegistroUrl,
+        request,
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      )
+      .pipe(
+        tap((response) => {
+          console.log('Registro social completado:', response);
+        }),
+        catchError((error) => {
+          console.error('Error completando registro:', error);
+          throw error;
+        }),
+      );
   }
 }
