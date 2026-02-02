@@ -22,4 +22,5 @@ export class MenuClienteService {
       responseType: 'blob',
     });
   }
+
 }

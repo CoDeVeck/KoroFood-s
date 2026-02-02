@@ -1,0 +1,36 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Zona } from '../../shared/enums/Zona';
+import { Observable } from 'rxjs';
+import { MesaDto } from '../../shared/dto/mesaDto';
+import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
+import { enviroment } from '../../../enviroments/enviroment';
+
+
+
+@Injectable({
+  providedIn: 'root',
+})
+export class MesasServiceService {
+
+  private baseUrl = `${enviroment.apiUrls.menu}/mesas/feign`;
+  private baseUrlService = `${enviroment.apiUrls.menu}/mesa`;
+    
+  constructor(private http: HttpClient) {}
+
+  obtenerMesasPorZona(
+    zona: Zona,
+    cantidadPersonas?: number,
+  ): Observable<ResultadoResponse<MesaDto[]>> {
+    let params: any = {};
+
+    if (cantidadPersonas) {
+      params.cantidadPersonas = cantidadPersonas;
+    }
+
+    return this.http.get<ResultadoResponse<MesaDto[]>>(
+      `${this.baseUrl}/zona/${zona}`,
+      { params },
+    );
+  }
+}

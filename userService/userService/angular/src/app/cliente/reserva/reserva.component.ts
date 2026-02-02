@@ -25,7 +25,7 @@ export class ReservaComponent implements OnInit {
 
   // Paso 1: Personas
   personas: number = 1;
-  quickNumbers: number[] = [1, 2, 4, 6];
+  quickNumbers: number[] = [1, 2, 3, 4];
 
   // Paso 2: Fecha
   currentMonth: Date = new Date();

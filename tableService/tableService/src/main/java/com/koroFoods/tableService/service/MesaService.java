@@ -2,7 +2,6 @@ package com.koroFoods.tableService.service;
 
 import com.koroFoods.tableService.dto.MesaDtoFeign;
 import com.koroFoods.tableService.dto.ResultadoResponse;
-import com.koroFoods.tableService.enums.EstadoMesa;
 import com.koroFoods.tableService.enums.Zona;
 import com.koroFoods.tableService.model.Mesa;
 import com.koroFoods.tableService.repository.IMesaRepository;
@@ -27,19 +26,48 @@ public class MesaService {
         return ResultadoResponse.success("Mesa encontrada", dto);
     }
 
-    public ResultadoResponse<List<MesaDtoFeign>> obtenerMesasPorZona(Zona zona) {
+    public ResultadoResponse<List<MesaDtoFeign>> obtenerMesasPorZona(
+            Zona zona, 
+            Integer cantidadPersonas) {
+
+        Integer capacidadRequerida = null;
+        if (cantidadPersonas != null) {
+            capacidadRequerida = calcularCapacidadPar(cantidadPersonas);
+        }
+        
+        final Integer capacidadFinal = capacidadRequerida;
 
         List<MesaDtoFeign> mesas = mesaRepository.findByZonaAndActivoTrue(zona)
                 .stream()
+                .filter(mesa -> {
+                    if (capacidadFinal != null) {
+                        return Integer.valueOf(mesa.getCapacidad()).equals(capacidadFinal);
+                    }
+                    return true;
+                })
                 .map(this::convertirAMesaFeign)
                 .toList();
 
-        return ResultadoResponse.success(
-                "Mesas encontradas en zona " + zona,
-                mesas
-        );
+        String mensaje = cantidadPersonas != null 
+                ? String.format("Mesas encontradas en zona %s con capacidad para %d personas", 
+                        zona, cantidadPersonas)
+                : "Mesas encontradas en zona " + zona;
+
+        return ResultadoResponse.success(mensaje, mesas);
     }
-    
+
+    private Integer calcularCapacidadPar(Integer cantidadPersonas) {
+        if (cantidadPersonas == null || cantidadPersonas <= 0) {
+            return null;
+        }
+        
+        if (cantidadPersonas % 2 == 0) {
+            return cantidadPersonas;
+        }
+        
+        return cantidadPersonas + 1;
+    }
+
     public ResultadoResponse<List<MesaDtoFeign>> obtenerMesasPorIds(List<Integer> ids) {
         List<MesaDtoFeign> mesas = mesaRepository.findAllById(ids)
                 .stream()
