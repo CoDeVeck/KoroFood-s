@@ -11,6 +11,7 @@
     </div>
   </div>
 </section>
+
 <section class="reservation-section">
   <div class="container">
     <!-- Stepper -->
@@ -87,8 +88,45 @@
           <button class="btn-continue" (click)="nextStep()">Continuar</button>
         </div>
 
-        <!-- PASO 2: Fecha -->
+        <!-- PASO 2: Mesa -->
         <div *ngIf="currentStep === 2" class="step-content">
+          <h2 class="step-title">Selecciona tu mesa</h2>
+
+          <!-- Selector de Zona -->
+          <div class="zona-selector">
+            <button
+              *ngFor="let zona of zonas"
+              class="zona-btn"
+              [class.active]="zonaSeleccionada === zona"
+              (click)="seleccionarZona(zona)"
+            >
+              Zona {{ zona }}
+            </button>
+          </div>
+
+          <!-- Componente de Mesas -->
+          <app-mesa-selector
+            [mesas]="mesasDisponibles"
+            [isLoading]="cargandoMesas"
+            [tipoVista]="'normal'"
+            [mensaje]="mensajeMesas"
+            (mesaSeleccionada)="onMesaSeleccionada($event)"
+          ></app-mesa-selector>
+
+          <div class="action-buttons">
+            <button class="btn-back" (click)="previousStep()">Atrás</button>
+            <button
+              class="btn-continue"
+              [disabled]="!mesaSeleccionada"
+              (click)="nextStep()"
+            >
+              Continuar
+            </button>
+          </div>
+        </div>
+
+        <!-- PASO 3: Fecha -->
+        <div *ngIf="currentStep === 3" class="step-content">
           <h2 class="step-title">Selecciona la fecha</h2>
 
           <div class="calendar">
@@ -116,17 +154,20 @@
             </div>
           </div>
 
-          <button
-            class="btn-continue"
-            [disabled]="!selectedDate"
-            (click)="nextStep()"
-          >
-            Continuar
-          </button>
+          <div class="action-buttons">
+            <button class="btn-back" (click)="previousStep()">Atrás</button>
+            <button
+              class="btn-continue"
+              [disabled]="!selectedDate"
+              (click)="nextStep()"
+            >
+              Continuar
+            </button>
+          </div>
         </div>
 
-        <!-- PASO 3: Hora -->
-        <div *ngIf="currentStep === 3" class="step-content">
+        <!-- PASO 4: Hora -->
+        <div *ngIf="currentStep === 4" class="step-content">
           <h2 class="step-title">Selecciona la hora</h2>
 
           <div class="time-grid">
@@ -154,17 +195,20 @@
             </div>
           </div>
 
-          <button
-            class="btn-continue"
-            [disabled]="!selectedTime"
-            (click)="nextStep()"
-          >
-            Continuar
-          </button>
+          <div class="action-buttons">
+            <button class="btn-back" (click)="previousStep()">Atrás</button>
+            <button
+              class="btn-continue"
+              [disabled]="!selectedTime"
+              (click)="nextStep()"
+            >
+              Continuar
+            </button>
+          </div>
         </div>
 
-        <!-- PASO 4: Confirmar -->
-        <div *ngIf="currentStep === 4" class="step-content">
+        <!-- PASO 5: Confirmar -->
+        <div *ngIf="currentStep === 5" class="step-content">
           <h2 class="step-title">Confirmar reserva</h2>
 
           <div class="auth-prompt">
@@ -215,6 +259,18 @@
           <span class="summary-icon">👥</span>
           <span class="summary-label">Personas</span>
           <span class="summary-value">{{ personas }}</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-icon">🪑</span>
+          <span class="summary-label">Mesa</span>
+          <span class="summary-value">{{ getMesaNumero() }}</span>
+        </div>
+
+        <div class="summary-item" *ngIf="mesaSeleccionada">
+          <span class="summary-icon">📍</span>
+          <span class="summary-label">Zona</span>
+          <span class="summary-value">{{ getMesaZona() }}</span>
         </div>
 
         <div class="summary-item">

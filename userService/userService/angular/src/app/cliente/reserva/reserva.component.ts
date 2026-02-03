@@ -1,5 +1,13 @@
-import { CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import {
+  MesaItem,
+  MesaSelectorComponent,
+} from './mesa-selector/mesa-selector.component';
+import { MesaDto } from '../../shared/dto/MesaDto';
+import { MesasServiceService } from '../service/mesas-service.service';
+import { Zona } from '../../shared/enums/Zona';
+import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 
 interface CalendarDay {
   day: number;
@@ -16,7 +24,8 @@ interface TimeSlot {
 
 @Component({
   selector: 'app-reserva',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, MesaSelectorComponent],
   templateUrl: './reserva.component.html',
   styleUrl: './reserva.component.css',
 })
@@ -27,13 +36,21 @@ export class ReservaComponent implements OnInit {
   personas: number = 1;
   quickNumbers: number[] = [1, 2, 3, 4];
 
-  // Paso 2: Fecha
+  // Paso 2: Mesa
+  zonas: string[] = ['Z1', 'Z2', 'Z3', 'Z4'];
+  zonaSeleccionada: string = 'Z1';
+  mesasDisponibles: MesaDto[] = [];
+  mesaSeleccionada: MesaDto | null = null;
+  cargandoMesas: boolean = false;
+  mensajeMesas: string = '';
+
+  // Paso 3: Fecha
   currentMonth: Date = new Date();
   weekDays: string[] = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   calendarDays: CalendarDay[] = [];
   selectedDate: Date | null = null;
 
-  // Paso 3: Hora
+  // Paso 4: Hora
   availableTimes: TimeSlot[] = [
     { time: '12:00' },
     { time: '12:30' },
@@ -67,7 +84,10 @@ export class ReservaComponent implements OnInit {
 
   selectedTime: TimeSlot | null = null;
 
-  constructor() {}
+  constructor(private mesasService: MesasServiceService) {
+    // Inyecta tu servicio aquí
+    // private mesasService: MesasServiceService
+  }
 
   ngOnInit(): void {
     this.generateCalendar();
@@ -75,7 +95,14 @@ export class ReservaComponent implements OnInit {
 
   // Navegación de pasos
   nextStep(): void {
-    if (this.currentStep < 4) {
+    if (this.currentStep === 1 && this.personas > 0) {
+      this.currentStep++;
+      this.cargarMesasPorZona(); // Cargar mesas al avanzar al paso 2
+    } else if (this.currentStep === 2 && this.mesaSeleccionada) {
+      this.currentStep++;
+    } else if (this.currentStep === 3 && this.selectedDate) {
+      this.currentStep++;
+    } else if (this.currentStep === 4 && this.selectedTime) {
       this.currentStep++;
     }
   }
@@ -103,7 +130,128 @@ export class ReservaComponent implements OnInit {
     this.personas = num;
   }
 
-  // Paso 2: Calendario
+  // Paso 2: Mesas
+  seleccionarZona(zona: string): void {
+    this.zonaSeleccionada = zona;
+    this.mesaSeleccionada = null;
+    this.cargarMesasPorZona();
+  }
+
+  cargarMesasPorZona(): void {
+    this.cargandoMesas = true;
+    console.log(
+      '🔍 Cargando mesas para:',
+      this.zonaSeleccionada,
+      'personas:',
+      this.personas,
+    );
+
+    this.mesasService
+      .obtenerMesasPorZona(this.zonaSeleccionada as Zona, this.personas)
+      .subscribe({
+        next: (response) => {
+          console.log('✅ Response completo:', response);
+          console.log('📊 Datos:', response.data);
+          console.log('💬 Mensaje:', response.mensaje);
+
+          this.mesasDisponibles = response.data;
+          this.mensajeMesas = response.mensaje!;
+          this.cargandoMesas = false;
+        },
+        error: (error) => {
+          console.error('❌ Error completo:', error);
+          console.error('📍 Status:', error.status);
+          console.error('📍 StatusText:', error.statusText);
+          console.error('📍 URL:', error.url);
+          console.error('📍 Headers:', error.headers);
+
+          this.mesasDisponibles = [];
+          this.mensajeMesas = 'Error al cargar las mesas disponibles';
+          this.cargandoMesas = false;
+        },
+      });
+
+    // Simulación para ejemplo (eliminar cuando uses el servicio real)
+    /*
+    setTimeout(() => {
+      // Simulamos diferentes resultados según la zona
+      if (this.zonaSeleccionada === 'Z1') {
+        this.mesasDisponibles = [
+          {
+            idMesa: 1,
+            numeroMesa: 101,
+            capacidad: 4,
+            tipo: 'Z1',
+            estado: 'LIBRE',
+          },
+          {
+            idMesa: 4,
+            numeroMesa: 104,
+            capacidad: 4,
+            tipo: 'Z1',
+            estado: 'LIBRE',
+          },
+          {
+            idMesa: 7,
+            numeroMesa: 107,
+            capacidad: 4,
+            tipo: 'Z1',
+            estado: 'OCUPADA',
+          },
+          {
+            idMesa: 9,
+            numeroMesa: 109,
+            capacidad: 4,
+            tipo: 'Z1',
+            estado: 'LIBRE',
+          },
+          {
+            idMesa: 11,
+            numeroMesa: 111,
+            capacidad: 4,
+            tipo: 'Z1',
+            estado: 'LIBRE',
+          },
+        ];
+        this.mensajeMesas = `Mesas encontradas en zona ${this.zonaSeleccionada} con capacidad para ${this.personas} personas`;
+      } else if (this.zonaSeleccionada === 'Z2') {
+        this.mesasDisponibles = [
+          {
+            idMesa: 12,
+            numeroMesa: 201,
+            capacidad: 4,
+            tipo: 'Z2',
+            estado: 'LIBRE',
+          },
+          {
+            idMesa: 13,
+            numeroMesa: 202,
+            capacidad: 4,
+            tipo: 'Z2',
+            estado: 'LIBRE',
+          },
+        ];
+        this.mensajeMesas = `2 mesas disponibles en zona ${this.zonaSeleccionada}`;
+      } else {
+        this.mesasDisponibles = [];
+        this.mensajeMesas = `No hay mesas disponibles en zona ${this.zonaSeleccionada}`;
+      }
+      this.cargandoMesas = false;
+    }, 1000);
+  
+
+  */
+  }
+
+  onMesaSeleccionada(mesa: MesaItem): void {
+    // Solo aceptamos MesaDto en este caso
+    if ('estado' in mesa && 'tipo' in mesa) {
+      this.mesaSeleccionada = mesa as MesaDto;
+      console.log('Mesa seleccionada:', mesa);
+    }
+  }
+
+  // Paso 3: Calendario
   generateCalendar(): void {
     const year = this.currentMonth.getFullYear();
     const month = this.currentMonth.getMonth();
@@ -132,7 +280,6 @@ export class ReservaComponent implements OnInit {
     // Días del mes actual
     for (let i = 1; i <= lastDateOfMonth; i++) {
       const date = new Date(year, month, i);
-      const isToday = new Date().toDateString() === date.toDateString();
       const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
 
       this.calendarDays.push({
@@ -218,9 +365,21 @@ export class ReservaComponent implements OnInit {
     return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]}`;
   }
 
-  // Paso 3: Hora
+  // Paso 4: Hora
   selectTime(time: TimeSlot): void {
     if (time.unavailable) return;
     this.selectedTime = time;
+  }
+
+  // Obtener número de mesa para el resumen
+  getMesaNumero(): string {
+    return this.mesaSeleccionada
+      ? `#${this.mesaSeleccionada.numeroMesa}`
+      : 'No seleccionada'; 
+  }
+
+  // Obtener zona de la mesa para el resumen
+  getMesaZona(): string {
+    return this.mesaSeleccionada ? this.mesaSeleccionada.tipo : '-';
   }
 }

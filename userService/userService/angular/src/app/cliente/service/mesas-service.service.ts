@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Zona } from '../../shared/enums/Zona';
 import { Observable } from 'rxjs';
-import { MesaDto } from '../../shared/dto/mesaDto';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 import { enviroment } from '../../../enviroments/enviroment';
+import { MesaDto } from '../../shared/dto/MesaDto';
 
 
 
@@ -13,8 +13,8 @@ import { enviroment } from '../../../enviroments/enviroment';
 })
 export class MesasServiceService {
 
-  private baseUrl = `${enviroment.apiUrls.menu}/mesas/feign`;
-  private baseUrlService = `${enviroment.apiUrls.menu}/mesa`;
+  private baseUrl = `${enviroment.apiUrls.mesas}/mesa/feign`;
+  private baseUrlService = `${enviroment.apiUrls.mesas}/mesa`;
     
   constructor(private http: HttpClient) {}
 

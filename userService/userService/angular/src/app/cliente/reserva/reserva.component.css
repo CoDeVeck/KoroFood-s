@@ -74,26 +74,6 @@
   font-weight: bold;
 }
 
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 3rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1.1rem;
-  }
-}
-
-@media (max-width: 576px) {
-  .hero-title {
-    font-size: 2.5rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1rem;
-  }
-}
-
 .reservation-section {
   background: #FBF8F3;
   padding: 60px 20px;
@@ -203,6 +183,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -289,7 +270,42 @@
   border-color: #C67C4E;
 }
 
-/* PASO 2: Calendario */
+/* PASO 2: Selector de Zona */
+.zona-selector {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.zona-btn {
+  padding: 12px 24px;
+  background: #F4EDE4;
+  border: 2px solid #E8DDD0;
+  border-radius: 25px;
+  color: #C67C4E;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+}
+
+.zona-btn:hover {
+  border-color: #C67C4E;
+  background: #FFF5F0;
+  transform: translateY(-2px);
+}
+
+.zona-btn.active {
+  background: #C67C4E;
+  color: white;
+  border-color: #C67C4E;
+  box-shadow: 0 4px 12px rgba(198, 124, 78, 0.3);
+}
+
+/* PASO 3: Calendario */
 .calendar {
   max-width: 600px;
   margin: 0 auto;
@@ -363,8 +379,8 @@
 }
 
 .calendar-day.selected {
-  background: #F4C2C2;
-  color: #D63384;
+  background: #C67C4E;
+  color: white;
   font-weight: 600;
 }
 
@@ -379,7 +395,7 @@
   background: transparent;
 }
 
-/* PASO 3: Horarios */
+/* PASO 4: Horarios */
 .time-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -405,9 +421,9 @@
 }
 
 .time-btn.selected {
-  background: #F4C2C2;
-  border-color: #F4C2C2;
-  color: #D63384;
+  background: #C67C4E;
+  border-color: #C67C4E;
+  color: white;
   font-weight: 600;
 }
 
@@ -452,7 +468,7 @@
   background: #F4C2C2;
 }
 
-/* PASO 4: Confirmar */
+/* PASO 5: Confirmar */
 .auth-prompt {
   background: #F4EDE4;
   padding: 40px;
@@ -594,9 +610,11 @@
   font-weight: 700;
 }
 
+/* Botones de Acción */
 .action-buttons {
   display: flex;
   gap: 15px;
+  margin-top: 30px;
 }
 
 .btn-back {
@@ -614,6 +632,7 @@
 
 .btn-back:hover {
   background: #E8DDD0;
+  transform: translateY(-2px);
 }
 
 .btn-confirm {
@@ -631,11 +650,12 @@
 
 .btn-confirm:hover {
   background: #45A049;
+  transform: translateY(-2px);
 }
 
 /* Botón Continuar */
 .btn-continue {
-  width: 100%;
+  flex: 2;
   padding: 15px;
   background: #C67C4E;
   color: white;
@@ -645,7 +665,6 @@
   font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 30px;
 }
 
 .btn-continue:hover:not(:disabled) {
@@ -657,6 +676,7 @@
 .btn-continue:disabled {
   background: #CCC;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* Summary Card */
@@ -665,6 +685,7 @@
   border-radius: 20px;
   padding: 30px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: sticky;
   top: 20px;
 }
 
@@ -754,9 +775,16 @@
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+  .content-wrapper {
+    margin: 0rem 4rem;
+  }
+}
+
 @media (max-width: 1024px) {
   .content-wrapper {
     grid-template-columns: 1fr;
+    margin: 0rem 2rem;
   }
 
   .summary-card {
@@ -767,6 +795,10 @@
 @media (max-width: 768px) {
   .hero-title {
     font-size: 2.5rem;
+  }
+
+  .content-wrapper {
+    margin: 0;
   }
 
   .stepper {
@@ -794,6 +826,20 @@
   .payment-methods {
     grid-template-columns: 1fr;
   }
+
+  .zona-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .btn-back,
+  .btn-continue,
+  .btn-confirm {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -811,5 +857,13 @@
 
   .time-grid {
     gap: 10px;
+  }
+
+  .zona-selector {
+    flex-direction: column;
+  }
+
+  .zona-btn {
+    width: 100%;
   }
 }
