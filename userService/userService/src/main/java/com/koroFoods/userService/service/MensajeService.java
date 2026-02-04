@@ -22,7 +22,6 @@ public class MensajeService {
     }
 
 
-
     public Mensaje guardarMensaje(Mensaje request) {
         Mensaje mensajeGuardado = new Mensaje();
 
