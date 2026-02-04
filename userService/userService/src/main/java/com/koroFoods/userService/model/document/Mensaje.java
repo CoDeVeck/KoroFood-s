@@ -10,14 +10,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 @Document(collection = "mensajes")
-@Getter @Setter
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Mensaje {
 
     @Id
     private String id;
-    private String chatId;
+    private Integer chatId;
     private Integer emisorId;
     private Integer receptorId;
     private String contenido;
