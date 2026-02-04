@@ -127,6 +127,13 @@
             <version>2.2.0</version>
         </dependency>
 
+        <!-- MONGO_DB -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
+
     </dependencies>
 
     <!-- SPRING CLOUD BOM -->
