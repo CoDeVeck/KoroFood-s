@@ -382,9 +382,14 @@
                   class="form-input"
                   placeholder="Documento de Identidad"
                   formControlName="nroDoc"
+                  [class.is-invalid]="isFieldInvalid('nroDoc')"
                   name="nroDoc"
+                  maxlength="8"
                   required
                 />
+                <div class="error-message" *ngIf="isFieldInvalid('nroDoc')">
+                  {{ getErrorMessage("nroDoc") }}
+                </div>
               </div>
 
               <div class="form-group">
@@ -404,9 +409,14 @@
                   class="form-input"
                   placeholder="Telefono"
                   formControlName="telefono"
+                  [class.is-invalid]="isFieldInvalid('telefono')"
                   name="telefono"
+                  maxlength="9"
                   required
                 />
+                <div class="error-message" *ngIf="isFieldInvalid('telefono')">
+                  {{ getErrorMessage("telefono") }}
+                </div>
               </div>
 
               <div class="form-group">

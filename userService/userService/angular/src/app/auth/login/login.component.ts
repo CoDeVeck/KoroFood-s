@@ -149,10 +149,26 @@ export class LoginComponent implements OnInit {
         ],
       ],
       tipoDoc: ['', Validators.required],
-      nroDoc: ['', [Validators.required, Validators.pattern(/^[0-9]{8}$/)]],
+      nroDoc: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^[0-9]{8}$/),
+          Validators.minLength(2),
+          Validators.maxLength(8),
+        ],
+      ],
       direccion: ['', [Validators.required, Validators.maxLength(50)]],
       idDistrito: ['', [Validators.required]],
-      telefono: ['', [Validators.required, Validators.pattern(/^[0-9]{9}$/)]],
+      telefono: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^[0-9]{9}$/),
+          Validators.minLength(2),
+          Validators.maxLength(9),
+        ],
+      ],
     });
 
     //Formulario del Login
@@ -219,9 +235,8 @@ export class LoginComponent implements OnInit {
       this.authStateSubscription = this.authService.authState.subscribe({
         next: (socialUser: SocialUser | null) => {
           if (socialUser) {
-            console.log('👤 Usuario Google detectado:', socialUser);
+            console.log('Usuario Google detectado:', socialUser);
 
-            // Obtener el idToken
             const idToken = (socialUser as any).idToken;
 
             if (!idToken) {
@@ -230,7 +245,6 @@ export class LoginComponent implements OnInit {
               return;
             }
 
-            // Enviar al backend
             this.handleGoogleLogin(idToken);
           }
         },
@@ -321,6 +335,8 @@ export class LoginComponent implements OnInit {
           this.socialAuth.saveToken(data.token);
 
           this.showSocialRegisterModal = false;
+          this.tempSocialData = null;
+          this.tempToken = null;
 
           this.completarLoginYRedirigir();
         } else {
@@ -331,7 +347,6 @@ export class LoginComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error completando registro:', error);
         AlertIziToast.error(
           'Error',
           error.error?.mensaje || 'Error al completar el registro',
@@ -355,25 +370,26 @@ export class LoginComponent implements OnInit {
 
         AlertIziToast.success('¡Bienvenido!', `Hola ${usuario.nombres}`);
 
+        //MODIFICAR LAS RUTAS DESPUES DEL LOGIN A DONDE SE VAN A REDIRIGIR SEGUN SUS ENDOPOINTS
         switch (descripcion) {
           case 'A':
-            this.router.navigate(['/admin']);
+            this.router.navigate(['/admin/dashboard']);
             break;
           case 'C':
-            this.router.navigate(['/cliente']);
+            this.router.navigate(['/cliente/inicio']);
             break;
           case 'R':
             this.router.navigate(['/recepcionista']);
             break;
           case 'M':
-            this.router.navigate(['/mesero']);
+            this.router.navigate(['/mesero/panel']);
             break;
           default:
             this.router.navigate(['/auth/login']);
         }
       },
       error: (error) => {
-        console.error('❌ Error al obtener usuario:', error);
+        console.error('Error al obtener usuario:', error);
         AlertIziToast.error('Error', 'No se pudo obtener datos del usuario');
       },
     });
@@ -424,6 +440,7 @@ export class LoginComponent implements OnInit {
   //REGISTRO DE UNA CUENTA NUEVA
   onSignUp(): void {
     if (this.registerForm.invalid) {
+      this.markFormGroupTouched(this.registerForm);
       AlertIziToast.error('Error', 'Completar todos los campos correctamente');
       return;
     }
@@ -463,7 +480,7 @@ export class LoginComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('❌ Error en registro:', error);
+        console.error('Error en registro:', error);
         AlertIziToast.error(
           'Error',
           error.error?.mensaje || 'Error al registrar',
@@ -489,81 +506,42 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  private validateSignupForm(): boolean {
-    const {
-      nombres,
-      apePaterno,
-      apeMaterno,
-      nroDoc,
-      direccion,
-      telefono,
-      idDistrito,
-      correo,
-      clave,
-    } = this.registerForm.value;
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.keys(formGroup.controls).forEach((key) => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
 
-    if (!nombres || !correo || !clave) {
-      alert('Por favor complete todos los campos');
-      return false;
-    }
-
-    if (!this.isValidEmail(correo)) {
-      alert('Por favor ingrese un email válido');
-      return false;
-    }
-
-    if (clave.length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres');
-      return false;
-    }
-
-    return true;
-  }
-
-  //VALIDACION DEL FORMULARIO DE LOGIN
-  private validateLoginForm(): boolean {
-    const correo = this.loginForm.get('correo')?.value;
-    const clave = this.loginForm.get('clave')?.value;
-
-    if (!correo || !clave) {
-      alert('Por favor complete todos los campos');
-      return false;
-    }
-
-    if (!this.isValidEmail(correo)) {
-      alert('Por favor ingrese un email válido');
-      return false;
-    }
-
-    return true;
-  }
-
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-
-  private resetSignupForm(): void {
-    this.registerForm.reset({
-      nombres: '',
-      apePaterno: '',
-      apeMaterno: '',
-      correo: '',
-      clave: '',
-      nroDoc: '',
-      direccion: '',
-      idDistrito: '',
-      telefono: '',
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
     });
-    this.showPassword = false;
-    this.showConfirmPassword = false;
   }
 
-  private resetLoginForm(): void {
-    this.loginForm.reset({
-      email: '',
-      password: '',
-    });
-    this.showLoginPassword = false;
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.registerForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  getErrorMessage(fieldName: string): string {
+    const field = this.registerForm.get(fieldName);
+
+    if (field?.hasError('required')) {
+      return 'Este campo es requerido';
+    }
+    if (field?.hasError('minlength')) {
+      return `Mínimo ${field.errors?.['minlength'].requiredLength} caracteres`;
+    }
+    if (field?.hasError('maxlength')) {
+      return `Máximo ${field.errors?.['maxlength'].requiredLength} caracteres`;
+    }
+    if (field?.hasError('pattern')) {
+      if (fieldName === 'nroDoc') {
+        return 'Debe tener 8 dígitos';
+      }
+      if (fieldName === 'telefono') {
+        return 'Debe tener 9 dígitos';
+      }
+    }
+    return '';
   }
 }

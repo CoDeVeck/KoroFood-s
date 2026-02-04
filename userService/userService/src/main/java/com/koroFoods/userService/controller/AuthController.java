@@ -159,8 +159,8 @@ public class AuthController {
             @RequestBody RegistroSocialRequest request
             ){
         try {
-            ResultadoResponse<?> resultado = usuarioService.registraUsuarioSocial(request);
 
+            ResultadoResponse<?> resultado = usuarioService.registraUsuarioSocial(request);
             if (resultado.isValor()) {
                 return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
             } else {

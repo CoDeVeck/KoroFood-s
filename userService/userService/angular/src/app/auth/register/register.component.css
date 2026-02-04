@@ -1,3 +1,12 @@
+
+.modal-container::-webkit-scrollbar {
+  display: none;
+}
+
+.modal-container {
+  -ms-overflow-style: none;  
+  scrollbar-width: none; 
+}
 /* Overlay del modal */
 .modal-overlay {
   position: fixed;
@@ -12,6 +21,7 @@
   z-index: 1000;
   padding: 1rem;
   overflow-y: auto;
+
 }
 
 /* Contenedor del modal */
@@ -293,4 +303,30 @@ select.form-control {
   .btn {
     width: 100%;
   }
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.toggle-password:hover {
+  opacity: 0.7;
+}
+
+.toggle-password svg {
+  display: block;
+  width: 20px;
+  height: 20px;
 }

@@ -190,9 +190,9 @@ public class UsuarioService  {
             nuevoUsuario.setNombres(request.getNombres());
             nuevoUsuario.setImagen(request.getImagen());
 
+            nuevoUsuario.setCorreo(request.getCorreo());
             nuevoUsuario.setApePaterno(request.getApePaterno());
             nuevoUsuario.setApeMaterno(request.getApeMaterno());
-            nuevoUsuario.setCorreo(request.getCorreo());
             nuevoUsuario.setTipoDoc(request.getTipoDocumento());
             nuevoUsuario.setNroDoc(request.getNroDoc());
             nuevoUsuario.setTelefono(request.getTelefono());
@@ -213,17 +213,31 @@ public class UsuarioService  {
 
             Usuario usuarioGuardado = usuarioRepository.save(nuevoUsuario);
 
-            List<String> roles = List.of(usuarioGuardado.getRol().getDescripcion());
+            if (usuarioGuardado.getRol() == null) {
+                usuarioGuardado = usuarioRepository.findById(usuarioGuardado.getIdUsuario())
+                        .orElseThrow(() -> new RuntimeException("Usuario no encontrado después de guardar"));
+            }
+
+            String rolDescripcion = "C";
+            if (usuarioGuardado.getRol() != null && usuarioGuardado.getRol().getDescripcion() != null) {
+                rolDescripcion = usuarioGuardado.getRol().getDescripcion();
+            }
+
+            List<String> roles = List.of(rolDescripcion);
             String token = jwtUtil.generateToken(request.getCorreo(), roles);
 
+            Map<String, Object> data = Map.of(
+                    "token", token,
+                    "usuario", usuarioGuardado
+            );
+
             return ResultadoResponse.success(
-                    "Usuario registrado exitosamente",
-                    Map.of("token", token, "usuario", usuarioGuardado)
+                    "Usuario registrado exitosamente", data
             );
 
 
         } catch (Exception e) {
-            throw new RuntimeException("Error al completar el registro: " + e);
+            throw new RuntimeException("Error al completar el registro: " + e.getMessage());
         }
     }
 
