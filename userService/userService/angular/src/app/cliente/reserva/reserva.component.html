@@ -208,6 +208,7 @@
         </div>
 
         <!-- PASO 5: Confirmar -->
+        <!-- PASO 5: Confirmar -->
         <div *ngIf="currentStep === 5" class="step-content">
           <h2 class="step-title">Confirmar reserva</h2>
 
@@ -227,26 +228,164 @@
               <span>Depósito (deducible de la cuenta final)</span>
               <span class="deposit-amount">S/ 15.00</span>
             </div>
+
             <p class="payment-label">Métodos de pago</p>
             <div class="payment-methods">
-              <button class="payment-btn">
+              <button
+                class="payment-btn"
+                [class.active]="metodoPagoSeleccionado === 'tarjeta'"
+                (click)="seleccionarMetodoPago('tarjeta')"
+              >
                 <span class="payment-icon">💳</span>
                 <span>Tarjeta</span>
               </button>
-              <button class="payment-btn">
+              <button
+                class="payment-btn"
+                [class.active]="metodoPagoSeleccionado === 'yape'"
+                (click)="seleccionarMetodoPago('yape')"
+              >
                 <span class="payment-icon yape">Y</span>
                 <span>Yape</span>
               </button>
-              <button class="payment-btn">
+              <button
+                class="payment-btn"
+                [class.active]="metodoPagoSeleccionado === 'plin'"
+                (click)="seleccionarMetodoPago('plin')"
+              >
                 <span class="payment-icon plin">P</span>
                 <span>Plin</span>
               </button>
+            </div>
+
+            <!-- Formulario de Tarjeta -->
+            <div
+              class="payment-form"
+              *ngIf="metodoPagoSeleccionado === 'tarjeta'"
+            >
+              <h4 class="payment-form-title">Datos de la tarjeta</h4>
+
+              <div class="form-group">
+                <label>Número de tarjeta</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  [class.error]="erroresTarjeta.numero"
+                  placeholder="1234 5678 9012 3456"
+                  [(ngModel)]="datosTarjeta.numero"
+                  (input)="formatearNumeroTarjeta($event)"
+                  maxlength="19"
+                />
+                <span class="error-message" *ngIf="erroresTarjeta.numero">
+                  {{ erroresTarjeta.numero }}
+                </span>
+              </div>
+
+              <div class="form-group">
+                <label>Nombre del titular</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  [class.error]="erroresTarjeta.nombre"
+                  placeholder="JUAN PEREZ"
+                  [(ngModel)]="datosTarjeta.nombre"
+                  (blur)="validarNombreTitular()"
+                  style="text-transform: uppercase"
+                />
+                <span class="error-message" *ngIf="erroresTarjeta.nombre">
+                  {{ erroresTarjeta.nombre }}
+                </span>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Fecha de expiración</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    [class.error]="erroresTarjeta.fechaExpiracion"
+                    placeholder="MM/AA"
+                    [(ngModel)]="datosTarjeta.fechaExpiracion"
+                    (input)="formatearFechaExpiracion($event)"
+                    maxlength="5"
+                  />
+                  <span
+                    class="error-message"
+                    *ngIf="erroresTarjeta.fechaExpiracion"
+                  >
+                    {{ erroresTarjeta.fechaExpiracion }}
+                  </span>
+                </div>
+
+                <div class="form-group">
+                  <label>CVV</label>
+                  <input
+                    type="password"
+                    class="form-input"
+                    [class.error]="erroresTarjeta.cvv"
+                    placeholder="123"
+                    [(ngModel)]="datosTarjeta.cvv"
+                    (keypress)="soloNumeros($event)"
+                    (blur)="validarCVV()"
+                    maxlength="4"
+                  />
+                  <span class="error-message" *ngIf="erroresTarjeta.cvv">
+                    {{ erroresTarjeta.cvv }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="card-icons">
+                <span class="card-icon">💳 Visa</span>
+                <span class="card-icon">💳 Mastercard</span>
+                <span class="card-icon">💳 American Express</span>
+              </div>
+            </div>
+
+            <!-- QR de Yape -->
+            <div class="payment-form" *ngIf="metodoPagoSeleccionado === 'yape'">
+              <h4 class="payment-form-title">Escanea el código QR con Yape</h4>
+              <div class="qr-container">
+                <img [src]="qrYape" alt="QR Yape" class="qr-code" />
+                <p class="qr-instructions">
+                  Abre tu app de Yape y escanea el código para pagar S/ 15.00
+                </p>
+                <div class="yape-badge">
+                  <span class="yape-icon">Y</span>
+                  <span>Pago mediante Yape</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Número de Plin -->
+            <div class="payment-form" *ngIf="metodoPagoSeleccionado === 'plin'">
+              <h4 class="payment-form-title">Transfiere a este número Plin</h4>
+              <div class="plin-container">
+                <div class="plin-number-display">
+                  <span class="plin-number">{{ numeroPlin }}</span>
+                  <button class="btn-copy" (click)="copiarNumeroPlin()">
+                    📋 Copiar
+                  </button>
+                </div>
+                <p class="plin-instructions">
+                  Monto a transferir: <strong>S/ 15.00</strong>
+                </p>
+                <div class="plin-badge">
+                  <span class="plin-icon">P</span>
+                  <span>Pago mediante Plin</span>
+                </div>
+              </div>
             </div>
           </div>
 
           <div class="action-buttons">
             <button class="btn-back" (click)="previousStep()">Atrás</button>
-            <button class="btn-confirm">Confirmar y Pagar</button>
+            <button
+              class="btn-confirm"
+              [disabled]="!puedeConfirmarPago()"
+              (click)="confirmarPago()"
+            >
+              Confirmar y Pagar
+            </button>
           </div>
         </div>
       </div>

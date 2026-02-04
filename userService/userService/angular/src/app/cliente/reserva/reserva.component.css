@@ -126,6 +126,7 @@
   color: white;
 }
 
+/* FIX: Centrar labels del stepper */
 .step-label {
   position: absolute;
   top: 60px;
@@ -134,6 +135,7 @@
   white-space: nowrap;
   color: #8B7355;
   font-size: 0.9rem;
+  width: max-content;
 }
 
 .step.active .step-label {
@@ -587,6 +589,14 @@
   transform: translateY(-2px);
 }
 
+/* Estado activo de botones de pago */
+.payment-btn.active {
+  border-color: #C67C4E;
+  background: #FFF5F0;
+  box-shadow: 0 4px 12px rgba(198, 124, 78, 0.2);
+  transform: scale(1.05);
+}
+
 .payment-icon {
   font-size: 1.5rem;
   width: 40px;
@@ -608,6 +618,226 @@
   background: #F3E5F5;
   color: #9C27B0;
   font-weight: 700;
+}
+
+/* ========================================
+   FORMULARIOS DE PAGO
+   ======================================== */
+
+.payment-form {
+  background: #F9F9F9;
+  padding: 25px;
+  border-radius: 15px;
+  margin-top: 25px;
+  animation: fadeInDown 0.3s ease;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.payment-form-title {
+  color: #C67C4E;
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Formulario de tarjeta */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: #666;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #E8DDD0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #C67C4E;
+  box-shadow: 0 0 0 3px rgba(198, 124, 78, 0.1);
+}
+
+.form-input.error {
+  border-color: #DC3545;
+}
+
+.error-message {
+  display: block;
+  color: #DC3545;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.card-icons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #E0E0E0;
+}
+
+.card-icon {
+  font-size: 0.9rem;
+  color: #666;
+  padding: 8px 15px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #E8DDD0;
+}
+
+/* QR de Yape */
+.qr-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.qr-code {
+  width: 220px;
+  height: 220px;
+  border: 3px solid #4CAF50;
+  border-radius: 15px;
+  padding: 10px;
+  background: white;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+}
+
+.qr-instructions {
+  color: #666;
+  margin: 20px 0;
+  font-size: 0.95rem;
+}
+
+.yape-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #E8F5E9;
+  padding: 12px 24px;
+  border-radius: 25px;
+  color: #4CAF50;
+  font-weight: 600;
+  margin-top: 15px;
+}
+
+.yape-icon {
+  width: 30px;
+  height: 30px;
+  background: #4CAF50;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* Plin */
+.plin-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.plin-number-display {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  border: 3px solid #9C27B0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(156, 39, 176, 0.2);
+}
+
+.plin-number {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #9C27B0;
+  letter-spacing: 2px;
+}
+
+.btn-copy {
+  padding: 10px 20px;
+  background: #9C27B0;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.btn-copy:hover {
+  background: #7B1FA2;
+  transform: translateY(-2px);
+}
+
+.plin-instructions {
+  color: #666;
+  margin: 15px 0;
+  font-size: 1rem;
+}
+
+.plin-instructions strong {
+  color: #9C27B0;
+  font-size: 1.3rem;
+}
+
+.plin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #F3E5F5;
+  padding: 12px 24px;
+  border-radius: 25px;
+  color: #9C27B0;
+  font-weight: 600;
+  margin-top: 15px;
+}
+
+.plin-icon {
+  width: 30px;
+  height: 30px;
+  background: #9C27B0;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
 }
 
 /* Botones de Acción */
@@ -648,9 +878,15 @@
   transition: all 0.3s ease;
 }
 
-.btn-confirm:hover {
+.btn-confirm:hover:not(:disabled) {
   background: #45A049;
   transform: translateY(-2px);
+}
+
+.btn-confirm:disabled {
+  background: #CCC;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* Botón Continuar */
@@ -839,6 +1075,25 @@
   .btn-continue,
   .btn-confirm {
     width: 100%;
+  }
+
+  /* Responsive para formularios de pago */
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .card-icons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .qr-code {
+    width: 180px;
+    height: 180px;
+  }
+
+  .plin-number {
+    font-size: 1.4rem;
   }
 }
 

@@ -10,7 +10,7 @@ import { Reserva } from '../../shared/model/reserva.model';
   providedIn: 'root',
 })
 export class ReservaServiceService {
-  private baseUrl = `${enviroment.apiUrls.resenas}/reserva`;
+  private baseUrl = `${enviroment.apiUrls.reserva}/reserva`;
 
   constructor(private http: HttpClient) {}
 
