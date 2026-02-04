@@ -58,7 +58,7 @@ INSERT INTO TB_DISTRITO (NOMBRE) VALUES
 
 INSERT INTO TB_USUARIO (NOMBRES, APE_PATERNO, APE_MATERNO, CORREO, CLAVE, TIPO_DOC, NRO_DOC, DIRECCION, TELEFONO, ID_DISTRITO, ID_ROL) VALUES 
 ('Carlos', 'Pérez', 'García', 'carlos.admin@restaurant.com', 'clave123', 'DNI', '12345678', 'Direccion 1', '987654321', 1, 1),
-('María', 'López', 'Martínez', 'maria.cliente@gmail.com', 'clave123', 'DNI', '87654321', 'Direccion 2', '912345678', 2, 2),
+('María', 'López', 'Martínez', 'maria.cliente@gmail.com', 'clave123', 'DNI', '87654321', 'Direccion 2', '912345678', 2, 4),
 ('Juan', 'Rodríguez', 'Silva', 'juan.mesero@restaurant.com', 'clave123', 'DNI', '45678912', 'Direccion 3', '923456789', 3, 3),
-('Ana', 'Torres', 'Vega', 'ana.cajera@restaurant.com', 'clave123', 'DNI', '78945612', 'Direccion 4', '934567890', 1, 4),
-('Pedro', 'Sánchez', 'Ramos', 'pedro.cliente@gmail.com', 'clave123', 'DNI', '32165498', 'Direccion 5', '945678901', 4, 2);
+('Ana', 'Torres', 'Vega', 'ana.recepcionista@restaurant.com', 'clave123', 'DNI', '78945612', 'Direccion 4', '934567890', 1, 2),
+('Pedro', 'Sánchez', 'Ramos', 'pedro.cliente@gmail.com', 'clave123', 'DNI', '32165498', 'Direccion 5', '945678901', 4, 4);

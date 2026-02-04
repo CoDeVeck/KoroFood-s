@@ -1,10 +1,10 @@
 import { EstadoMesa } from "../enums/estadoMesa.enum";
-import { TipoMesa } from "../enums/tipoMesa.enum";
+import { Zona } from "../enums/Zona";
 
 export interface Mesa{
     idMesa: number;
     numeroMesa: number;
     capacidad: number;
-    tipo: TipoMesa;
+    tipo: Zona;
     estado: EstadoMesa; 
 }
