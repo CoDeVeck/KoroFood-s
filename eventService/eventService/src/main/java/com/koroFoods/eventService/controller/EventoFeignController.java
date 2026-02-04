@@ -47,9 +47,6 @@ public class EventoFeignController {
 		ResultadoResponse<EventoDtoFeign> event = eventoService.getEventById(id);
 		return ResponseEntity.ok(event);
 	}
-	
-	
-	
 
 	@GetMapping("/validar/{id}")
 	public ResponseEntity<ResultadoResponse<EventoFeignReserva>> obtenerEventoValidado(@PathVariable Integer id) {
