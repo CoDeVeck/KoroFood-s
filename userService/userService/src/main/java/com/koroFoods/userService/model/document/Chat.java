@@ -9,19 +9,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Document(collection = "mensajes")
+@Document(collection = "chats")
 @Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Mensaje {
+public class Chat {
 
     @Id
     private String id;
-    private String chatId;
     private Integer emisorId;
     private Integer receptorId;
-    private String contenido;
-    private LocalDateTime fechaMandado;
-    private boolean leido;
-
+    private String ultimoMensaje;
+    private LocalDateTime fechaUltimoMensaje;
 }
