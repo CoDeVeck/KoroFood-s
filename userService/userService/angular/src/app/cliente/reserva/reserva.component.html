@@ -208,21 +208,26 @@
         </div>
 
         <!-- PASO 5: Confirmar -->
-        <!-- PASO 5: Confirmar -->
         <div *ngIf="currentStep === 5" class="step-content">
           <h2 class="step-title">Confirmar reserva</h2>
 
-          <div class="auth-prompt">
+          <!-- Prompt de autenticación - SOLO SI NO HAY SESIÓN -->
+          <div class="auth-prompt" *ngIf="!usuarioAutenticado">
             <div class="auth-icon">👤</div>
             <h3>Inicia sesión para continuar</h3>
             <p>Necesitas una cuenta para completar tu reserva</p>
             <div class="auth-buttons">
-              <button class="btn-primary">Iniciar Sesión</button>
-              <button class="btn-secondary">Registrarse</button>
+              <button class="btn-primary" (click)="irALogin()">
+                Iniciar Sesión
+              </button>
+              <button class="btn-secondary" (click)="irARegistro()">
+                Registrarse
+              </button>
             </div>
           </div>
 
-          <div class="deposit-info">
+          <!-- Información de depósito y métodos de pago -->
+          <div class="deposit-info" *ngIf="usuarioAutenticado">
             <h3 class="deposit-title">Depósito requerido</h3>
             <div class="deposit-detail">
               <span>Depósito (deducible de la cuenta final)</span>
@@ -273,6 +278,7 @@
                   placeholder="1234 5678 9012 3456"
                   [(ngModel)]="datosTarjeta.numero"
                   (input)="formatearNumeroTarjeta($event)"
+                  (blur)="validarNumeroTarjeta()"
                   maxlength="19"
                 />
                 <span class="error-message" *ngIf="erroresTarjeta.numero">
@@ -288,6 +294,7 @@
                   [class.error]="erroresTarjeta.nombre"
                   placeholder="JUAN PEREZ"
                   [(ngModel)]="datosTarjeta.nombre"
+                  (input)="validarNombreTitular()"
                   (blur)="validarNombreTitular()"
                   style="text-transform: uppercase"
                 />
@@ -306,6 +313,7 @@
                     placeholder="MM/AA"
                     [(ngModel)]="datosTarjeta.fechaExpiracion"
                     (input)="formatearFechaExpiracion($event)"
+                    (blur)="validarFechaExpiracion()"
                     maxlength="5"
                   />
                   <span
@@ -325,6 +333,7 @@
                     placeholder="123"
                     [(ngModel)]="datosTarjeta.cvv"
                     (keypress)="soloNumeros($event)"
+                    (input)="validarCVV()"
                     (blur)="validarCVV()"
                     maxlength="4"
                   />
@@ -381,10 +390,10 @@
             <button class="btn-back" (click)="previousStep()">Atrás</button>
             <button
               class="btn-confirm"
-              [disabled]="!puedeConfirmarPago()"
+              [disabled]="!puedeConfirmarPago() || procesandoPago"
               (click)="confirmarPago()"
             >
-              Confirmar y Pagar
+              {{ procesandoPago ? "Procesando..." : "Confirmar y Pagar" }}
             </button>
           </div>
         </div>
