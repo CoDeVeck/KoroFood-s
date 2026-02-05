@@ -25,7 +25,7 @@ public class ReservaController {
 	private final ReservaService reservaService;
 
 	// cuando el usuario ya escogio una hora
-	@GetMapping("/desocupado")
+	@GetMapping("/ocupada")
 	public ResultadoResponse<Boolean> validarReserva(@RequestParam Integer mesaId,
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaHora,
 			@RequestParam(defaultValue = "false") boolean esEvento) {

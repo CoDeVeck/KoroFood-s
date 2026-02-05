@@ -2,7 +2,8 @@
   <div class="hero-content">
     <h1 class="hero-title">Reservar Mesa</h1>
     <p class="hero-subtitle">
-      Reserva tu mesa para disfrutar de nuestra exquisita cocina asiática en un ambiente acogedor
+      Reserva tu mesa para disfrutar de nuestra exquisita cocina asiática en un
+      ambiente acogedor
     </p>
     <div class="confirmation-badge">
       <span class="check-icon">✓</span>
@@ -10,28 +11,50 @@
     </div>
   </div>
 </section>
+
 <section class="reservation-section">
   <div class="container">
     <!-- Stepper -->
     <div class="stepper">
-      <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
+      <div
+        class="step"
+        [class.active]="currentStep === 1"
+        [class.completed]="currentStep > 1"
+      >
         <div class="step-number">1</div>
         <div class="step-label">Personas</div>
         <div class="step-line"></div>
       </div>
-      <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
+      <div
+        class="step"
+        [class.active]="currentStep === 2"
+        [class.completed]="currentStep > 2"
+      >
         <div class="step-number">2</div>
+        <div class="step-label">Mesa</div>
+        <div class="step-line"></div>
+      </div>
+      <div
+        class="step"
+        [class.active]="currentStep === 3"
+        [class.completed]="currentStep > 3"
+      >
+        <div class="step-number">3</div>
         <div class="step-label">Fecha</div>
         <div class="step-line"></div>
       </div>
-      <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">
-        <div class="step-number">3</div>
+      <div
+        class="step"
+        [class.active]="currentStep === 4"
+        [class.completed]="currentStep > 4"
+      >
+        <div class="step-number">4</div>
         <div class="step-label">Hora</div>
         <div class="step-line"></div>
       </div>
-      <div class="step" [class.active]="currentStep === 4">
-        <div class="step-number">4</div>
-        <div class="step-label">Confirmar</div>
+      <div class="step" [class.active]="currentStep === 5">
+        <div class="step-number">5</div>
+        <div class="step-label">Resumen</div>
       </div>
     </div>
 
@@ -41,7 +64,7 @@
         <!-- PASO 1: Personas -->
         <div *ngIf="currentStep === 1" class="step-content">
           <h2 class="step-title">¿Para cuántas personas?</h2>
-          
+
           <div class="counter-wrapper">
             <button class="counter-btn" (click)="decrementPersonas()">−</button>
             <div class="counter-display">
@@ -52,11 +75,12 @@
           </div>
 
           <div class="quick-select">
-            <button 
-              *ngFor="let num of quickNumbers" 
-              class="quick-btn" 
+            <button
+              *ngFor="let num of quickNumbers"
+              class="quick-btn"
               [class.active]="personas === num"
-              (click)="setPersonas(num)">
+              (click)="setPersonas(num)"
+            >
               {{ num }}
             </button>
           </div>
@@ -64,10 +88,47 @@
           <button class="btn-continue" (click)="nextStep()">Continuar</button>
         </div>
 
-        <!-- PASO 2: Fecha -->
+        <!-- PASO 2: Mesa -->
         <div *ngIf="currentStep === 2" class="step-content">
+          <h2 class="step-title">Selecciona tu mesa</h2>
+
+          <!-- Selector de Zona -->
+          <div class="zona-selector">
+            <button
+              *ngFor="let zona of zonas"
+              class="zona-btn"
+              [class.active]="zonaSeleccionada === zona"
+              (click)="seleccionarZona(zona)"
+            >
+              Zona {{ zona }}
+            </button>
+          </div>
+
+          <!-- Componente de Mesas -->
+          <app-mesa-selector
+            [mesas]="mesasDisponibles"
+            [isLoading]="cargandoMesas"
+            [tipoVista]="'normal'"
+            [mensaje]="mensajeMesas"
+            (mesaSeleccionada)="onMesaSeleccionada($event)"
+          ></app-mesa-selector>
+
+          <div class="action-buttons">
+            <button class="btn-back" (click)="previousStep()">Atrás</button>
+            <button
+              class="btn-continue"
+              [disabled]="!mesaSeleccionada"
+              (click)="nextStep()"
+            >
+              Continuar
+            </button>
+          </div>
+        </div>
+
+        <!-- PASO 3: Fecha -->
+        <div *ngIf="currentStep === 3" class="step-content">
           <h2 class="step-title">Selecciona la fecha</h2>
-          
+
           <div class="calendar">
             <div class="calendar-header">
               <button class="calendar-nav" (click)="previousMonth()">‹</button>
@@ -80,32 +141,43 @@
             </div>
 
             <div class="calendar-days">
-              <div 
-                *ngFor="let day of calendarDays" 
+              <div
+                *ngFor="let day of calendarDays"
                 class="calendar-day"
                 [class.disabled]="!day.enabled"
                 [class.selected]="day.selected"
                 [class.other-month]="day.otherMonth"
-                (click)="selectDate(day)">
+                (click)="selectDate(day)"
+              >
                 {{ day.day }}
               </div>
             </div>
           </div>
 
-          <button class="btn-continue" [disabled]="!selectedDate" (click)="nextStep()">Continuar</button>
+          <div class="action-buttons">
+            <button class="btn-back" (click)="previousStep()">Atrás</button>
+            <button
+              class="btn-continue"
+              [disabled]="!selectedDate"
+              (click)="nextStep()"
+            >
+              Continuar
+            </button>
+          </div>
         </div>
 
-        <!-- PASO 3: Hora -->
-        <div *ngIf="currentStep === 3" class="step-content">
+        <!-- PASO 4: Hora -->
+        <div *ngIf="currentStep === 4" class="step-content">
           <h2 class="step-title">Selecciona la hora</h2>
-          
+
           <div class="time-grid">
-            <button 
-              *ngFor="let time of availableTimes" 
+            <button
+              *ngFor="let time of availableTimes"
               class="time-btn"
               [class.selected]="selectedTime === time"
               [class.unavailable]="time.unavailable"
-              (click)="selectTime(time)">
+              (click)="selectTime(time)"
+            >
               {{ time.time }}
             </button>
           </div>
@@ -113,22 +185,33 @@
           <div class="alternative-times" *ngIf="alternativeTimes.length > 0">
             <p class="alternative-label">Horarios alternativos disponibles:</p>
             <div class="alternative-grid">
-              <button 
-                *ngFor="let time of alternativeTimes" 
+              <button
+                *ngFor="let time of alternativeTimes"
                 class="alternative-btn"
-                (click)="selectTime(time)">
+                (click)="selectTime(time)"
+              >
                 {{ time.time }}
               </button>
             </div>
           </div>
 
-          <button class="btn-continue" [disabled]="!selectedTime" (click)="nextStep()">Continuar</button>
+          <div class="action-buttons">
+            <button class="btn-back" (click)="previousStep()">Atrás</button>
+            <button
+              class="btn-continue"
+              [disabled]="!selectedTime"
+              (click)="nextStep()"
+            >
+              Continuar
+            </button>
+          </div>
         </div>
 
-        <!-- PASO 4: Confirmar -->
-        <div *ngIf="currentStep === 4" class="step-content">
+        <!-- PASO 5: Confirmar -->
+        <!-- PASO 5: Confirmar -->
+        <div *ngIf="currentStep === 5" class="step-content">
           <h2 class="step-title">Confirmar reserva</h2>
-          
+
           <div class="auth-prompt">
             <div class="auth-icon">👤</div>
             <h3>Inicia sesión para continuar</h3>
@@ -145,26 +228,164 @@
               <span>Depósito (deducible de la cuenta final)</span>
               <span class="deposit-amount">S/ 15.00</span>
             </div>
+
             <p class="payment-label">Métodos de pago</p>
             <div class="payment-methods">
-              <button class="payment-btn">
+              <button
+                class="payment-btn"
+                [class.active]="metodoPagoSeleccionado === 'tarjeta'"
+                (click)="seleccionarMetodoPago('tarjeta')"
+              >
                 <span class="payment-icon">💳</span>
                 <span>Tarjeta</span>
               </button>
-              <button class="payment-btn">
+              <button
+                class="payment-btn"
+                [class.active]="metodoPagoSeleccionado === 'yape'"
+                (click)="seleccionarMetodoPago('yape')"
+              >
                 <span class="payment-icon yape">Y</span>
                 <span>Yape</span>
               </button>
-              <button class="payment-btn">
+              <button
+                class="payment-btn"
+                [class.active]="metodoPagoSeleccionado === 'plin'"
+                (click)="seleccionarMetodoPago('plin')"
+              >
                 <span class="payment-icon plin">P</span>
                 <span>Plin</span>
               </button>
+            </div>
+
+            <!-- Formulario de Tarjeta -->
+            <div
+              class="payment-form"
+              *ngIf="metodoPagoSeleccionado === 'tarjeta'"
+            >
+              <h4 class="payment-form-title">Datos de la tarjeta</h4>
+
+              <div class="form-group">
+                <label>Número de tarjeta</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  [class.error]="erroresTarjeta.numero"
+                  placeholder="1234 5678 9012 3456"
+                  [(ngModel)]="datosTarjeta.numero"
+                  (input)="formatearNumeroTarjeta($event)"
+                  maxlength="19"
+                />
+                <span class="error-message" *ngIf="erroresTarjeta.numero">
+                  {{ erroresTarjeta.numero }}
+                </span>
+              </div>
+
+              <div class="form-group">
+                <label>Nombre del titular</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  [class.error]="erroresTarjeta.nombre"
+                  placeholder="JUAN PEREZ"
+                  [(ngModel)]="datosTarjeta.nombre"
+                  (blur)="validarNombreTitular()"
+                  style="text-transform: uppercase"
+                />
+                <span class="error-message" *ngIf="erroresTarjeta.nombre">
+                  {{ erroresTarjeta.nombre }}
+                </span>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Fecha de expiración</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    [class.error]="erroresTarjeta.fechaExpiracion"
+                    placeholder="MM/AA"
+                    [(ngModel)]="datosTarjeta.fechaExpiracion"
+                    (input)="formatearFechaExpiracion($event)"
+                    maxlength="5"
+                  />
+                  <span
+                    class="error-message"
+                    *ngIf="erroresTarjeta.fechaExpiracion"
+                  >
+                    {{ erroresTarjeta.fechaExpiracion }}
+                  </span>
+                </div>
+
+                <div class="form-group">
+                  <label>CVV</label>
+                  <input
+                    type="password"
+                    class="form-input"
+                    [class.error]="erroresTarjeta.cvv"
+                    placeholder="123"
+                    [(ngModel)]="datosTarjeta.cvv"
+                    (keypress)="soloNumeros($event)"
+                    (blur)="validarCVV()"
+                    maxlength="4"
+                  />
+                  <span class="error-message" *ngIf="erroresTarjeta.cvv">
+                    {{ erroresTarjeta.cvv }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="card-icons">
+                <span class="card-icon">💳 Visa</span>
+                <span class="card-icon">💳 Mastercard</span>
+                <span class="card-icon">💳 American Express</span>
+              </div>
+            </div>
+
+            <!-- QR de Yape -->
+            <div class="payment-form" *ngIf="metodoPagoSeleccionado === 'yape'">
+              <h4 class="payment-form-title">Escanea el código QR con Yape</h4>
+              <div class="qr-container">
+                <img [src]="qrYape" alt="QR Yape" class="qr-code" />
+                <p class="qr-instructions">
+                  Abre tu app de Yape y escanea el código para pagar S/ 15.00
+                </p>
+                <div class="yape-badge">
+                  <span class="yape-icon">Y</span>
+                  <span>Pago mediante Yape</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Número de Plin -->
+            <div class="payment-form" *ngIf="metodoPagoSeleccionado === 'plin'">
+              <h4 class="payment-form-title">Transfiere a este número Plin</h4>
+              <div class="plin-container">
+                <div class="plin-number-display">
+                  <span class="plin-number">{{ numeroPlin }}</span>
+                  <button class="btn-copy" (click)="copiarNumeroPlin()">
+                    📋 Copiar
+                  </button>
+                </div>
+                <p class="plin-instructions">
+                  Monto a transferir: <strong>S/ 15.00</strong>
+                </p>
+                <div class="plin-badge">
+                  <span class="plin-icon">P</span>
+                  <span>Pago mediante Plin</span>
+                </div>
+              </div>
             </div>
           </div>
 
           <div class="action-buttons">
             <button class="btn-back" (click)="previousStep()">Atrás</button>
-            <button class="btn-confirm">Confirmar y Pagar</button>
+            <button
+              class="btn-confirm"
+              [disabled]="!puedeConfirmarPago()"
+              (click)="confirmarPago()"
+            >
+              Confirmar y Pagar
+            </button>
           </div>
         </div>
       </div>
@@ -172,7 +393,7 @@
       <!-- Resumen (Sidebar) -->
       <div class="summary-card">
         <h3 class="summary-title">Resumen de Reserva</h3>
-        
+
         <div class="summary-item">
           <span class="summary-icon">👥</span>
           <span class="summary-label">Personas</span>
@@ -180,15 +401,31 @@
         </div>
 
         <div class="summary-item">
+          <span class="summary-icon">🪑</span>
+          <span class="summary-label">Mesa</span>
+          <span class="summary-value">{{ getMesaNumero() }}</span>
+        </div>
+
+        <div class="summary-item" *ngIf="mesaSeleccionada">
+          <span class="summary-icon">📍</span>
+          <span class="summary-label">Zona</span>
+          <span class="summary-value">{{ getMesaZona() }}</span>
+        </div>
+
+        <div class="summary-item">
           <span class="summary-icon">📅</span>
           <span class="summary-label">Fecha</span>
-          <span class="summary-value">{{ selectedDate ? formatDate(selectedDate) : 'No seleccionada' }}</span>
+          <span class="summary-value">{{
+            selectedDate ? formatDate(selectedDate) : "No seleccionada"
+          }}</span>
         </div>
 
         <div class="summary-item">
           <span class="summary-icon">🕐</span>
           <span class="summary-label">Hora</span>
-          <span class="summary-value">{{ selectedTime ? selectedTime.time : 'No seleccionada' }}</span>
+          <span class="summary-value">{{
+            selectedTime ? selectedTime.time : "No seleccionada"
+          }}</span>
         </div>
 
         <div class="summary-item">
@@ -200,7 +437,11 @@
         <div class="summary-divider"></div>
 
         <div class="restaurant-info">
-          <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=100&h=100&fit=crop" alt="KoroFood" class="restaurant-image">
+          <img
+            src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=100&h=100&fit=crop"
+            alt="KoroFood"
+            class="restaurant-image"
+          />
           <div class="restaurant-details">
             <h4 class="restaurant-name">KoroFood</h4>
             <p class="restaurant-type">Cocina Asiática</p>

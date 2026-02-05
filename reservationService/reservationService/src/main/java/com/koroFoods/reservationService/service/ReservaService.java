@@ -130,7 +130,7 @@ public class ReservaService {
 	}
 
 	/*
-	 * Reserva Normal----- Horario local (12:00 – 23:00) generarSlots
+	 * Reserva Simple----- Horario local (12:00 – 23:00) generarSlots
 	 * filtrarSlotsDisponibles frontend muestra horas libres usuario elige una
 	 * mesaOcupadaPorReserva (check final)
 	 * 
@@ -175,7 +175,7 @@ public class ReservaService {
 
 		boolean esEvento = idEvento != null;
 
-		// 1️⃣ Validar contra EVENTO_MESA SOLO si es evento
+		// 1️ Validar contra EVENTO_MESA SOLO si es evento
 		if (esEvento) {
 			try {
 			    ResultadoResponse<Boolean> response =
