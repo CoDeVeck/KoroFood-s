@@ -57,8 +57,17 @@ INSERT INTO TB_DISTRITO (NOMBRE) VALUES
 ('Villa María del Triunfo');
 
 INSERT INTO TB_USUARIO (NOMBRES, APE_PATERNO, APE_MATERNO, CORREO, CLAVE, TIPO_DOC, NRO_DOC, DIRECCION, TELEFONO, ID_DISTRITO, ID_ROL) VALUES 
-('Carlos', 'Pérez', 'García', 'carlos.admin@restaurant.com', 'clave123', 'DNI', '12345678', 'Direccion 1', '987654321', 1, 1),
-('María', 'López', 'Martínez', 'maria.cliente@gmail.com', 'clave123', 'DNI', '87654321', 'Direccion 2', '912345678', 2, 4),
-('Juan', 'Rodríguez', 'Silva', 'juan.mesero@restaurant.com', 'clave123', 'DNI', '45678912', 'Direccion 3', '923456789', 3, 3),
-('Ana', 'Torres', 'Vega', 'ana.recepcionista@restaurant.com', 'clave123', 'DNI', '78945612', 'Direccion 4', '934567890', 1, 2),
-('Pedro', 'Sánchez', 'Ramos', 'pedro.cliente@gmail.com', 'clave123', 'DNI', '32165498', 'Direccion 5', '945678901', 4, 4);
+--admin clave123
+('Carlos', 'Pérez', 'García', 'carlos.admin@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '12345678', 'Direccion 1', '987654321', 1, 1),
+
+--recepcionista clave123
+('Ana', 'Torres', 'Vega', 'ana.recepcionista@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '78945612', 'Direccion 2', '934567890', 1, 2),
+('Juana', 'Casas', 'Henrique', 'juana.recepcionista@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '78945612', 'Direccion 3', '904567890', 1, 2),
+('Briggite', 'Zapata', 'Inglesias', 'briggite.recepcionista@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '78940012', 'Direccion 4', '909567890', 1, 2),
+
+--mozo clave123
+('Juan', 'Rodríguez', 'Silva', 'juan.mesero@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '45678912', 'Direccion 3', '923456789', 3, 3),
+
+--cliente clave123
+('María', 'López', 'Martínez', 'maria.cliente@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '87654321', 'Direccion 2', '912345678', 2, 4),
+('Pedro', 'Sánchez', 'Ramos', 'pedro.cliente@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '32165498', 'Direccion 5', '945678901', 4, 4);

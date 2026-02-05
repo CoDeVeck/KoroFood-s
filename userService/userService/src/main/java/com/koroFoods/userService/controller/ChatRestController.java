@@ -4,6 +4,7 @@ package com.koroFoods.userService.controller;
 
 import com.koroFoods.userService.dto.request.StarChatRequest;
 import com.koroFoods.userService.dto.response.HistorialUsuarioResponse;
+import com.koroFoods.userService.dto.response.RecepcionistaResponse;
 import com.koroFoods.userService.model.document.Chat;
 import com.koroFoods.userService.model.document.Mensaje;
 import com.koroFoods.userService.service.ChatService;
@@ -57,7 +58,13 @@ public class ChatRestController {
     }
 
     //Obtener la lista de recepcionistas para elegir a quien mandar mensaje
+    @GetMapping("/recepcionistas")
+    public ResponseEntity<?> listaRecepcionistas(){
 
+        List<RecepcionistaResponse> lista = chatService.listaDeRecepcionistas();
+
+        return ResponseEntity.ok(lista);
+    }
 
 
 

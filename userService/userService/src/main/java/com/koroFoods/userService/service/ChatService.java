@@ -1,6 +1,7 @@
 package com.koroFoods.userService.service;
 
 import com.koroFoods.userService.dto.response.HistorialUsuarioResponse;
+import com.koroFoods.userService.dto.response.RecepcionistaResponse;
 import com.koroFoods.userService.model.Usuario;
 import com.koroFoods.userService.model.document.Chat;
 import com.koroFoods.userService.model.document.Mensaje;
@@ -22,7 +23,7 @@ public class ChatService {
     private final IUsuarioRepository usuarioRepository;
 
     //Lista de chats que hay ya sea cliente/recepcionista o recepcionista/cliente
-    public List<HistorialUsuarioResponse> listaDeChatsDto(Integer idUsuario){
+    public List<HistorialUsuarioResponse> listaDeChatsDto(Integer idUsuario) {
 
         List<Chat> chats = repositoryChat
                 .findByEmisorIdOrReceptorId(idUsuario, idUsuario);
@@ -55,18 +56,18 @@ public class ChatService {
 
 
     //Obtener ID del usuario a quien queremos enviar el mensaje(receptor)
-    public Integer obtenerReceptor(String chatId, Integer emisorId){
+    public Integer obtenerReceptor(String chatId, Integer emisorId) {
 
         Chat chat = repositoryChat.findById(chatId)
-                .orElseThrow(() -> new RuntimeException("Chat con ID: " + chatId + " no existe" ));
+                .orElseThrow(() -> new RuntimeException("Chat con ID: " + chatId + " no existe"));
 
         //Si soy el cliente obtengo el Id del recepcionista
-        if(chat.getEmisorId().equals(emisorId)){
+        if (chat.getEmisorId().equals(emisorId)) {
             return chat.getReceptorId();
         }
 
         //Si soy el recepcionista obtengo el Id del usuario
-        if(chat.getReceptorId().equals(emisorId)){
+        if (chat.getReceptorId().equals(emisorId)) {
             return chat.getEmisorId();
         }
 
@@ -74,10 +75,10 @@ public class ChatService {
     }
 
 
-    public Chat iniciarChat(Integer emisorId, Integer receptorId){
+    public Chat iniciarChat(Integer emisorId, Integer receptorId) {
         return repositoryChat.findByEmisorIdAndReceptorIdOrEmisorIdAndReceptorId(
-                emisorId,receptorId,
-                receptorId,emisorId
+                emisorId, receptorId,
+                receptorId, emisorId
         ).orElseGet(() -> {
             Chat nuevoChat = new Chat();
             nuevoChat.setEmisorId(emisorId);
@@ -88,5 +89,24 @@ public class ChatService {
             return repositoryChat.save(nuevoChat);
         });
     }
+
+
+    public List<RecepcionistaResponse> listaDeRecepcionistas() {
+
+        List<Usuario> recepcionistas =
+                usuarioRepository.findByRol_IdRol(2);
+
+        return recepcionistas.stream().map(u ->
+                new RecepcionistaResponse(
+                        u.getIdUsuario(),
+                        u.getNombres(),
+                        u.getApePaterno(),
+                        u.getImagen()
+                )
+        ).toList();
+
+
+    }
+
 
 }
