@@ -27,7 +27,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
             "/cliente/index",
             "/evento/feign",
             "/menu/feign",
-            "/calificacion"
+            "/calificacion",
+            "/ws/**"
         );
 
     @Override
