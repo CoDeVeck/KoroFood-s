@@ -15,6 +15,7 @@ public class WebSocketListener {
 
     private final SimpMessageSendingOperations messageTemplate;
 
+    //Capturamos el momento en que un cliente se va
     @EventListener
     public void handleWebSocketDisconnectListener(
             SessionDisconnectEvent event
