@@ -12,17 +12,26 @@ import java.time.LocalDateTime;
 @Document(collection = "mensajes")
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
+
 public class Mensaje {
 
     @Id
     private String id;
-    private Integer chatId;
+    private String chatId;
     private Integer emisorId;
     private Integer receptorId;
     private String contenido;
     private LocalDateTime fechaMandado;
     private boolean leido;
+
+
+    public Mensaje(String chatId, Integer emisorId, Integer receptorId, String contenido) {
+        this.chatId = chatId;
+        this.emisorId = emisorId;
+        this.receptorId = receptorId;
+        this.contenido = contenido;
+        this.fechaMandado = LocalDateTime.now();
+        this.leido = false;
+    }
 
 }
