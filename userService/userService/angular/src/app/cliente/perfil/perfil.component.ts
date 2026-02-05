@@ -44,7 +44,7 @@ export class PerfilComponent implements OnInit {
 
     const idUsuario = usuario.idUsuario;
 
-    this.perfilService.getPerfilCliente(idUsuario).subscribe({
+    this.perfilService.getPerfilCliente(idUsuario!).subscribe({
       next: (data: PerfilClienteResponse[]) => {
         this.perfilDTO = data;
       },

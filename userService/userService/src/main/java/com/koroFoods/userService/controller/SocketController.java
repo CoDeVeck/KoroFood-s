@@ -29,10 +29,9 @@ public class SocketController {
     public void sendMessage(
             @DestinationVariable String chatId,
             @Payload ChatMessageRequest request
-            //Principal principal
     ) {
         //Obtenemos quien manda el mensaje
-        Integer emisorId = 6;
+        Integer emisorId = request.getEmisorId();
 
         //obtenemos a quien va a mandar el mensaje
         Integer receptorId = chatService.obtenerReceptor(chatId, emisorId);

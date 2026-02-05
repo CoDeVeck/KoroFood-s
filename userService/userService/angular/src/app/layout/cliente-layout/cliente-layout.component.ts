@@ -50,6 +50,16 @@ export class ClienteLayoutComponent {
     }
   }
 
+  navigateToChats(): void {
+    if (this.isLoggedIn) {
+      this.router.navigate(['/cliente/chat']);
+    } else {
+      this.router.navigate(['/auth/login'], {
+        queryParams: { returnUrl: '/cliente/perfil' },
+      });
+    }
+  }
+
   logout(): void {
     this.authService.logout();
     this.isLoggedIn = false;
