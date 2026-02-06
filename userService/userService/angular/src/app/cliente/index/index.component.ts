@@ -8,11 +8,13 @@ import {
 import { ResenaListResponse } from '../../shared/dto/ResenaListResponse';
 import { ResenaClienteService } from '../service/resenaClienteService';
 import { RouterLink } from '@angular/router';
+import { SupportChatComponent } from '../app-support-chat/app-support-chat.component';
+
 declare var Swiper: any;
 
 @Component({
   selector: 'app-index',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, SupportChatComponent],
   templateUrl: './index.component.html',
   styleUrl: './index.component.css',
   encapsulation: ViewEncapsulation.None,
