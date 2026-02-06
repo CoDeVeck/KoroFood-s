@@ -95,6 +95,16 @@ export class ReservaComponent implements OnInit {
   // Estado de procesamiento
   procesandoPago: boolean = false;
 
+  mostrarAlerta: boolean = false;
+  alertaTipo: 'exito' | 'error' = 'exito';
+  alertaDatos = {
+    idReserva: 0,
+    numeroMesa: 0,
+    fecha: '',
+    hora: '',
+    mensaje: '',
+  };
+
   constructor(
     private mesasService: MesasServiceService,
     private reservaService: ReservaServiceService,
@@ -368,7 +378,6 @@ export class ReservaComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
-
           if (response.data && response.data.length > 0) {
             this.availableTimes = response.data.map((dateTimeStr) => {
               const date = new Date(dateTimeStr);
@@ -428,8 +437,7 @@ export class ReservaComponent implements OnInit {
       this.erroresTarjeta.numero = 'Solo se permiten números';
     } else if (numero.length < 13 || numero.length > 19) {
       this.erroresTarjeta.numero = 'Número de tarjeta inválido (13-19 dígitos)';
-    }
-    else {
+    } else {
       this.erroresTarjeta.numero = '';
     }
 
@@ -606,6 +614,16 @@ export class ReservaComponent implements OnInit {
     }, 2000);
   }
 
+  getMesaNumero(): string {
+    return this.mesaSeleccionada
+      ? `#${this.mesaSeleccionada.numeroMesa}`
+      : 'No seleccionada';
+  }
+
+  getMesaZona(): string {
+    return this.mesaSeleccionada ? this.mesaSeleccionada.tipo : '-';
+  }
+
   private crearReserva(): void {
     if (!this.mesaSeleccionada || !this.selectedTime || !this.idUsuario) {
       console.error('❌ Faltan datos para crear la reserva');
@@ -616,8 +634,8 @@ export class ReservaComponent implements OnInit {
     const reservaRequest: ReservaRequest = {
       idUsuario: this.idUsuario,
       idMesa: this.mesaSeleccionada.idMesa!,
-      fechaHora: this.selectedTime.dateTime!, // Ya está en formato ISO
-      idEvento: null, // Reserva normal
+      fechaHora: this.selectedTime.dateTime!,
+      idEvento: null,
       observaciones: `Reserva para ${this.personas} personas. Pago: ${this.metodoPagoSeleccionado}`,
     };
 
@@ -628,35 +646,67 @@ export class ReservaComponent implements OnInit {
         console.log('✅ Reserva creada exitosamente:', response);
         this.procesandoPago = false;
 
-        alert(`¡Reserva confirmada exitosamente! 
-        
-        Número de reserva: ${response.data}
-        Mesa: ${this.mesaSeleccionada?.numeroMesa}
-        Fecha: ${this.formatDate(this.selectedDate!)}
-        Hora: ${this.selectedTime?.time}
-                
-        ¡Te esperamos!`);
+        this.mostrarAlertaExito(
+          response.data,
+          this.mesaSeleccionada?.numeroMesa,
+          this.formatDate(this.selectedDate!),
+          this.selectedTime?.time,
+        );
 
         localStorage.removeItem('reserva_temporal');
-        this.router.navigate(['/cliente/inicio']); // Ajusta la ruta
+
+        // Redireccionar después de 3 segundos
+        setTimeout(() => {
+          this.router.navigate(['/cliente/inicio']);
+        }, 3000);
       },
       error: (error) => {
         console.error('❌ Error al crear reserva:', error);
         this.procesandoPago = false;
 
         const mensaje = error.error?.mensaje || 'Error al procesar la reserva';
-        alert(`Error: ${mensaje}`);
+        this.mostrarAlertaError(mensaje);
       },
     });
   }
 
-  getMesaNumero(): string {
-    return this.mesaSeleccionada
-      ? `#${this.mesaSeleccionada.numeroMesa}`
-      : 'No seleccionada';
+  private mostrarAlertaExito(
+    idReserva: number,
+    numeroMesa: number | undefined,
+    fecha: string,
+    hora: string | undefined,
+  ): void {
+    this.alertaTipo = 'exito';
+    this.alertaDatos = {
+      idReserva: idReserva,
+      numeroMesa: numeroMesa || 0,
+      fecha: fecha,
+      hora: hora || '',
+      mensaje: '',
+    };
+    this.mostrarAlerta = true;
+
+    setTimeout(() => {
+      this.mostrarAlerta = false;
+      setTimeout(() => {
+        this.router.navigate(['/cliente/inicio']);
+      }, 300);
+    }, 3000);
   }
 
-  getMesaZona(): string {
-    return this.mesaSeleccionada ? this.mesaSeleccionada.tipo : '-';
+  private mostrarAlertaError(mensaje: string): void {
+    this.alertaTipo = 'error';
+    this.alertaDatos = {
+      idReserva: 0,
+      numeroMesa: 0,
+      fecha: '',
+      hora: '',
+      mensaje: mensaje,
+    };
+    this.mostrarAlerta = true;
+
+    setTimeout(() => {
+      this.mostrarAlerta = false;
+    }, 4000);
   }
 }
