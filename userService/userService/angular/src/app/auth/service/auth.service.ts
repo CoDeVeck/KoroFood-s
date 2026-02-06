@@ -11,13 +11,7 @@ import { Usuario } from '../../shared/model/usuario.model';
 import { RegistroSocialRequest } from '../../shared/request/registroSocialRequest.model';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 import { SocialRegisterData } from '../../shared/dto/socialRegisterData.model';
-
-//Datos de prueba
-export interface GithubUser {
-  name: string;
-  email: string;
-  avatar: string;
-}
+import { UserService } from '../../cliente/service/user.service';
 
 @Injectable({
   providedIn: 'root',
@@ -28,7 +22,10 @@ export class AuthService {
   private userUrl = `${enviroment.apiUrls.usuarios}/auth/me`;
   private completarRegistroUrl = `${enviroment.apiUrls.usuarios}/auth/social/register`;
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private userService: UserService,
+  ) {
     console.log(' API URL:', this.apiUrl);
   }
 
@@ -146,6 +143,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('auth_token');
+    this.userService.clearUser();
   }
 
   completarRegistroSocial(

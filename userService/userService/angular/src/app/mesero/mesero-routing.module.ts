@@ -4,26 +4,27 @@ import { MeseroLayoutComponent } from '../layout/mesero-layout/mesero-layout.com
 import { OrdenesComponent } from './ordenes/ordenes.component';
 import { FormOrdenComponent } from './form-orden/form-orden.component';
 
-const routes: Routes = [{
-  path: '',
-      component: MeseroLayoutComponent,
-      children: [
-        {
-          path: 'ordenes',
-          component: OrdenesComponent,
-          data: { title: 'Ordenes' },
-        },
-        {
-          path: 'nueva-orden',
-          component: FormOrdenComponent,
-          data: { title: 'Nueva Orden' },
-        }
+const routes: Routes = [
+  {
+    path: '',
+    component: MeseroLayoutComponent,
+    children: [
+      {
+        path: 'ordenes',
+        component: OrdenesComponent,
+        data: { title: 'Ordenes' },
+      },
+      {
+        path: 'nueva-orden',
+        component: FormOrdenComponent,
+        data: { title: 'Nueva Orden' },
+      },
     ],
   },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class MeseroRoutingModule { }
+export class MeseroRoutingModule {}

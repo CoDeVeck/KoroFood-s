@@ -14,4 +14,5 @@ public class ChatMessageRequest {
     private String content;
     private String sender;
     private String avatar;
+    private Integer emisorId;
 }

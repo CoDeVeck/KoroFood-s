@@ -46,7 +46,7 @@ public class ChatService {
                     chat.getId(),
                     receptorId,
                     u.getNombres(),
-                    u.getApeMaterno(),
+                    u.getApePaterno(),
                     u.getImagen(),
                     ultimoMensaje != null ? ultimoMensaje.getContenido() : " ",
                     chat.getFechaUltimoMensaje()
