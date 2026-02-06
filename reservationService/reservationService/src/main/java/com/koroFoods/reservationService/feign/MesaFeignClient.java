@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.koroFoods.reservationService.dto.ResultadoResponse;
 
-@FeignClient(name = "mesas", url = "http://localhost:8082/mesa/feign")
+@FeignClient(name = "tableService")
 public interface MesaFeignClient {
 
-	@GetMapping("{/id}")
+	@GetMapping("/mesa/feign/{/id}")
 	ResultadoResponse<MesaFeign> obtenerMesaPorId(@PathVariable Integer id);
 }

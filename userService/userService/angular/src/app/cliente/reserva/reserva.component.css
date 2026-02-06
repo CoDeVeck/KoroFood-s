@@ -1,9 +1,15 @@
+/* =================================
+   RESET Y GLOBALES
+   ================================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* =================================
+   HERO SECTION
+   ================================= */
 .hero-section {
   position: relative;
   padding: 4.5rem 0rem;
@@ -74,6 +80,9 @@
   font-weight: bold;
 }
 
+/* =================================
+   RESERVATION SECTION
+   ================================= */
 .reservation-section {
   background: #FBF8F3;
   padding: 60px 20px;
@@ -85,7 +94,9 @@
   margin: 0 auto;
 }
 
-/* Stepper */
+/* =================================
+   STEPPER
+   ================================= */
 .stepper {
   display: flex;
   justify-content: center;
@@ -126,7 +137,6 @@
   color: white;
 }
 
-/* FIX: Centrar labels del stepper */
 .step-label {
   position: absolute;
   top: 60px;
@@ -159,7 +169,9 @@
   display: none;
 }
 
-/* Content Wrapper */
+/* =================================
+   CONTENT WRAPPER
+   ================================= */
 .content-wrapper {
   display: grid;
   grid-template-columns: 1fr 400px;
@@ -168,7 +180,9 @@
   align-items: start;
 }
 
-/* Form Card */
+/* =================================
+   FORM CARD
+   ================================= */
 .form-card {
   background: white;
   border-radius: 20px;
@@ -199,7 +213,9 @@
   font-family: 'Georgia', serif;
 }
 
-/* PASO 1: Personas */
+/* =================================
+   PASO 1: PERSONAS
+   ================================= */
 .counter-wrapper {
   display: flex;
   align-items: center;
@@ -272,7 +288,9 @@
   border-color: #C67C4E;
 }
 
-/* PASO 2: Selector de Zona */
+/* =================================
+   PASO 2: SELECTOR DE ZONA
+   ================================= */
 .zona-selector {
   display: flex;
   gap: 15px;
@@ -307,7 +325,9 @@
   box-shadow: 0 4px 12px rgba(198, 124, 78, 0.3);
 }
 
-/* PASO 3: Calendario */
+/* =================================
+   PASO 3: CALENDARIO
+   ================================= */
 .calendar {
   max-width: 600px;
   margin: 0 auto;
@@ -397,7 +417,9 @@
   background: transparent;
 }
 
-/* PASO 4: Horarios */
+/* =================================
+   PASO 4: HORARIOS
+   ================================= */
 .time-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -470,7 +492,9 @@
   background: #F4C2C2;
 }
 
-/* PASO 5: Confirmar */
+/* =================================
+   PASO 5: CONFIRMAR Y PAGO
+   ================================= */
 .auth-prompt {
   background: #F4EDE4;
   padding: 40px;
@@ -589,7 +613,6 @@
   transform: translateY(-2px);
 }
 
-/* Estado activo de botones de pago */
 .payment-btn.active {
   border-color: #C67C4E;
   background: #FFF5F0;
@@ -620,16 +643,37 @@
   font-weight: 700;
 }
 
-/* ========================================
+/* =================================
    FORMULARIOS DE PAGO
-   ======================================== */
-
+   ================================= */
 .payment-form {
   background: #F9F9F9;
   padding: 25px;
   border-radius: 15px;
   margin-top: 25px;
   animation: fadeInDown 0.3s ease;
+}
+
+.payment-form-wrapper {
+  position: relative;
+}
+
+.payment-form-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  backdrop-filter: blur(10px);
+  background: rgba(249, 249, 249, 0.95);
+  border-radius: 15px;
+  z-index: 0;
+}
+
+.payment-form-content {
+  position: relative;
+  z-index: 1;
+  /* Contenido nítido */
 }
 
 @keyframes fadeInDown {
@@ -651,7 +695,6 @@
   text-align: center;
 }
 
-/* Formulario de tarjeta */
 .form-group {
   margin-bottom: 20px;
 }
@@ -840,7 +883,9 @@
   font-size: 1.1rem;
 }
 
-/* Botones de Acción */
+/* =================================
+   BOTONES DE ACCIÓN
+   ================================= */
 .action-buttons {
   display: flex;
   gap: 15px;
@@ -889,7 +934,6 @@
   opacity: 0.6;
 }
 
-/* Botón Continuar */
 .btn-continue {
   flex: 2;
   padding: 15px;
@@ -915,7 +959,9 @@
   opacity: 0.6;
 }
 
-/* Summary Card */
+/* =================================
+   SUMMARY CARD
+   ================================= */
 .summary-card {
   background: white;
   border-radius: 20px;
@@ -1010,7 +1056,157 @@
   font-size: 1rem;
 }
 
-/* Responsive */
+/* =================================
+   ALERTA PERSONALIZADA
+   ================================= */
+
+/* Backdrop */
+.koro-alerta::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(233, 151, 29, 0.425);
+  z-index: 9998;
+}
+
+/* Contenedor principal de la alerta */
+.koro-alerta {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) scale(0.9) !important;
+  background: white !important;
+  border-radius: 16px !important;
+  padding: 32px !important;
+  z-index: 9999 !important;
+  max-width: 450px !important;
+  width: 90% !important;
+  opacity: 0 !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  pointer-events: auto !important;
+}
+
+.koro-alerta.koro-mostrar {
+  opacity: 1 !important;
+  transform: translate(-50%, -50%) scale(1) !important;
+}
+
+/* Icono de la alerta */
+.koro-alerta .koro-icono {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.koro-alerta.koro-exito .koro-icono {
+  color: #10b981;
+}
+
+.koro-alerta.koro-error .koro-icono {
+  color: #ef4444;
+}
+
+.koro-alerta .koro-icono svg {
+  width: 64px;
+  height: 64px;
+  animation: koroIconoEntrada 0.5s ease-out;
+}
+
+@keyframes koroIconoEntrada {
+  0% {
+    transform: scale(0) rotate(-180deg);
+  }
+
+  50% {
+    transform: scale(1.1) rotate(10deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Contenido de la alerta */
+.koro-alerta .koro-contenido {
+  text-align: center;
+}
+
+.koro-alerta .koro-contenido h3 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: #1f2937;
+}
+
+.koro-alerta .koro-detalles {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.koro-alerta .koro-detalles p {
+  margin: 8px 0;
+  color: #4b5563;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.koro-alerta .koro-detalles strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.koro-alerta .koro-mensaje {
+  font-size: 18px;
+  color: #6b7280;
+  margin: 16px 0 0 0;
+  font-weight: 500;
+}
+
+.koro-alerta.koro-exito .koro-mensaje {
+  color: #059669;
+}
+
+.koro-alerta.koro-error .koro-mensaje {
+  color: #dc2626;
+}
+
+/* Barra de progreso */
+.koro-alerta::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 0 0 16px 16px;
+  animation: koroProgreso 3s linear;
+  z-index: 1;
+}
+
+.koro-alerta.koro-error::after {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  animation: koroProgreso 4s linear;
+}
+
+@keyframes koroProgreso {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}
+
+/* =================================
+   MEDIA QUERIES
+   ================================= */
+
 @media (max-width: 1200px) {
   .content-wrapper {
     margin: 0rem 4rem;
@@ -1077,7 +1273,6 @@
     width: 100%;
   }
 
-  /* Responsive para formularios de pago */
   .form-row {
     grid-template-columns: 1fr;
   }
@@ -1094,6 +1289,28 @@
 
   .plin-number {
     font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 640px) {
+
+  /* Ajustes responsive para alerta */
+  .koro-alerta {
+    padding: 24px !important;
+    width: 95% !important;
+  }
+
+  .koro-alerta .koro-contenido h3 {
+    font-size: 20px;
+  }
+
+  .koro-alerta .koro-icono svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .koro-alerta .koro-detalles p {
+    font-size: 14px;
   }
 }
 
