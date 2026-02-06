@@ -57,7 +57,7 @@ INSERT INTO TB_USUARIO (NOMBRES, APE_PATERNO, APE_MATERNO, CORREO, CLAVE, TIPO_D
 ('Carlos', 'Pérez', 'García', 'carlos.admin@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '12345678', 'Direccion 1', '987654321', 1, 1),
 
 --recepcionista
-('Ana', 'Torres', 'Vega', 'ana.recepcionista@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '78945692', 'Direccion 2', '934567890', 1, 2),
+    ('Ana', 'Torres', 'Vega', 'ana.recepcionista@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '78945692', 'Direccion 2', '934567890', 1, 2),
 ('Juana', 'Casas', 'Henrique', 'juana.recepcionista@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '78909612', 'Direccion 3', '904567890', 1, 2),
 ('Briggite', 'Zapata', 'Inglesias', 'briggite.recepcionista@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '78940012', 'Direccion 4', '909567890', 1, 2),
 

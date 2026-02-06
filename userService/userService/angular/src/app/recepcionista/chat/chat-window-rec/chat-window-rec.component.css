@@ -1,5 +1,5 @@
 /* ============================================
-   CHAT WINDOW COMPONENT - CLIENTE
+   CHAT WINDOW COMPONENT
    ============================================ */
 
 /* El componente ocupa todo el espacio disponible */
@@ -111,6 +111,27 @@
   font-size: 0.875rem;
   color: #10b981;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #10b981;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .chat-actions {
@@ -285,7 +306,7 @@
 
 /* ===== INPUT AREA - Tamaño fijo ===== */
 .chat-input-container {
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.5rem;
   background: white;
   border-top: 1px solid #e5e7eb;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
@@ -301,6 +322,7 @@
   border-radius: 24px;
   padding: 0.5rem 0.75rem;
   transition: all 0.3s ease;
+  margin-bottom: 0.75rem;
 }
 
 .input-wrapper:focus-within {
@@ -355,6 +377,31 @@
   transform: none;
 }
 
+/* ===== QUICK RESPONSES ===== */
+.quick-responses {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.quick-response-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  background: white;
+  color: #6b7280;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.quick-response-btn:hover {
+  background: #f9fafb;
+  border-color: #667eea;
+  color: #667eea;
+}
+
 /* ===== SCROLLBAR ===== */
 .messages-container::-webkit-scrollbar {
   width: 6px;
@@ -373,6 +420,7 @@
   background: #94a3b8;
 }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .message-bubble {
     max-width: 80%;
@@ -386,94 +434,12 @@
     width: 36px;
     height: 36px;
   }
-}
 
-/* ============================================
-   📱 MOBILE RESPONSIVE (celulares)
-   ============================================ */
-@media (max-width: 768px) {
-
-  /* Usa toda la pantalla real del móvil (evita cortes por barra del navegador) */
-  :host,
-  .chat-window-container,
-  .chat-window-content {
-    height: 100dvh;
+  .quick-responses {
+    flex-direction: column;
   }
 
-  /* ===== HEADER ===== */
-  .chat-window-header {
-    padding: 0.75rem 1rem;
-  }
-
-  .contact-avatar img {
-    width: 36px;
-    height: 36px;
-  }
-
-  .contact-details h3 {
-    font-size: 0.95rem;
-  }
-
-  .status-text {
-    font-size: 0.75rem;
-  }
-
-  .chat-actions {
-    gap: 0.25rem;
-  }
-
-  .btn-icon {
-    width: 38px;
-    height: 38px;
-  }
-
-  /* ===== MENSAJES ===== */
-  .messages-container {
-    padding: 1rem 0.75rem;
-  }
-
-  .messages-list {
-    gap: 0.5rem;
-  }
-
-  .message-bubble {
-    max-width: 92%;   /* casi toda la pantalla */
-    padding: 0.75rem 0.9rem;
-    font-size: 0.9rem;
-  }
-
-  .message-text {
-    font-size: 0.9rem;
-  }
-
-  .message-time {
-    font-size: 0.7rem;
-  }
-
-  /* ===== INPUT ===== */
-  .chat-input-container {
-    padding: 0.75rem;
-  }
-
-  .input-wrapper {
-    padding: 0.4rem 0.6rem;
-    border-radius: 20px;
-  }
-
-  .input-wrapper input {
-    font-size: 0.95rem;
-  }
-
-  .btn-send {
-    width: 44px;
-    height: 44px;
-  }
-
-  .empty-chat-state h3 {
-    font-size: 1.2rem;
-  }
-
-  .empty-chat-state p {
-    font-size: 0.9rem;
+  .quick-response-btn {
+    width: 100%;
   }
 }

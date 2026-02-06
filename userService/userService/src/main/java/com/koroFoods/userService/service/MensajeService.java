@@ -1,7 +1,6 @@
 package com.koroFoods.userService.service;
 
 import com.koroFoods.userService.dto.request.ChatMessageRequest;
-import com.koroFoods.userService.dto.response.RecepcionistaResponse;
 import com.koroFoods.userService.model.document.Mensaje;
 import com.koroFoods.userService.repository.IRepositoryMensaje;
 import lombok.RequiredArgsConstructor;
