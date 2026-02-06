@@ -1,6 +1,7 @@
 package com.koroFoods.paymentService.model;
 
 import com.koroFoods.paymentService.enums.EstadoPago;
+import com.koroFoods.paymentService.enums.MetodoPago;
 import com.koroFoods.paymentService.enums.TipoPago;
 
 import jakarta.persistence.*;
@@ -41,8 +42,9 @@ public class Pago {
     @Column(name = "MONTO")
     private BigDecimal monto;
     
+    @Enumerated(EnumType.STRING)
     @Column(name = "METODO_PAGO")
-    private String metodoPago;
+    private MetodoPago metodoPago;
     
     @Column(name = "FECHA_PAGO")
     private LocalDateTime fechaPago;;
@@ -53,4 +55,24 @@ public class Pago {
     
     @Column(name = "OBSERVACIONES")
     private String observaciones;
+    
+    @Column(name = "CODIGO_OPERACION", unique = true)
+    private String codigoOperacion; // Código que ingresa el usuario después de pagar
+
+    @Column(name = "REFERENCIA_PAGO", unique = true)
+    private String referenciaPago; // ID único generado para el QR
+
+    @Column(name = "FECHA_CREACION")
+    private LocalDateTime fechaCreacion;
+
+    @Column(name = "FECHA_EXPIRACION")
+    private LocalDateTime fechaExpiracion; // QR válido por X tiempo
+
+    @PrePersist
+    protected void onCreate() {
+        this.fechaCreacion = LocalDateTime.now();
+        this.estado = EstadoPago.PEN;
+        // QR válido por 30 minutos
+        this.fechaExpiracion = LocalDateTime.now().plusMinutes(30);
+    }
 }
