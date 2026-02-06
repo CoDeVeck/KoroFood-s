@@ -1,6 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  NavigationEnd,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
 import { filter } from 'rxjs';
 
 @Component({
@@ -13,7 +19,7 @@ export class MeseroLayoutComponent {
   sidebarCollapsed = false;
   currentTime = new Date();
   userName = 'Carlos Mendoza';
-  
+
   pageTitles: { [key: string]: string } = {
     '/mesero/ordenes': 'Órdenes',
     '/mesero/nueva-orden': 'Nueva Orden',
