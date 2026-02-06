@@ -8,8 +8,17 @@ import { MenuComponent } from './menu/menu.component';
 import { ContactoComponent } from './contacto/contacto.component';
 import { ReservaComponent } from './reserva/reserva.component';
 import { PerfilComponent } from './perfil/perfil.component';
+import { ChatContainerComponent } from './chat/chat-container.component';
 
 const routes: Routes = [
+  //Ruta para el chat sin layout
+  {
+    path: 'chat',
+    component: ChatContainerComponent,
+    data: { title: 'Chat' },
+  },
+
+  //Rutas con el layout presente
   {
     path: '',
     component: ClienteLayoutComponent,

@@ -6,7 +6,7 @@ SHOW CLIENT_ENCODING;
 SET CLIENT_ENCODING TO 'UTF8';
 
 INSERT INTO TB_RESERVA (ID_USUARIO, ID_MESA, ID_EVENTO, TIPO_RESERVA, FECHA_RESERVA, ESTADO, OBSERVACIONES) VALUES
-(4, 1, 1, 'ESPECIAL', '2026-02-25 19:30:00', 'PAGADA','Mesa cerca del escenario'),
-(4, 13, 2, 'ESPECIAL', '2026-03-15 18:00:00', 'PAGADA','Incluye bebida de cortesía'),
-(4, 5, NULL, 'SIMPLE', '2026-02-15 13:00:00', 'PAGADA', 'Almuerzo familiar'),
-(4, 20, NULL, 'SIMPLE', '2026-02-20 20:00:00', 'PAGADA','Cena romántica');
+(5, 1, 1, 'ESPECIAL', '2026-02-25 19:30:00', 'PAGADA','Mesa cerca del escenario'),
+(5, 13, 2, 'ESPECIAL', '2026-03-15 18:00:00', 'PAGADA','Incluye bebida de cortesía'),
+(5, 5, NULL, 'SIMPLE', '2026-02-15 13:00:00', 'PAGADA', 'Almuerzo familiar'),
+(5, 20, NULL, 'SIMPLE', '2026-02-20 20:00:00', 'PAGADA','Cena romántica');

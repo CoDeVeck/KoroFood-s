@@ -2,7 +2,6 @@ package com.koroFoods.eventService.controller;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.koroFoods.eventService.dtos.EventTableResponse;
 import com.koroFoods.eventService.dtos.EventoConMesaDto;
 import com.koroFoods.eventService.dtos.EventoDtoFeign;
 import com.koroFoods.eventService.dtos.EventoFeignReserva;
@@ -47,10 +45,8 @@ public class EventoFeignController {
 		ResultadoResponse<EventoDtoFeign> event = eventoService.getEventById(id);
 		return ResponseEntity.ok(event);
 	}
-	
-	
-	
 
+	// Detalle del evento
 	@GetMapping("/validar/{id}")
 	public ResponseEntity<ResultadoResponse<EventoFeignReserva>> obtenerEventoValidado(@PathVariable Integer id) {
 		ResultadoResponse<EventoFeignReserva> evento = eventoService.buscarEventoParaReserva(id);
@@ -66,11 +62,15 @@ public class EventoFeignController {
 
 		return ResultadoResponse.success("Validación realizada", asignada);
 	}
-	
-    @GetMapping("/mesas/{idEvento}")
-    public ResponseEntity<List<EventoConMesaDto>> listarPorEvento(@PathVariable Integer idEvento) {
-        List<EventoConMesaDto> eventoMesas = eventoMesaService.listarMesasPorEventoParaReserva(idEvento);
-        return ResponseEntity.ok(eventoMesas);
-    }
+
+	@GetMapping("/mesas/{idEvento}")
+	public ResponseEntity<ResultadoResponse<List<EventoConMesaDto>>> listarMesasPorEvento(@PathVariable Integer idEvento,
+			@RequestParam(required = false) Integer cantidadPersonas) {
+
+		ResultadoResponse<List<EventoConMesaDto>> resultado = eventoMesaService
+				.listarMesasPorEventoParaReserva(idEvento, cantidadPersonas);
+
+		return ResponseEntity.ok(resultado);
+	}
 
 }
