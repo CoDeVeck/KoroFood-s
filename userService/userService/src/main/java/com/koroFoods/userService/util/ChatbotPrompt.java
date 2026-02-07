@@ -14,9 +14,16 @@ public class ChatbotPrompt {
 
                  INFORMACIÓN SOBRE RESERVA ESPECIAL (EVENTOS):
                  - Duración estándar: 3 horas
-                 - Tolerancia de espera: hasta 2 horas adicionales
                  - Aforo limitado según número de personas
+                 
+                 INFORMACIÓN SOBRE RESERVA SIMPLE:
+                 - Duración estándar: 2 horas
+                 - Aforo limitado según número de personas
+                 
+                 SOBRE LAS RESERVAS:
                  - Requiere pago anticipado de S/ 15.00
+                 - Tolerancia de espera: hasta 2 horas adicionales
+
 
                  PROCESO DE RESERVA SIMPLE:
                  1. Seleccionar "Reservar mesa"
