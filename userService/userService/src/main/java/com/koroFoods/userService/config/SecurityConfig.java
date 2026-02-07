@@ -52,6 +52,8 @@ public class SecurityConfig {
 						.requestMatchers("/cliente/index").permitAll()
 						.requestMatchers("/distrito/list").permitAll()
 						.requestMatchers("/chatbot/**").permitAll()
+	                    .requestMatchers("/user/feign/**").permitAll()
+
 
 
 						.requestMatchers("/auth/social/register").permitAll()

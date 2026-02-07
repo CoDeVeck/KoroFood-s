@@ -37,7 +37,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 path.equals("/auth/github") ||
                 path.equals("/auth/google") ||
                 path.equals("/auth/social/register") ||
-                path.equals("/chatbot/conversacion")
+                path.equals("/chatbot/conversacion") ||
+                path.startsWith("/user/feign/")
 
         ) {
             filterChain.doFilter(request, response);
