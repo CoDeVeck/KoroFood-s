@@ -2,23 +2,6 @@
    KORO SUPPORT CHAT - ESTILOS NARANJA/BLANCO
    ============================================ */
 
-/* Variables CSS */
-:root {
-    --koro-chat-primary: #FF8A3D;
-    --koro-chat-primary-dark: #E67422;
-    --koro-chat-primary-light: #FFF5EF;
-    --koro-chat-bg-white: #FFFFFF;
-    --koro-chat-bg-light: #FFF8F3;
-    --koro-chat-text-dark: #2C3E50;
-    --koro-chat-text-gray: #6C757D;
-    --koro-chat-text-light: #ADB5BD;
-    --koro-chat-border: #FFE4D1;
-    --koro-chat-shadow: 0 8px 32px rgba(255, 138, 61, 0.15);
-    --koro-chat-shadow-sm: 0 2px 8px rgba(255, 138, 61, 0.1);
-    --koro-chat-radius: 16px;
-    --koro-chat-radius-sm: 12px;
-}
-
 /* ============================================
    CONTENEDOR PRINCIPAL
    ============================================ */
@@ -37,10 +20,10 @@
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--koro-chat-primary) 0%, var(--koro-chat-primary-dark) 100%);
+    background: linear-gradient(135deg, #FF8A3D 0%, #E67422 100%);
     border: none;
     cursor: pointer;
-    box-shadow: var(--koro-chat-shadow);
+    box-shadow: 0 8px 32px rgba(255, 138, 61, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -62,11 +45,11 @@
 
     0%,
     100% {
-        box-shadow: var(--koro-chat-shadow), 0 0 0 0 rgba(255, 138, 61, 0.4);
+        box-shadow: 0 8px 32px rgba(255, 138, 61, 0.15), 0 0 0 0 rgba(255, 138, 61, 0.4);
     }
 
     50% {
-        box-shadow: var(--koro-chat-shadow), 0 0 0 8px rgba(255, 138, 61, 0);
+        box-shadow: 0 8px 32px rgba(255, 138, 61, 0.15), 0 0 0 8px rgba(255, 138, 61, 0);
     }
 }
 
@@ -115,15 +98,15 @@
 .koro-chat-ventana {
     width: 380px;
     height: 600px;
-    background: var(--koro-chat-bg-white);
-    border-radius: var(--koro-chat-radius);
-    box-shadow: var(--koro-chat-shadow);
+    background: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(255, 138, 61, 0.15);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     animation: koro-chat-slide-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
-    border: 2px solid var(--koro-chat-border);
+    border: 2px solid #FFE4D1;
 }
 
 @keyframes koro-chat-slide-up {
@@ -142,7 +125,7 @@
    HEADER
    ============================================ */
 .koro-chat-header {
-    background: linear-gradient(135deg, var(--koro-chat-primary) 0%, var(--koro-chat-primary-dark) 100%);
+    background: linear-gradient(135deg, #FF8A3D 0%, #E67422 100%);
     padding: 20px;
     display: flex;
     align-items: center;
@@ -197,7 +180,7 @@
 .koro-chat-avatar svg {
     width: 24px;
     height: 24px;
-    color: var(--koro-chat-primary);
+    color: #FF8A3D;
 }
 
 .koro-chat-header-text {
@@ -271,16 +254,16 @@
    TABS
    ============================================ */
 .koro-chat-tabs {
-    background: var(--koro-chat-bg-light);
+    background: #FFF8F3;
     padding: 16px 20px;
-    border-bottom: 2px solid var(--koro-chat-border);
+    border-bottom: 2px solid #FFE4D1;
 }
 
 .koro-chat-tabs-titulo {
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 1px;
-    color: var(--koro-chat-primary);
+    color: #FF8A3D;
     margin: 0 0 12px 0;
 }
 
@@ -292,11 +275,11 @@
 
 .koro-chat-tab {
     background: white;
-    border: 2px solid var(--koro-chat-border);
+    border: 2px solid #FFE4D1;
     padding: 8px 14px;
     border-radius: 20px;
     font-size: 13px;
-    color: var(--koro-chat-text-gray);
+    color: #6C757D;
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 500;
@@ -304,15 +287,15 @@
 }
 
 .koro-chat-tab:hover {
-    border-color: var(--koro-chat-primary);
-    color: var(--koro-chat-primary);
+    border-color: #FF8A3D;
+    color: #FF8A3D;
     transform: translateY(-1px);
-    background: var(--koro-chat-primary-light);
+    background: #FFF5EF;
 }
 
 .koro-chat-tab-activo {
-    background: var(--koro-chat-primary);
-    border-color: var(--koro-chat-primary);
+    background: #FF8A3D;
+    border-color: #FF8A3D;
     color: white;
     font-weight: 600;
 }
@@ -324,7 +307,7 @@
     flex: 1;
     overflow-y: auto;
     padding: 20px;
-    background: var(--koro-chat-bg-white);
+    background: #FFFFFF;
     scroll-behavior: smooth;
 }
 
@@ -333,16 +316,16 @@
 }
 
 .koro-chat-mensajes::-webkit-scrollbar-track {
-    background: var(--koro-chat-bg-light);
+    background: #FFF8F3;
 }
 
 .koro-chat-mensajes::-webkit-scrollbar-thumb {
-    background: var(--koro-chat-border);
+    background: #FFE4D1;
     border-radius: 10px;
 }
 
 .koro-chat-mensajes::-webkit-scrollbar-thumb:hover {
-    background: var(--koro-chat-primary-light);
+    background: #FFF5EF;
 }
 
 /* ============================================
@@ -378,19 +361,19 @@
 .koro-chat-mensaje-avatar {
     width: 32px;
     height: 32px;
-    background: var(--koro-chat-primary-light);
+    background: #FFF5EF;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    border: 2px solid var(--koro-chat-border);
+    border: 2px solid #FFE4D1;
 }
 
 .koro-chat-mensaje-avatar svg {
     width: 18px;
     height: 18px;
-    color: var(--koro-chat-primary);
+    color: #FF8A3D;
 }
 
 .koro-chat-mensaje-contenido {
@@ -406,22 +389,22 @@
 }
 
 .koro-chat-mensaje-burbuja {
-    background: var(--koro-chat-bg-light);
+    background: #FFF8F3;
     padding: 12px 16px;
-    border-radius: var(--koro-chat-radius-sm);
+    border-radius: 12px;
     position: relative;
     transition: all 0.3s ease;
-    border: 1px solid var(--koro-chat-border);
+    border: 1px solid #FFE4D1;
 }
 
 .koro-chat-mensaje-bot .koro-chat-mensaje-burbuja {
     background: white;
-    border: 2px solid var(--koro-chat-border);
+    border: 2px solid #FFE4D1;
     border-bottom-left-radius: 4px;
 }
 
 .koro-chat-mensaje-usuario .koro-chat-mensaje-burbuja {
-    background: linear-gradient(135deg, var(--koro-chat-primary) 0%, var(--koro-chat-primary-dark) 100%);
+    background: linear-gradient(135deg, #FF8A3D 0%, #E67422 100%);
     color: white;
     border-bottom-right-radius: 4px;
     border: none;
@@ -431,7 +414,7 @@
     margin: 0;
     font-size: 14px;
     line-height: 1.5;
-    color: var(--koro-chat-text-dark);
+    color: #2C3E50;
 }
 
 .koro-chat-mensaje-usuario .koro-chat-mensaje-burbuja p {
@@ -444,7 +427,7 @@
 
 .koro-chat-mensaje-hora {
     font-size: 11px;
-    color: var(--koro-chat-text-light);
+    color: #ADB5BD;
     padding: 0 4px;
 }
 
@@ -461,7 +444,7 @@
 .koro-chat-escribiendo span {
     width: 8px;
     height: 8px;
-    background: var(--koro-chat-primary);
+    background: #FF8A3D;
     border-radius: 50%;
     animation: koro-chat-escribiendo-bounce 1.4s infinite ease-in-out;
 }
@@ -493,9 +476,9 @@
    INPUT AREA
    ============================================ */
 .koro-chat-input-area {
-    background: var(--koro-chat-bg-white);
+    background: #FFFFFF;
     padding: 16px 20px;
-    border-top: 2px solid var(--koro-chat-border);
+    border-top: 2px solid #FFE4D1;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -512,12 +495,12 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    color: var(--koro-chat-text-gray);
+    color: #6C757D;
 }
 
 .koro-chat-adjunto:hover {
-    background: var(--koro-chat-primary-light);
-    color: var(--koro-chat-primary);
+    background: #FFF5EF;
+    color: #FF8A3D;
     transform: rotate(15deg);
 }
 
@@ -528,33 +511,33 @@
 
 .koro-chat-input {
     flex: 1;
-    border: 2px solid var(--koro-chat-border);
+    border: 2px solid #FFE4D1;
     background: white;
     padding: 12px 16px;
     border-radius: 24px;
     font-size: 14px;
-    color: var(--koro-chat-text-dark);
+    color: #2C3E50;
     outline: none;
     transition: all 0.3s ease;
 }
 
 .koro-chat-input:focus {
-    background: var(--koro-chat-primary-light);
-    border-color: var(--koro-chat-primary);
+    background: #FFF5EF;
+    border-color: #FF8A3D;
     box-shadow: 0 0 0 3px rgba(255, 138, 61, 0.1);
 }
 
 .koro-chat-input::placeholder {
-    color: var(--koro-chat-text-light);
+    color: #ADB5BD;
 }
 
 .koro-chat-input:disabled {
-    background: var(--koro-chat-bg-light);
+    background: #FFF8F3;
     cursor: not-allowed;
 }
 
 .koro-chat-enviar {
-    background: linear-gradient(135deg, var(--koro-chat-primary) 0%, var(--koro-chat-primary-dark) 100%);
+    background: linear-gradient(135deg, #FF8A3D 0%, #E67422 100%);
     border: none;
     width: 40px;
     height: 40px;
@@ -597,8 +580,8 @@
     bottom: -20px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--koro-chat-bg-white);
-    border: 2px solid var(--koro-chat-border);
+    background: #FFFFFF;
+    border: 2px solid #FFE4D1;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -607,20 +590,20 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: var(--koro-chat-shadow-sm);
+    box-shadow: 0 2px 8px rgba(255, 138, 61, 0.1);
     z-index: 10;
 }
 
 .koro-chat-minimizar:hover {
-    background: var(--koro-chat-primary-light);
-    border-color: var(--koro-chat-primary);
+    background: #FFF5EF;
+    border-color: #FF8A3D;
     transform: translateX(-50%) translateY(2px);
 }
 
 .koro-chat-minimizar svg {
     width: 20px;
     height: 20px;
-    color: var(--koro-chat-primary);
+    color: #FF8A3D;
 }
 
 /* ============================================

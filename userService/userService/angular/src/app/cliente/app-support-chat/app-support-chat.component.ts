@@ -47,9 +47,9 @@ export class SupportChatComponent implements OnInit, OnDestroy {
   // Respuestas predefinidas por categoría
   respuestasPredefinidas: { [key: string]: string } = {
     reserva:
-      'Para hacer una reserva, puedes llamarnos al +51 1 234-5678 o usar nuestro sistema de reservas en línea. ¿Para cuántas personas necesitas la reserva?',
+      'Contamos con dos tipos de reserva, simple y especial. ¿De cuál necesitas información?',
     tolerancia:
-      'Tenemos un tiempo de tolerancia de 15 minutos. Pasado ese tiempo, tu mesa podría ser reasignada. Por favor, avísanos si llegarás tarde.',
+      'Tenemos un tiempo de tolerancia promedio de 2 horas. Pasado ese tiempo, tu mesa podría ser reasignada. Por favor, avísanos si llegarás tarde enviando un mensaje a recepcionista.',
     pago: 'Después de realizar el pago anticipado, recibirás una confirmación por email con los detalles de tu reserva. El pago garantiza tu mesa y puede incluir un menú degustación según el plan elegido.',
   };
 
