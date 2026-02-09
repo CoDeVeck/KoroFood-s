@@ -64,7 +64,6 @@ public class UsuarioSoapMapper {
 
     /**
      * Convierte de Entidad JPA a objeto SOAP
-     * NO incluye la contraseña por seguridad
      */
     public com.koroFoods.userServiceSoap.generated.Usuario entidadASoap(Usuario usuario) {
         if (usuario == null) {
@@ -78,7 +77,6 @@ public class UsuarioSoapMapper {
         usuarioSoap.setApePaterno(usuario.getApePaterno());
         usuarioSoap.setApeMaterno(usuario.getApeMaterno());
         usuarioSoap.setCorreo(usuario.getCorreo());
-        // NO mapear la clave por seguridad
         usuarioSoap.setTipoDoc(
         		com.koroFoods.userServiceSoap.generated.TipoDocumentoSoap.valueOf(usuario.getTipoDoc().name())
         );
@@ -92,8 +90,6 @@ public class UsuarioSoapMapper {
         
         if (usuario.getRol() != null) {
             usuarioSoap.setIdRol(usuario.getRol().getIdRol());
-            // Si tienes el nombre del rol disponible
-            // usuarioSoap.setNombreRol(usuario.getRol().getNombre());
         }
         
         usuarioSoap.setActivo(usuario.getActivo());

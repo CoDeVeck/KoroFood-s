@@ -20,60 +20,161 @@
   </div>
 
   <!-- Tabla -->
-  <div *ngIf="!cargando" class="table-container">
-    <table class="tabla-usuarios">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>NOMBRE COMPLETO</th>
-          <th>CORREO</th>
-          <th>DOCUMENTO</th>
-          <th>ROL</th>
-          <th>TELÉFONO</th>
-          <th>ESTADO</th>
-          <th>ACCIONES</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let usuario of usuarios">
-          <td>{{ usuario.idUsuario }}</td>
-          <td>{{ getNombreCompleto(usuario) }}</td>
-          <td>{{ usuario.correo }}</td>
-          <td>
-            <span class="badge-documento">{{ usuario.tipoDoc }}</span>
-            <br>
-            {{ usuario.nroDoc }}
-          </td>
-          <td>
-            <span class="badge-rol" [class.rol-recepcionista]="usuario.idRol === 2"
-              [class.rol-mesero]="usuario.idRol === 3">
-              {{ usuario.nombreRol || obtenerNombreRol(usuario.idRol) }}
-            </span>
-          </td>
-          <td>{{ usuario.telefono || 'N/A' }}</td>
-          <td>
-            <span class="badge-estado" [class.activo]="usuario.activo" [class.inactivo]="!usuario.activo">
-              {{ usuario.activo ? 'Activo' : 'Inactivo' }}
-            </span>
-          </td>
-          <td class="acciones">
-            <button class="btn-editar" (click)="abrirModalEditar(usuario)" title="Editar">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn-estado" [class.btn-activar]="!usuario.activo" [class.btn-desactivar]="usuario.activo"
-              (click)="cambiarEstado(usuario)" [title]="usuario.activo ? 'Desactivar' : 'Activar'">
-              <i class="fas" [class.fa-toggle-off]="!usuario.activo" [class.fa-toggle-on]="usuario.activo"></i>
-            </button>
-          </td>
-        </tr>
-        <tr *ngIf="usuarios.length === 0">
-          <td colspan="8" class="text-center py-4">
-            No hay usuarios registrados
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="filtros-container">
+  <div class="filtros-group">
+    <div class="filtro-item">
+      <label>Rol:</label>
+      <div class="btn-group">
+        <button 
+          class="btn-filtro" 
+          [class.active]="filtroRol === null"
+          (click)="filtrarPorRol(null)">
+          Todos
+        </button>
+        <button 
+          class="btn-filtro" 
+          [class.active]="filtroRol === 2"
+          (click)="filtrarPorRol(2)">
+          Recepcionista
+        </button>
+        <button 
+          class="btn-filtro" 
+          [class.active]="filtroRol === 3"
+          (click)="filtrarPorRol(3)">
+          Mesero
+        </button>
+      </div>
+    </div>
+
+    <div class="filtro-item">
+      <label>Estado:</label>
+      <div class="btn-group">
+        <button 
+          class="btn-filtro" 
+          [class.active]="filtroEstado === null"
+          (click)="filtrarPorEstado(null)">
+          Todos
+        </button>
+        <button 
+          class="btn-filtro" 
+          [class.active]="filtroEstado === true"
+          (click)="filtrarPorEstado(true)">
+          Activos
+        </button>
+        <button 
+          class="btn-filtro" 
+          [class.active]="filtroEstado === false"
+          (click)="filtrarPorEstado(false)">
+          Inactivos
+        </button>
+      </div>
+    </div>
+
+    <button 
+      class="btn-limpiar" 
+      (click)="limpiarFiltros()"
+      *ngIf="filtroRol !== null || filtroEstado !== null">
+      <i class="fas fa-times"></i> Limpiar filtros
+    </button>
   </div>
+</div>
+
+<div *ngIf="!cargando" class="table-container">
+  <table class="tabla-usuarios">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>NOMBRE COMPLETO</th>
+        <th>CORREO</th>
+        <th>DOCUMENTO</th>
+        <th>ROL</th>
+        <th>TELÉFONO</th>
+        <th>ESTADO</th>
+        <th>ACCIONES</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let usuario of usuariosPaginados">
+        <td>{{ usuario.idUsuario }}</td>
+        <td>{{ getNombreCompleto(usuario) }}</td>
+        <td>{{ usuario.correo }}</td>
+        <td>
+          <span class="badge-documento">{{ usuario.tipoDoc }}</span>
+          <br>
+          {{ usuario.nroDoc }}
+        </td>
+        <td>
+          <span class="badge-rol" 
+            [class.rol-recepcionista]="usuario.idRol === 2"
+            [class.rol-mesero]="usuario.idRol === 3">
+            {{ usuario.nombreRol || obtenerNombreRol(usuario.idRol) }}
+          </span>
+        </td>
+        <td>{{ usuario.telefono || 'N/A' }}</td>
+        <td>
+          <span class="badge-estado" 
+            [class.activo]="usuario.activo" 
+            [class.inactivo]="!usuario.activo">
+            {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+          </span>
+        </td>
+        <td class="acciones">
+          <button class="btn-editar" (click)="abrirModalEditar(usuario)" title="Editar">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="btn-estado" 
+            [class.btn-activar]="!usuario.activo" 
+            [class.btn-desactivar]="usuario.activo"
+            (click)="cambiarEstado(usuario)" 
+            [title]="usuario.activo ? 'Desactivar' : 'Activar'">
+            <i class="fas" 
+              [class.fa-toggle-off]="!usuario.activo" 
+              [class.fa-toggle-on]="usuario.activo"></i>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="usuariosPaginados.length === 0">
+        <td colspan="8" class="text-center py-4">
+          No hay usuarios que coincidan con los filtros
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Paginación -->
+  <div class="paginacion" *ngIf="totalPaginas > 1">
+    <button 
+      class="btn-pag" 
+      (click)="cambiarPagina(paginaActual - 1)"
+      [disabled]="paginaActual === 1">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+
+    <button 
+      *ngFor="let pagina of paginasArray"
+      class="btn-pag" 
+      [class.active]="pagina === paginaActual"
+      (click)="cambiarPagina(pagina)">
+      {{ pagina }}
+    </button>
+
+    <button 
+      class="btn-pag" 
+      (click)="cambiarPagina(paginaActual + 1)"
+      [disabled]="paginaActual === totalPaginas">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+
+    <span class="paginacion-info">
+      Página {{ paginaActual }} de {{ totalPaginas }} 
+      ({{ usuariosFiltrados.length }} usuarios)
+    </span>
+  </div>
+</div>
+
+<div *ngIf="cargando" class="loading-container">
+  <i class="fas fa-spinner fa-spin"></i> Cargando...
+</div>
 
   <!-- Modal -->
   <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">

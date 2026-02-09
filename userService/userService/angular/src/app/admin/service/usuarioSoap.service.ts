@@ -37,7 +37,6 @@ export class UsuarioSoapService {
     return element ? element.textContent || '' : '';
   }
 
-  // ================= CREAR USUARIO =================
   crearUsuario(
     data: UsuarioSoap,
   ): Observable<RespuestaSoap & { idUsuario?: number }> {
@@ -67,7 +66,6 @@ export class UsuarioSoapService {
         const parser = new DOMParser();
         const doc = this.parseXmlResponse(response, parser);
 
-        // Leer ignorando namespaces
         const exitosoNode = Array.from(doc.getElementsByTagName('*')).find(
           (n) => n.localName === 'exitoso',
         );
@@ -130,7 +128,6 @@ export class UsuarioSoapService {
         const parser = new DOMParser();
         const doc = parser.parseFromString(response, 'text/xml');
 
-        // Buscar todos los elementos <usuarios> en el namespace
         const usuariosElements = doc.getElementsByTagNameNS(
           this.NAMESPACE,
           'usuarios',

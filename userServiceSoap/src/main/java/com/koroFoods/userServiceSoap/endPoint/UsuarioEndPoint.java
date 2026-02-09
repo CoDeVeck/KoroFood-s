@@ -33,7 +33,7 @@ public class UsuarioEndPoint {
         Respuesta respuesta = new Respuesta();
 
         try {
-            // Validar contraseña
+            // Validación mínima
             if (request.getClave() == null || request.getClave().trim().isEmpty()) {
                 respuesta.setExitoso(false);
                 respuesta.setMensaje("La contraseña es obligatoria");
@@ -42,7 +42,8 @@ public class UsuarioEndPoint {
                 return response;
             }
 
-            // Mapear usando el mapper
+            String nombreRol = obtenerNombreRol(request.getIdRol());
+
             Usuario usuario = mapper.crearRequestAEntidad(
                 request.getNombres(),
                 request.getApePaterno(),
@@ -57,12 +58,10 @@ public class UsuarioEndPoint {
                 request.getIdRol()
             );
 
-            // Crear usuario (service encripta la contraseña)
             Usuario usuarioCreado = usuarioService.crearUsuario(usuario);
 
-            // Preparar respuesta
             respuesta.setExitoso(true);
-            respuesta.setMensaje("Usuario creado exitosamente");
+            respuesta.setMensaje(nombreRol + " creado exitosamente");
             respuesta.setCodigo("OK_001");
             response.setRespuesta(respuesta);
             response.setUsuario(mapper.entidadASoap(usuarioCreado));
@@ -76,6 +75,7 @@ public class UsuarioEndPoint {
 
         return response;
     }
+
 
     // ==================== LISTAR USUARIOS ====================
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "listarUsuariosRequest")
@@ -206,4 +206,18 @@ public class UsuarioEndPoint {
 
         return response;
     }
+    
+    private String obtenerNombreRol(Integer idRol) {
+        if (idRol == null) return "Usuario";
+
+        switch (idRol) {
+            case 3:
+                return "Mesero";
+            case 2:
+                return "Recepcionista";
+            default:
+                return "Usuario";
+        }
+    }
+
 }

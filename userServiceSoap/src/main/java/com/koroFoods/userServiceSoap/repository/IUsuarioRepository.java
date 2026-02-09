@@ -13,10 +13,12 @@ Optional<Usuario> findByCorreo(String correo);
     Optional<Usuario> findByNroDoc(String nroDoc);
     
     List<Usuario> findByRol_IdRol(Integer idRol);
-    
+
     List<Usuario> findByActivo(Boolean activo);
-    
+
     List<Usuario> findByRol_IdRolAndActivo(Integer idRol, Boolean activo);
-    
+
     List<Usuario> findByRol_IdRolIn(List<Integer> roles);
+
+    List<Usuario> findByRol_IdRolInAndActivo(List<Integer> roles, Boolean activo);
 }

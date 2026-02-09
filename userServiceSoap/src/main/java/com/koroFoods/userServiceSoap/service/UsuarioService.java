@@ -41,19 +41,21 @@ public class UsuarioService {
 
     public List<Usuario> listarUsuarios(Integer idRol, Boolean activo) {
 
+        List<Integer> rolesPermitidos = Arrays.asList(2, 3);
+
         if (idRol != null && activo != null) {
-            return usuarioRepository.findByRol_IdRolAndActivo(idRol, activo);
+            return usuarioRepository.findByRol_IdRolInAndActivo(rolesPermitidos, activo);
         }
 
         if (idRol != null) {
-            return usuarioRepository.findByRol_IdRol(idRol);
+            return usuarioRepository.findByRol_IdRolIn(rolesPermitidos);
         }
 
         if (activo != null) {
-            return usuarioRepository.findByActivo(activo);
+            return usuarioRepository.findByRol_IdRolInAndActivo(rolesPermitidos, activo);
         }
 
-        return usuarioRepository.findByRol_IdRolIn(Arrays.asList(2, 3));
+        return usuarioRepository.findByRol_IdRolIn(rolesPermitidos);
     }
 
 
