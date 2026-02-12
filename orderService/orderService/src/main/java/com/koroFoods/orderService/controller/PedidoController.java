@@ -3,16 +3,11 @@ package com.koroFoods.orderService.controller;
 import java.util.List;
 
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
+import com.koroFoods.orderService.dto.response.DetallePedidoResponse;
 import com.koroFoods.orderService.model.DetallePedido;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.koroFoods.orderService.dto.PedidoRequestDTO;
 import com.koroFoods.orderService.dto.PedidoResumenDto;
@@ -27,33 +22,33 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/pedido")
 public class PedidoController {
-	private final PedidoService pedidoService;
+    private final PedidoService pedidoService;
 
-	@GetMapping
-	public ResponseEntity<ResultadoResponse<List<PedidoResumenDto>>> list(
-	        @RequestParam(required = false) EstadoPedido estado) {
-	    ResultadoResponse<List<PedidoResumenDto>> resultado = pedidoService.listarPedidos(estado);
+    @GetMapping
+    public ResponseEntity<ResultadoResponse<List<PedidoResumenDto>>> list(
+            @RequestParam(required = false) EstadoPedido estado) {
+        ResultadoResponse<List<PedidoResumenDto>> resultado = pedidoService.listarPedidos(estado);
 
-	    if(resultado.isValor()) {
-	        return ResponseEntity.ok(resultado);
-	    } else {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
-	    }
-	}
+        if (resultado.isValor()) {
+            return ResponseEntity.ok(resultado);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+        }
+    }
 
-	
-	@PostMapping
-	public ResponseEntity<ResultadoResponse<Pedido>> crearPedido(@RequestBody PedidoRequestDTO dto) {
-		ResultadoResponse<Pedido> resultado = pedidoService.crearPedido(dto);
-		if (resultado.isValor()) {
-	        return ResponseEntity.status(HttpStatus.CREATED).body(resultado); 
-	    } else {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
-	    }
-	}
+
+    @PostMapping
+    public ResponseEntity<ResultadoResponse<Pedido>> crearPedido(@RequestBody PedidoRequestDTO dto) {
+        ResultadoResponse<Pedido> resultado = pedidoService.crearPedido(dto);
+        if (resultado.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+        }
+    }
 
     @PostMapping("/newPlato")
-    public ResponseEntity<ResultadoResponse<DetallePedido>> agregarPlatoOrden(@RequestBody DetallePedidoRequest request){
+    public ResponseEntity<ResultadoResponse<DetallePedido>> agregarPlatoOrden(@RequestBody DetallePedidoRequest request) {
         ResultadoResponse<DetallePedido> resultado = pedidoService.registrarPlato(request);
         if (resultado.isValor()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
@@ -62,4 +57,34 @@ public class PedidoController {
         }
     }
 
+    @GetMapping("/list/{pedidoId}")
+    public ResponseEntity<ResultadoResponse<List<DetallePedidoResponse>>> agregarPlatoOrden(@PathVariable Integer pedidoId) {
+        ResultadoResponse<List<DetallePedidoResponse>> lista = pedidoService.obtenerDetallePorPedido(pedidoId);
+        if (lista.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(lista);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(lista);
+        }
+    }
+
+    @PutMapping("/ent/{idDetalle}")
+    public ResponseEntity<ResultadoResponse<DetallePedido>> cambiarEstadoEntregado(@PathVariable Integer idDetalle){
+        ResultadoResponse<DetallePedido> cambiado = pedidoService.cambiarEstadoAEntregado(idDetalle);
+        if (cambiado.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(cambiado);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cambiado);
+        }
+    }
+
+    @PutMapping("/can/{idDetalle}")
+    public ResponseEntity<ResultadoResponse<DetallePedido>> cambiarEstadoCancelado(@PathVariable Integer idDetalle){
+        ResultadoResponse<DetallePedido> cambiado = pedidoService.cambiarEstadoACancelado(idDetalle);
+        if (cambiado.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(cambiado);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cambiado);
+        }
+    }
 }
+

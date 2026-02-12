@@ -5,6 +5,7 @@ import com.koroFoods.orderService.dto.PedidoResumenDto;
 import com.koroFoods.orderService.dto.PedidoRequestDTO;
 import com.koroFoods.orderService.dto.ResultadoResponse;
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
+import com.koroFoods.orderService.dto.response.DetallePedidoResponse;
 import com.koroFoods.orderService.enums.EstadoDetallePedido;
 import com.koroFoods.orderService.enums.EstadoPedido;
 import com.koroFoods.orderService.feign.MesaFeignClient;
@@ -206,5 +207,92 @@ public class PedidoService {
         pedido.setSubtotal(pedido.getSubtotal().add(nuevoSubtotal));
         pedido.setTotal(pedido.getTotal().add(nuevoSubtotal));
         pedidoRepository.save(pedido);
+    }
+
+
+    public ResultadoResponse<List<DetallePedidoResponse>> obtenerDetallePorPedido(Integer pedidoId) {
+
+        validarId(pedidoId);
+
+        List<DetallePedido> detalles =
+                detallePedidoRepository.findByIdPedidoDescEstado(pedidoId);
+        List<DetallePedidoResponse> response =
+                detalles
+                        .stream()
+                        .map(this::mapToResponse)
+                        .toList();
+        return ResultadoResponse.success("Lista Obtenida! " ,response);
+
+    }
+
+    private DetallePedidoResponse mapToResponse(DetallePedido dp){
+
+        var platoObtenido = platoFeignClient.getDishById(dp.getIdPlato());
+        var platoData =  platoObtenido.getData();
+
+        DetallePedidoResponse rs = new DetallePedidoResponse();
+
+        rs.setIdDetalle(dp.getIdDetalle());
+        rs.setIdPedido(dp.getIdPedido());
+        rs.setIdPlato(dp.getIdPlato());
+
+        rs.setImagen(platoData.getImagen());
+        rs.setNombre(platoData.getNombre());
+
+        rs.setCantidad(dp.getCantidad());
+        rs.setEstado(dp.getEstado());
+        rs.setPrecioUnitario(dp.getPrecioUnitario());
+        rs.setSubtotal(dp.getSubtotal());
+        return rs;
+    }
+
+    @Transactional
+    public ResultadoResponse<DetallePedido> cambiarEstadoAEntregado(Integer idDetalle){
+
+        validarId(idDetalle);
+
+        DetallePedido dp = detallePedidoRepository.findById(idDetalle)
+                .orElseThrow(() -> new RuntimeException("Error al obetner el detalle: " + idDetalle));
+
+        validarEstadoParaEntregar(dp.getEstado());
+
+        dp.setEstado(EstadoDetallePedido.ENT);
+        detallePedidoRepository.save(dp);
+
+        return ResultadoResponse.success("Se actualizo al estado Entregado" , dp);
+    }
+
+     @Transactional
+     public ResultadoResponse<DetallePedido> cambiarEstadoACancelado(Integer idDetalle){
+
+         validarId(idDetalle);
+
+         DetallePedido dp = detallePedidoRepository.findById(idDetalle)
+                 .orElseThrow(() -> new RuntimeException("Error al obetner el detalle: " + idDetalle));
+
+         validarEstadoParaCancelar(dp.getEstado());
+
+         dp.setEstado(EstadoDetallePedido.CAN);
+         detallePedidoRepository.save(dp);
+
+         return ResultadoResponse.success("Cancelaste este plato" , dp);
+     }
+
+    private void validarId(Integer request){
+        if (request == null ||request <= 0) {
+            throw new IllegalArgumentException("ID invalido");
+        }
+    }
+
+    private void validarEstadoParaEntregar(EstadoDetallePedido estado){
+        if (estado.equals(EstadoDetallePedido.CAN)|| estado.equals(EstadoDetallePedido.ENT) ){
+            throw new RuntimeException("El estado no puede estar cancelado para poder entregar");
+        }
+    }
+
+    private void validarEstadoParaCancelar(EstadoDetallePedido estado){
+        if (estado.equals(EstadoDetallePedido.ENT) || estado.equals(EstadoDetallePedido.CAN)){
+            throw new RuntimeException("El estado no puede estar entregado para poder cancelar");
+        }
     }
 }
