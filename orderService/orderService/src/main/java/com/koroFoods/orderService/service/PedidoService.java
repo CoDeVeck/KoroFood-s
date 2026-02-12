@@ -212,8 +212,12 @@ public class PedidoService {
     public ResultadoResponse<List<DetallePedido>> obtenerDetallePorPedido(Integer pedidoId) {
 
         List<DetallePedido> lista = null;
-        if (pedidoId != null || pedidoId > 0) {
-            lista = detallePedidoRepository.findByIdPedidoDescEstado(pedidoId);
+        Pedido validarPedido = obtenerPedido(pedidoId);
+
+        Integer idPedidoExistente = validarPedido.getIdPedido();
+
+        if (idPedidoExistente != null ||idPedidoExistente > 0) {
+            lista = detallePedidoRepository.findByIdPedidoDescEstado(idPedidoExistente);
 
             return ResultadoResponse.success("Lista obtenida", lista);
         }
