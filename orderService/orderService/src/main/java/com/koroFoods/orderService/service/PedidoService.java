@@ -207,4 +207,20 @@ public class PedidoService {
         pedido.setTotal(pedido.getTotal().add(nuevoSubtotal));
         pedidoRepository.save(pedido);
     }
+
+
+    public ResultadoResponse<List<DetallePedido>> obtenerDetallePorPedido(Integer pedidoId) {
+
+        List<DetallePedido> lista = null;
+        if (pedidoId != null || pedidoId > 0) {
+            lista = detallePedidoRepository.findByIdPedidoDescEstado(pedidoId);
+
+            return ResultadoResponse.success("Lista obtenida", lista);
+        }
+
+        return ResultadoResponse.error("Error al obtener la lista" ,lista);
+
+    }
+
+
 }

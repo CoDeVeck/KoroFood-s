@@ -27,33 +27,33 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/pedido")
 public class PedidoController {
-	private final PedidoService pedidoService;
+    private final PedidoService pedidoService;
 
-	@GetMapping
-	public ResponseEntity<ResultadoResponse<List<PedidoResumenDto>>> list(
-	        @RequestParam(required = false) EstadoPedido estado) {
-	    ResultadoResponse<List<PedidoResumenDto>> resultado = pedidoService.listarPedidos(estado);
+    @GetMapping
+    public ResponseEntity<ResultadoResponse<List<PedidoResumenDto>>> list(
+            @RequestParam(required = false) EstadoPedido estado) {
+        ResultadoResponse<List<PedidoResumenDto>> resultado = pedidoService.listarPedidos(estado);
 
-	    if(resultado.isValor()) {
-	        return ResponseEntity.ok(resultado);
-	    } else {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
-	    }
-	}
+        if (resultado.isValor()) {
+            return ResponseEntity.ok(resultado);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+        }
+    }
 
-	
-	@PostMapping
-	public ResponseEntity<ResultadoResponse<Pedido>> crearPedido(@RequestBody PedidoRequestDTO dto) {
-		ResultadoResponse<Pedido> resultado = pedidoService.crearPedido(dto);
-		if (resultado.isValor()) {
-	        return ResponseEntity.status(HttpStatus.CREATED).body(resultado); 
-	    } else {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
-	    }
-	}
+
+    @PostMapping
+    public ResponseEntity<ResultadoResponse<Pedido>> crearPedido(@RequestBody PedidoRequestDTO dto) {
+        ResultadoResponse<Pedido> resultado = pedidoService.crearPedido(dto);
+        if (resultado.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+        }
+    }
 
     @PostMapping("/newPlato")
-    public ResponseEntity<ResultadoResponse<DetallePedido>> agregarPlatoOrden(@RequestBody DetallePedidoRequest request){
+    public ResponseEntity<ResultadoResponse<DetallePedido>> agregarPlatoOrden(@RequestBody DetallePedidoRequest request) {
         ResultadoResponse<DetallePedido> resultado = pedidoService.registrarPlato(request);
         if (resultado.isValor()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
@@ -62,4 +62,14 @@ public class PedidoController {
         }
     }
 
+    @GetMapping("/list/{pedidoId}")
+    public ResponseEntity<ResultadoResponse<List<DetallePedido>>> agregarPlatoOrden(@PathVariable Integer pedidoId) {
+        ResultadoResponse<List<DetallePedido>> lista = pedidoService.obtenerDetallePorPedido(pedidoId);
+        if (lista.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(lista);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(lista);
+        }
+    }
 }
+
