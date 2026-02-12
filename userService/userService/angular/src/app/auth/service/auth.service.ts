@@ -17,10 +17,10 @@ import { UserService } from '../../cliente/service/user.service';
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = `${enviroment.apiUrls.usuarios}/auth/login`;
-  private registerUrl = `${enviroment.apiUrls.usuarios}/auth/register`;
-  private userUrl = `${enviroment.apiUrls.usuarios}/auth/me`;
-  private completarRegistroUrl = `${enviroment.apiUrls.usuarios}/auth/social/register`;
+  private apiUrl = `${enviroment.apigateway}/auth/login`;
+  private registerUrl = `${enviroment.apigateway}/auth/register`;
+  private userUrl = `${enviroment.apigateway}/auth/me`;
+  private completarRegistroUrl = `${enviroment.apigateway}/auth/social/register`;
 
   constructor(
     private http: HttpClient,

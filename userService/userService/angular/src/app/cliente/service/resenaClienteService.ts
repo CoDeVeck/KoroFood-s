@@ -11,7 +11,7 @@ import { enviroment } from '../../../enviroments/enviroment';
   providedIn: 'root',
 })
 export class ResenaClienteService {
-  private baseUrl = `${enviroment.apiUrls.resenas}/calificacion`;
+  private baseUrl = `${enviroment.apigateway}/calificacion`;
 
   constructor(private http: HttpClient) {}
 

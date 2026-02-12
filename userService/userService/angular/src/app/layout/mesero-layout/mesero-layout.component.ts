@@ -8,6 +8,7 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { filter } from 'rxjs';
+import { AuthService } from '../../auth/service/auth.service';
 
 @Component({
   selector: 'app-mesero-layout',
@@ -18,7 +19,7 @@ import { filter } from 'rxjs';
 export class MeseroLayoutComponent {
   sidebarCollapsed = false;
   currentTime = new Date();
-  userName = 'Carlos Mendoza';
+  userName = '';
 
   pageTitles: { [key: string]: string } = {
     '/mesero/ordenes': 'Órdenes',
@@ -30,18 +31,55 @@ export class MeseroLayoutComponent {
 
   currentRoute = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+  ) {}
 
   ngOnInit(): void {
+    // reloj
     setInterval(() => {
       this.currentTime = new Date();
     }, 60000);
 
+    // cambiar título según ruta
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((event: any) => {
         this.currentRoute = event.url;
       });
+
+    // Evitar error de localStorage en SSR
+    if (typeof window === 'undefined') {
+      console.warn('SSR detectado — no se ejecutará getUsuario()');
+      this.userName = 'Usuario';
+      return;
+    }
+
+    // Si no hay token, evita error
+    const token = this.authService.getToken();
+    if (!token) {
+      this.userName = 'Usuario';
+      return;
+    }
+
+    // obtener usuario
+    this.authService.getUsuario().subscribe({
+  next: (u: any) => {
+    console.log('usuario data', u); 
+    if (u) {
+      this.userName = `${u.nombres} ${u.apePaterno}`;
+      console.log('usuario es:', this.userName);
+    } else {
+      this.userName = 'Usuario';
+    }
+  },
+  error: (err) => {
+    console.error('Error obteniendo usuario:', err);
+    this.userName = 'Usuario';
+  },
+});
+
   }
 
   toggleSidebar(): void {
@@ -57,12 +95,11 @@ export class MeseroLayoutComponent {
   }
 
   getPageTitle(): string {
-    return this.pageTitles[this.currentRoute] || 'Ordenes';
+    return this.pageTitles[this.currentRoute] || 'Órdenes';
   }
 
   logout(): void {
-    // Implementar lógica de logout
-    console.log('Cerrando sesión...');
-    this.router.navigate(['/login']);
+    this.authService.logout();
+    this.router.navigate(['/cliente/inicio']);
   }
 }

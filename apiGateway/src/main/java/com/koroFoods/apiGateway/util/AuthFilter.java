@@ -27,7 +27,9 @@ public class AuthFilter implements GlobalFilter, Ordered {
             "/cliente/index",
             "/evento/feign",
             "/menu/feign",
+            "/menu",
             "/calificacion",
+            "/user/feign/noauth/**",
             "/ws/**"
         );
 
@@ -96,7 +98,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isPublicPath(String path) {
-        return PUBLIC_PATHS.stream().anyMatch(path::contains);
+        return PUBLIC_PATHS.stream()
+                .anyMatch(publicPath -> path.startsWith(publicPath.replace("/**", "")));
     }
 
     private Mono<Void> onError(ServerWebExchange exchange, String message, HttpStatus status) {

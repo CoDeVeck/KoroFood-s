@@ -1,5 +1,6 @@
 export const enviroment = {
   production: false,
+  apigateway: 'http://localhost:8098',
   apiUrls: {
     usuarios: 'http://localhost:8081',
     menu: 'http://localhost:8087',

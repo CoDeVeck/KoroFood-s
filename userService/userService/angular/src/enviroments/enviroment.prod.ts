@@ -1,5 +1,6 @@
 export const enviroment = {
   production: true,
+  apigateway: 'http://dominio.com/gateway',
   apiUrls: {
     usuarios: 'https://dominio.com/usuarios',
     menu: 'https://dominio.com/menu',
