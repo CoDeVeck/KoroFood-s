@@ -3,6 +3,7 @@ package com.koroFoods.orderService.controller;
 import java.util.List;
 
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
+import com.koroFoods.orderService.dto.response.DetallePedidoResponse;
 import com.koroFoods.orderService.model.DetallePedido;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,8 +64,8 @@ public class PedidoController {
     }
 
     @GetMapping("/list/{pedidoId}")
-    public ResponseEntity<ResultadoResponse<List<DetallePedido>>> agregarPlatoOrden(@PathVariable Integer pedidoId) {
-        ResultadoResponse<List<DetallePedido>> lista = pedidoService.obtenerDetallePorPedido(pedidoId);
+    public ResponseEntity<ResultadoResponse<List<DetallePedidoResponse>>> agregarPlatoOrden(@PathVariable Integer pedidoId) {
+        ResultadoResponse<List<DetallePedidoResponse>> lista = pedidoService.obtenerDetallePorPedido(pedidoId);
         if (lista.isValor()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(lista);
         } else {

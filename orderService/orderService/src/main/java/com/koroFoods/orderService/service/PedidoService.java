@@ -5,6 +5,7 @@ import com.koroFoods.orderService.dto.PedidoResumenDto;
 import com.koroFoods.orderService.dto.PedidoRequestDTO;
 import com.koroFoods.orderService.dto.ResultadoResponse;
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
+import com.koroFoods.orderService.dto.response.DetallePedidoResponse;
 import com.koroFoods.orderService.enums.EstadoDetallePedido;
 import com.koroFoods.orderService.enums.EstadoPedido;
 import com.koroFoods.orderService.feign.MesaFeignClient;
@@ -209,22 +210,42 @@ public class PedidoService {
     }
 
 
-    public ResultadoResponse<List<DetallePedido>> obtenerDetallePorPedido(Integer pedidoId) {
+    public ResultadoResponse<List<DetallePedidoResponse>> obtenerDetallePorPedido(Integer pedidoId) {
 
-        List<DetallePedido> lista = null;
-        Pedido validarPedido = obtenerPedido(pedidoId);
-
-        Integer idPedidoExistente = validarPedido.getIdPedido();
-
-        if (idPedidoExistente != null ||idPedidoExistente > 0) {
-            lista = detallePedidoRepository.findByIdPedidoDescEstado(idPedidoExistente);
-
-            return ResultadoResponse.success("Lista obtenida", lista);
+        if (pedidoId == null ||pedidoId <= 0) {
+            return ResultadoResponse.error("Id Invalido", null);
         }
 
-        return ResultadoResponse.error("Error al obtener la lista" ,lista);
+        List<DetallePedido> detalles =
+                detallePedidoRepository.findByIdPedidoDescEstado(pedidoId);
+        List<DetallePedidoResponse> response =
+                detalles
+                        .stream()
+                        .map(this::mapToResponse)
+                        .toList();
+        return ResultadoResponse.success("Lista Obtenida! " ,response);
 
     }
 
+    private DetallePedidoResponse mapToResponse(DetallePedido dp){
+
+        var platoObtenido = platoFeignClient.getDishById(dp.getIdPlato());
+        var platoData =  platoObtenido.getData();
+
+        DetallePedidoResponse rs = new DetallePedidoResponse();
+
+        rs.setIdDetalle(dp.getIdDetalle());
+        rs.setIdPedido(dp.getIdPedido());
+        rs.setIdPlato(dp.getIdPlato());
+
+        rs.setImagen(platoData.getImagen());
+        rs.setNombre(platoData.getNombre());
+
+        rs.setCantidad(dp.getCantidad());
+        rs.setEstado(dp.getEstado());
+        rs.setPrecioUnitario(dp.getPrecioUnitario());
+        rs.setSubtotal(dp.getSubtotal());
+        return rs;
+    }
 
 }
