@@ -39,7 +39,7 @@ interface PlatoSeleccionado {
   ],
 })
 export class FormOrdenComponent implements OnInit {
-  currentStep = 1;
+ currentStep = 1;
 
   reservaSearchId: string | null = null;
   reservaEncontrada: ReservaDto | null = null;
@@ -54,6 +54,11 @@ export class FormOrdenComponent implements OnInit {
   filtroPlato = '';
   filtroTipo = '';
   tiposPlato: string[] = [];
+
+  // Propiedades de paginación
+  paginaActual = 1;
+  platosPorPagina = 12; 
+  totalPaginas = 0;
 
   creandoOrden = false;
   ordenCreada: any = null;
@@ -110,6 +115,7 @@ export class FormOrdenComponent implements OnInit {
           this.platos = response.data;
           this.platosFiltrados = [...this.platos];
           this.extraerTiposPlato();
+          this.calcularTotalPaginas();
         } else {
           this.errorPlatos = response.mensaje || 'Error al cargar platos';
         }
@@ -142,7 +148,58 @@ export class FormOrdenComponent implements OnInit {
       filtrados = filtrados.filter((p) => p.tipoPlato === this.filtroTipo);
     }
 
-    return filtrados;
+    // Recalcular paginación cuando cambian los filtros
+    this.calcularTotalPaginas(filtrados.length);
+    
+    // Aplicar paginación
+    const inicio = (this.paginaActual - 1) * this.platosPorPagina;
+    const fin = inicio + this.platosPorPagina;
+    
+    return filtrados.slice(inicio, fin);
+  }
+
+  calcularTotalPaginas(totalItems?: number): void {
+    const total = totalItems ?? this.platos.length;
+    this.totalPaginas = Math.ceil(total / this.platosPorPagina);
+    
+    // Ajustar página actual si está fuera de rango
+    if (this.paginaActual > this.totalPaginas) {
+      this.paginaActual = Math.max(1, this.totalPaginas);
+    }
+  }
+
+  cambiarPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaActual = pagina;
+      // Scroll suave hacia arriba del grid
+      document.querySelector('.platos-grid')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  get paginasArray(): number[] {
+    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+  }
+
+  // Método para obtener rango de páginas visible (evita mostrar 100 botones)
+  get paginasVisibles(): number[] {
+    const maxPaginas = 5; // Mostrar máximo 5 números de página
+    const mitad = Math.floor(maxPaginas / 2);
+    
+    let inicio = Math.max(1, this.paginaActual - mitad);
+    let fin = Math.min(this.totalPaginas, inicio + maxPaginas - 1);
+    
+    // Ajustar inicio si estamos cerca del final
+    if (fin - inicio < maxPaginas - 1) {
+      inicio = Math.max(1, fin - maxPaginas + 1);
+    }
+    
+    return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
+  }
+
+  // Llamar esto cuando cambien los filtros
+  aplicarFiltros(): void {
+    this.paginaActual = 1; // Resetear a página 1 al filtrar
+    this.platosFiltradosMetodo();
   }
 
   agregarPlato(plato: PlatoDto): void {

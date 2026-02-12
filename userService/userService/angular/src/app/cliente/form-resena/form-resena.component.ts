@@ -10,12 +10,12 @@ import {
 import { PlatoDto } from '../../shared/dto/PlatoDto';
 import { EventoDto } from '../../shared/dto/EventoDto';
 import { TipoEntidad } from '../../shared/enums/tipoEntidad.enum';
-
 import { ResenaRequest } from '../../shared/dto/ResenaRequest';
 import { AlertService } from '../../util/alert.service';
 import { ResenaClienteService } from '../service/resenaClienteService';
 import { MenuClienteService } from '../service/menuClienteService';
 import { EventoClienteService } from '../service/eventoClienteService';
+import { AuthService } from '../../auth/service/auth.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -25,7 +25,7 @@ import { Router } from '@angular/router';
   templateUrl: './form-resena.component.html',
   styleUrl: './form-resena.component.css',
 })
-export class FormResenaComponent {
+export class FormResenaComponent implements OnInit {
   resenaForm!: FormGroup;
   isSubmitting = false;
   showSuccess = false;
@@ -47,23 +47,30 @@ export class FormResenaComponent {
   currentPage: number = 1;
   itemsPerPage: number = 6;
 
+  // Propiedades de autenticación
+  isLoggedIn: boolean = false;
+  currentUserId: number | null = null;
+  isLoadingUser: boolean = true;
+
   constructor(
     private fb: FormBuilder,
     private resenaService: ResenaClienteService,
     private menuService: MenuClienteService,
     private eventoService: EventoClienteService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit() {
     this.initForm();
+    this.verificarAutenticacion();
     this.cargarPlatos();
     this.cargarEventos();
   }
 
   initForm() {
     this.resenaForm = this.fb.group({
-      idUsuario: [1, Validators.required],
+      idUsuario: [null, Validators.required],
       tipoEntidad: ['', Validators.required],
       idEntidad: ['', Validators.required],
       calificacion: [
@@ -79,6 +86,41 @@ export class FormResenaComponent {
         ],
       ],
     });
+  }
+
+  // Verificar si el usuario está autenticado
+  verificarAutenticacion() {
+    const token = this.authService.getToken();
+    
+    if (!token) {
+      this.isLoggedIn = false;
+      this.isLoadingUser = false;
+      console.log('Usuario no autenticado - Modo solo lectura');
+      return;
+    }
+
+    this.authService.getUsuario().subscribe({
+      next: (response) => {
+        console.log('Usuario autenticado:', response);
+        this.isLoggedIn = true;
+        this.currentUserId = response.idUsuario || response.id;
+        this.resenaForm.patchValue({ idUsuario: this.currentUserId });
+        this.isLoadingUser = false;
+      },
+      error: (error) => {
+        console.error('Error al verificar autenticación:', error);
+        this.isLoggedIn = false;
+        this.isLoadingUser = false;
+        // Limpiar token si es inválido
+        localStorage.removeItem('auth_token');
+      },
+    });
+  }
+
+  // Redirigir al login
+  redirectToLogin() {
+    AlertService.info('Debes iniciar sesión para dejar una reseña');
+    this.router.navigate(['/login']);
   }
 
   // Type Guards
@@ -119,11 +161,16 @@ export class FormResenaComponent {
 
   // Rating Stars
   setRating(rating: number) {
+    if (!this.isLoggedIn) {
+      this.redirectToLogin();
+      return;
+    }
     this.selectedRating = rating;
     this.resenaForm.patchValue({ calificacion: rating });
   }
 
   hoverRating(rating: number) {
+    if (!this.isLoggedIn) return;
     this.hoveredRating = rating;
   }
 
@@ -168,6 +215,10 @@ export class FormResenaComponent {
   }
 
   selectItemFromModal() {
+    if (!this.isLoggedIn) {
+      this.redirectToLogin();
+      return;
+    }
     if (this.selectedItem) {
       const id = this.getItemId(this.selectedItem);
       this.resenaForm.patchValue({ idEntidad: id });
@@ -216,6 +267,11 @@ export class FormResenaComponent {
 
   // Submit
   onSubmit() {
+    if (!this.isLoggedIn) {
+      this.redirectToLogin();
+      return;
+    }
+
     if (this.resenaForm.invalid) {
       this.markFormGroupTouched(this.resenaForm);
       return;
@@ -251,7 +307,7 @@ export class FormResenaComponent {
 
   resetForm() {
     this.resenaForm.reset({
-      idUsuario: 1, // por default por el momento
+      idUsuario: this.currentUserId,
       tipoEntidad: '',
       idEntidad: '',
       calificacion: 0,
@@ -266,6 +322,7 @@ export class FormResenaComponent {
       control?.markAsTouched();
     });
   }
+
   get entidadesFiltradas(): (PlatoDto | EventoDto)[] {
     const tipo = this.resenaForm.get('tipoEntidad')?.value;
     const entidades = tipo === TipoEntidad.PLATO ? this.platos : this.eventos;
@@ -281,62 +338,57 @@ export class FormResenaComponent {
     );
   }
 
-  // Entidades paginadas
   get entidadesPaginadas(): (PlatoDto | EventoDto)[] {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
     return this.entidadesFiltradas.slice(startIndex, endIndex);
   }
 
-  // Total de páginas
   get totalPages(): number {
     return Math.ceil(this.entidadesFiltradas.length / this.itemsPerPage);
   }
 
-  // Array de páginas para la paginación
   get pages(): number[] {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
-  // Cambiar página
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
     }
   }
 
-  // Página anterior
   previousPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
     }
   }
 
-  // Página siguiente
   nextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
     }
   }
 
-  // Limpiar búsqueda
   clearSearch() {
     this.searchTerm = '';
     this.currentPage = 1;
   }
 
-  // Al cambiar tipo de entidad, resetear búsqueda y página
   onTipoEntidadChange() {
+    if (!this.isLoggedIn) {
+      this.redirectToLogin();
+      return;
+    }
     this.resenaForm.patchValue({ idEntidad: '' });
     this.searchTerm = '';
     this.currentPage = 1;
   }
 
-  // Al buscar, resetear a página 1
   onSearch() {
     this.currentPage = 1;
   }
-  // Validaciones
+
   isFieldInvalid(fieldName: string): boolean {
     const field = this.resenaForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));

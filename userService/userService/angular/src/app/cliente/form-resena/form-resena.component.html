@@ -1,47 +1,94 @@
-<div class="resena-page">
-    <!-- Hero Section -->
-    <div class="resena-hero">
-        <div class="hero-overlay"></div>
-        <div class="container">
-            <div class="hero-content">
-                <h1 class="hero-title">Comparte Tu Experiencia</h1>
-                <p class="hero-subtitle">
-                    Tu opinión nos ayuda a mejorar y a crear experiencias gastronómicas aún más memorables
-                </p>
+
+      <div class="resena-page">
+    <!-- Loading State -->
+    <div *ngIf="isLoadingUser" class="loading-container">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p>Verificando autenticación...</p>
+    </div>
+
+    <!-- Vista para usuarios NO autenticados -->
+    <div *ngIf="!isLoadingUser && !isLoggedIn" class="guest-view">
+        <div class="resena-hero">
+            <div class="hero-overlay"></div>
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">Reseñas de Nuestros Clientes</h1>
+                    <p class="hero-subtitle">
+                        Descubre lo que nuestros clientes dicen sobre nosotros
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <!-- Mensaje para invitar a iniciar sesión -->
+                    <div class="login-prompt-card">
+                        <div class="login-prompt-icon">
+                            <i class="bi bi-person-lock"></i>
+                        </div>
+                        <h3>¿Quieres dejar tu reseña?</h3>
+                        <p>Inicia sesión para compartir tu experiencia con nosotros</p>
+                        <button class="btn btn-primary btn-lg" style="background-color: #E67E22;" (click)="redirectToLogin()">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Iniciar Sesión
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Form Section -->
-    <div class="form-section">
-        <div class="" style="overflow: hidden;">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
+    <!-- Vista para usuarios autenticados (HTML original) -->
+    <div *ngIf="!isLoadingUser && isLoggedIn">
+        <!-- Hero Section -->
+        <div class="resena-hero">
+            <div class="hero-overlay"></div>
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">Comparte Tu Experiencia</h1>
+                    <p class="hero-subtitle">
+                        Tu opinión nos ayuda a mejorar y a crear experiencias gastronómicas aún más memorables
+                    </p>
+                </div>
+            </div>
+        </div>
 
-                    <!-- Success Alert -->
-                    <div *ngIf="showSuccess" class="alert alert-success alert-custom fade-in" role="alert">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <strong>¡Gracias por tu reseña!</strong> Tu opinión ha sido enviada exitosamente.
-                    </div>
+        <!-- Form Section -->
+        <div class="form-section">
+            <div class="" style="overflow: hidden;">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
 
-                    <!-- Error Alert -->
-                    <div *ngIf="showError" class="alert alert-danger alert-custom fade-in" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <strong>Error:</strong> {{ errorMessage }}
-                    </div>
-
-                    <!-- Form Card -->
-                    <div class="form-card">
-                        <div class="form-header">
-                            <div class="form-icon">
-                                <i class="bi bi-chat-heart-fill"></i>
-                            </div>
-                            <h2 class="form-title">Cuéntanos tu experiencia</h2>
-                            <p class="form-description">
-                                Completa el formulario para compartir tu opinión sobre nuestros platos o eventos
-                            </p>
+                        <!-- Success Alert -->
+                        <div *ngIf="showSuccess" class="alert alert-success alert-custom fade-in" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>¡Gracias por tu reseña!</strong> Tu opinión ha sido enviada exitosamente.
                         </div>
 
+                        <!-- Error Alert -->
+                        <div *ngIf="showError" class="alert alert-danger alert-custom fade-in" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Error:</strong> {{ errorMessage }}
+                        </div>
+
+                        <!-- Form Card -->
+                        <div class="form-card">
+                            <!-- Todo el formulario original aquí -->
+                            <div class="form-header">
+                                <div class="form-icon">
+                                    <i class="bi bi-chat-heart-fill"></i>
+                                </div>
+                                <h2 class="form-title">Cuéntanos tu experiencia</h2>
+                                <p class="form-description">
+                                    Completa el formulario para compartir tu opinión sobre nuestros platos o eventos
+                                </p>
+                            </div>
+
+                            
                         <form [formGroup]="resenaForm" (ngSubmit)="onSubmit()">
 
                             <!-- Tipo de Entidad -->
@@ -268,39 +315,41 @@
                             </div>
 
                         </form>
-                    </div>
+                        </div>
 
-                    <div class="info-cards mt-5">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <div class="info-card">
-                                    <i class="bi bi-shield-check info-icon"></i>
-                                    <h5>Seguro y Confiable</h5>
-                                    <p>Tus datos están protegidos</p>
+                        <!-- Info Cards -->
+                        <div class="info-cards mt-5">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="info-card">
+                                        <i class="bi bi-shield-check info-icon"></i>
+                                        <h5>Seguro y Confiable</h5>
+                                        <p>Tus datos están protegidos</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="info-card">
-                                    <i class="bi bi-people info-icon"></i>
-                                    <h5>Comunidad</h5>
-                                    <p>Ayuda a otros clientes</p>
+                                <div class="col-md-4 mb-3">
+                                    <div class="info-card">
+                                        <i class="bi bi-people info-icon"></i>
+                                        <h5>Comunidad</h5>
+                                        <p>Ayuda a otros clientes</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="info-card">
-                                    <i class="bi bi-heart info-icon"></i>
-                                    <h5>Mejoramos Contigo</h5>
-                                    <p>Tu opinión nos importa</p>
+                                <div class="col-md-4 mb-3">
+                                    <div class="info-card">
+                                        <i class="bi bi-heart info-icon"></i>
+                                        <h5>Mejoramos Contigo</h5>
+                                        <p>Tu opinión nos importa</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</div>              
 
 <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
     <div class="modal-container" (click)="$event.stopPropagation()">
