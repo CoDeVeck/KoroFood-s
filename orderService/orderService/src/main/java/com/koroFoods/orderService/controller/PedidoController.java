@@ -7,13 +7,7 @@ import com.koroFoods.orderService.dto.response.DetallePedidoResponse;
 import com.koroFoods.orderService.model.DetallePedido;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.koroFoods.orderService.dto.PedidoRequestDTO;
 import com.koroFoods.orderService.dto.PedidoResumenDto;
@@ -70,6 +64,26 @@ public class PedidoController {
             return ResponseEntity.status(HttpStatus.CREATED).body(lista);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(lista);
+        }
+    }
+
+    @PutMapping("/ent/{idDetalle}")
+    public ResponseEntity<ResultadoResponse<DetallePedido>> cambiarEstadoEntregado(@PathVariable Integer idDetalle){
+        ResultadoResponse<DetallePedido> cambiado = pedidoService.cambiarEstadoAEntregado(idDetalle);
+        if (cambiado.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(cambiado);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cambiado);
+        }
+    }
+
+    @PutMapping("/can/{idDetalle}")
+    public ResponseEntity<ResultadoResponse<DetallePedido>> cambiarEstadoCancelado(@PathVariable Integer idDetalle){
+        ResultadoResponse<DetallePedido> cambiado = pedidoService.cambiarEstadoACancelado(idDetalle);
+        if (cambiado.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(cambiado);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cambiado);
         }
     }
 }
