@@ -101,7 +101,7 @@ public class ReservaService {
 		Reserva reserva = optionalReserva.get();
 
 		try {
-			var pedidoResponse = pedidoFeignClient.getPedidoByReservaId(reserva.getIdReserva());
+			var pedidoResponse = pedidoFeignClient.getPedidoByIdReserva(reserva.getIdReserva());
 
 			if (pedidoResponse.isValor() && pedidoResponse.getData() != null) {
 				return ResultadoResponse.error("Esta reserva ya tiene un pedido asociado.");
