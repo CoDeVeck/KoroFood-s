@@ -2,6 +2,8 @@ package com.koroFoods.orderService.controller;
 
 import java.util.List;
 
+import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
+import com.koroFoods.orderService.model.DetallePedido;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,5 +51,15 @@ public class PedidoController {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
 	    }
 	}
+
+    @PostMapping("/newPlato")
+    public ResponseEntity<ResultadoResponse<DetallePedido>> agregarPlatoOrden(@RequestBody DetallePedidoRequest request){
+        ResultadoResponse<DetallePedido> resultado = pedidoService.registrarPlato(request);
+        if (resultado.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+        }
+    }
 
 }
