@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import com.koroFoods.orderService.dto.ResultadoResponse;
 
 
-@FeignClient(name = "plato-service", url = "http://localhost:8087/menu/feign")
+@FeignClient(name = "menuService")
 public interface PlatoFeignClient {
-	@GetMapping("/{id}")
+	@GetMapping("/menu/feign/{id}")
     ResultadoResponse<PlatoFeign> getDishById(@PathVariable Integer id);
 	
-	@PutMapping("/substract-stock/{idPlato}/{cantidadVendida}")
+	@PutMapping("/menu/feign/substract-stock/{idPlato}/{cantidadVendida}")
     ResultadoResponse<PlatoFeign> substractStockOrder(
 			@PathVariable Integer idPlato, @PathVariable Integer cantidadVendida);
 }
