@@ -11,14 +11,23 @@ import com.koroFoods.userService.dto.UsuarioDtoFeign;
 import com.koroFoods.userService.service.UsuarioService;
 
 import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/user/feign")
 @RequiredArgsConstructor
 public class UserFeignController {
 	private final UsuarioService usuarioService;
- 	@GetMapping("/{id}")
- 	public ResponseEntity<ResultadoResponse<UsuarioDtoFeign>> getUserById(@PathVariable Integer id) {
- 	    ResultadoResponse<UsuarioDtoFeign> user = usuarioService.getUsuarioByIdFeign(id);
- 	    return ResponseEntity.ok(user);
- 	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<ResultadoResponse<UsuarioDtoFeign>> getUserById(@PathVariable Integer id) {
+		ResultadoResponse<UsuarioDtoFeign> user = usuarioService.getUsuarioByIdFeign(id);
+		return ResponseEntity.ok(user);
+	}
+	
+	// Implementado para el listado de resenias 
+	@GetMapping("/noauth/{id}")
+	public ResponseEntity<ResultadoResponse<UsuarioDtoFeign>> getUserByIdNoauth(@PathVariable Integer id) {
+		ResultadoResponse<UsuarioDtoFeign> user = usuarioService.getUsuarioByIdFeign(id);
+		return ResponseEntity.ok(user);
+	}
 }

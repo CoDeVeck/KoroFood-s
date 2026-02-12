@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
@@ -46,4 +47,7 @@ public class Plato {
     @JsonIgnore
     @Transient
     private MultipartFile imagenMultipart; // para la subida de imagens
+    
+    @OneToMany(mappedBy = "plato", fetch = FetchType.LAZY)
+    private List<PlatoEtiqueta> platoEtiquetas;
 }

@@ -42,12 +42,19 @@ public class PedidoController {
 	
 	@PostMapping
 	public ResponseEntity<ResultadoResponse<Pedido>> crearPedido(@RequestBody PedidoRequestDTO dto) {
-		ResultadoResponse<Pedido> resultado = pedidoService.crearPedido(dto);
-		if (resultado.isValor()) {
+
+	    System.out.println("📥 Llegó al controlador. DTO recibido: " + dto);
+
+	    ResultadoResponse<Pedido> resultado = pedidoService.crearPedido(dto);
+
+	    System.out.println("📤 Resultado del service: " + resultado);
+
+	    if (resultado.isValor()) {
 	        return ResponseEntity.status(HttpStatus.CREATED).body(resultado); 
 	    } else {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
 	    }
 	}
+
 
 }

@@ -33,7 +33,7 @@ public class Etiqueta {
 	private String descripcion;
 	
     @Column(name="ACTIVO")
-    private String activo;
+    private Boolean activo;
 	
 	@Column(name = "FECHA_REGISTRO")
 	private LocalDateTime fechaRegistro;

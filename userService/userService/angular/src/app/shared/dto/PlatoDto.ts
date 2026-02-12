@@ -4,4 +4,11 @@ export interface PlatoDto {
   tipoPlato: string;
   imagen: string;
   precio:number;
+  etiquetas: EtiquetaDTO[];
+}
+
+
+export interface EtiquetaDTO{
+  idEtiqueta:number;
+  nombre: string;
 }

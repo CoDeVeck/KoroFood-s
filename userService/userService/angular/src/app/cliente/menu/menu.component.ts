@@ -158,4 +158,14 @@ tipoPlatoLabels: any = {
   setDefaultImage(event: any) {
     event.target.src = '/img/no-imagen.jpg';
   }
+  getTipoPlato(tipo: string): string {
+  switch (tipo) {
+    case 'E': return 'ENTRADA';
+    case 'S': return 'SEGUNDO';
+    case 'P': return 'POSTRE';
+    case 'B': return 'BEBIDA';
+    default: return tipo;
+  }
+}
+
 }
