@@ -7,6 +7,7 @@ import com.koroFoods.reservationService.enums.EstadoReserva;
 import com.koroFoods.reservationService.enums.TipoReserva;
 import com.koroFoods.reservationService.feign.EventoFeignClient;
 import com.koroFoods.reservationService.feign.PedidoFeignClient;
+import com.koroFoods.reservationService.feign.UsuarioFeign;
 import com.koroFoods.reservationService.feign.UsuarioFeignClient;
 import com.koroFoods.reservationService.model.Reserva;
 import com.koroFoods.reservationService.repository.IReservaRepository;
@@ -25,13 +26,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ReservaService {
 
-	private final IReservaRepository reservaRepository;
-	private final UsuarioFeignClient usuarioFeignClient;
-	private final PedidoFeignClient pedidoFeignClient;
+    private final IReservaRepository reservaRepository;
+    private final UsuarioFeignClient usuarioFeignClient;
+    private final PedidoFeignClient pedidoFeignClient;
 
-	private final EventoFeignClient eventoFeignClient;
-	
-	public ResultadoResponse<Integer> registrarReserva(ReservaRequest request) {
+    private final EventoFeignClient eventoFeignClient;
+
+    public ResultadoResponse<Integer> registrarReserva(ReservaRequest request) {
 
         boolean esEvento = request.getIdEvento() != null;
 
@@ -52,8 +53,8 @@ public class ReservaService {
                         "La mesa no está asignada al evento seleccionado"
                 );
             }
-            
-            
+
+
         }
 
         boolean ocupada = reservaRepository.existeSolapamientoReserva(
@@ -73,10 +74,10 @@ public class ReservaService {
         reserva.setIdMesa(request.getIdMesa());
         reserva.setIdEvento(request.getIdEvento());
         reserva.setTipoReserva(
-        	    reserva.getIdEvento() != null 
-        	        ? TipoReserva.ESPECIAL 
-        	        : TipoReserva.SIMPLE
-        	);
+                reserva.getIdEvento() != null
+                        ? TipoReserva.ESPECIAL
+                        : TipoReserva.SIMPLE
+        );
         reserva.setFechaHora(inicio);
         reserva.setEstado(EstadoReserva.PENDIENTE);
         reserva.setFechaRegistro(LocalDateTime.now());
@@ -91,118 +92,144 @@ public class ReservaService {
         );
     }
 
-	public ResultadoResponse<ReservaDtoFeing> getReservationByID(String codigo) {
-		Optional<Reserva> optionalReserva = reservaRepository.findReservaAsistidaById(codigo);
+    public ResultadoResponse<ReservaDtoFeing> getReservationByID(String codigo) {
+        Optional<Reserva> optionalReserva = reservaRepository.findReservaAsistidaById(codigo);
 
-		if (optionalReserva.isEmpty()) {
-			return ResultadoResponse.error("Reserva no encontrada, intente con otro código por favor");
-		}
+        if (optionalReserva.isEmpty()) {
+            return ResultadoResponse.error("Reserva no encontrada, intente con otro código por favor");
+        }
 
-		Reserva reserva = optionalReserva.get();
+        Reserva reserva = optionalReserva.get();
 
-		try {
-			var pedidoResponse = pedidoFeignClient.getPedidoByIdReserva(reserva.getIdReserva());
+        try {
+            var pedidoResponse = pedidoFeignClient.getPedidoByIdReserva(reserva.getIdReserva());
 
-			if (pedidoResponse.isValor() && pedidoResponse.getData() != null) {
-				return ResultadoResponse.error("Esta reserva ya tiene un pedido asociado.");
-			}
-		} catch (FeignException.NotFound e) {
+            if (pedidoResponse.isValor() && pedidoResponse.getData() != null) {
+                return ResultadoResponse.error("Esta reserva ya tiene un pedido asociado.");
+            }
+        } catch (FeignException.NotFound e) {
 
-		} catch (Exception e) {
-			return ResultadoResponse.error("Error al validar el pedido de la reserva: " + e.getMessage());
-		}
+        } catch (Exception e) {
+            return ResultadoResponse.error("Error al validar el pedido de la reserva: " + e.getMessage());
+        }
 
-		var usuario = usuarioFeignClient.getUsuarioById(reserva.getIdUsuario());
+        var usuario = usuarioFeignClient.getUsuarioById(reserva.getIdUsuario());
 
-		if (!usuario.isValor() || usuario.getData() == null) {
-			return ResultadoResponse.error("El usuario con ID " + reserva.getIdUsuario() + " no existe");
-		}
+        if (!usuario.isValor() || usuario.getData() == null) {
+            return ResultadoResponse.error("El usuario con ID " + reserva.getIdUsuario() + " no existe");
+        }
 
-		ReservaDtoFeing dto = new ReservaDtoFeing();
-		dto.setIdReserva(reserva.getIdReserva());
-		dto.setEstado(reserva.getEstado().toString());
-		dto.setIdUsuario(reserva.getIdUsuario());
-		dto.setMesa(reserva.getIdMesa());
-		dto.setNombreCompletoUsuario(usuario.getData().getNombres() + " " + usuario.getData().getApePaterno() + " "
-				+ usuario.getData().getApeMaterno());
+        ReservaDtoFeing dto = new ReservaDtoFeing();
+        dto.setIdReserva(reserva.getIdReserva());
+        dto.setEstado(reserva.getEstado().toString());
+        dto.setIdUsuario(reserva.getIdUsuario());
+        dto.setMesa(reserva.getIdMesa());
+        dto.setNombreCompletoUsuario(usuario.getData().getNombres() + " " + usuario.getData().getApePaterno() + " "
+                + usuario.getData().getApeMaterno());
 
-		return ResultadoResponse.success("Reserva encontrada", dto);
-	}
+        return ResultadoResponse.success("Reserva encontrada", dto);
+    }
 
-	/*
-	 * Reserva Simple----- Horario local (12:00 – 23:00) generarSlots
-	 * filtrarSlotsDisponibles frontend muestra horas libres usuario elige una
-	 * mesaOcupadaPorReserva (check final)
-	 * 
-	 *
-	 * Reserva Especial---- Horario evento (19:00 – 22:00) generarSlots
-	 * filtrarSlotsDisponibles usuario elige mesaOcupadaPorReserva
-	 * 
-	 */
+    /*
+     * Reserva Simple----- Horario local (12:00 – 23:00) generarSlots
+     * filtrarSlotsDisponibles frontend muestra horas libres usuario elige una
+     * mesaOcupadaPorReserva (check final)
+     *
+     *
+     * Reserva Especial---- Horario evento (19:00 – 22:00) generarSlots
+     * filtrarSlotsDisponibles usuario elige mesaOcupadaPorReserva
+     *
+     */
 
-	private int obtenerDuracionHoras(boolean esEvento) {
-		return esEvento ? 3 : 2;
-	}
+    private int obtenerDuracionHoras(boolean esEvento) {
+        return esEvento ? 3 : 2;
+    }
 
-	// 1
-	private List<LocalDateTime> generarSlots(LocalDateTime desde, LocalDateTime hasta, int intervaloMinutos) {
+    // 1
+    private List<LocalDateTime> generarSlots(LocalDateTime desde, LocalDateTime hasta, int intervaloMinutos) {
 
-		List<LocalDateTime> slots = new ArrayList<>();
-		LocalDateTime actual = desde;
+        List<LocalDateTime> slots = new ArrayList<>();
+        LocalDateTime actual = desde;
 
-		while (!actual.isAfter(hasta)) {
-			slots.add(actual);
-			actual = actual.plusMinutes(intervaloMinutos);
-		}
+        while (!actual.isAfter(hasta)) {
+            slots.add(actual);
+            actual = actual.plusMinutes(intervaloMinutos);
+        }
 
-		return slots;
-	}
+        return slots;
+    }
 
-	// 2
-	private List<LocalDateTime> filtrarSlotsDisponibles(Integer idMesa, List<LocalDateTime> slots, boolean esEvento) {
+    // 2
+    private List<LocalDateTime> filtrarSlotsDisponibles(Integer idMesa, List<LocalDateTime> slots, boolean esEvento) {
 
-		int duracionHoras = obtenerDuracionHoras(esEvento);
+        int duracionHoras = obtenerDuracionHoras(esEvento);
 
-		return slots.stream().filter(slot -> {
-			LocalDateTime fin = slot.plusHours(duracionHoras);
-			return !reservaRepository.existeSolapamientoReserva(idMesa, slot, fin);
-		}).toList();
-	}
+        return slots.stream().filter(slot -> {
+            LocalDateTime fin = slot.plusHours(duracionHoras);
+            return !reservaRepository.existeSolapamientoReserva(idMesa, slot, fin);
+        }).toList();
+    }
 
-	// 3 - Controller
-	public List<LocalDateTime> obtenerSlotsDisponibles(Integer idMesa, LocalDateTime desde, LocalDateTime hasta,
-			Integer idEvento) {
+    // 3 - Controller
+    public List<LocalDateTime> obtenerSlotsDisponibles(Integer idMesa, LocalDateTime desde, LocalDateTime hasta,
+                                                       Integer idEvento) {
 
-		boolean esEvento = idEvento != null;
+        boolean esEvento = idEvento != null;
 
-		// 1️ Validar contra EVENTO_MESA SOLO si es evento
-		if (esEvento) {
-			try {
-			    ResultadoResponse<Boolean> response =
-			            eventoFeignClient.validarHorariosParaReservaConEvento(
-			                    idMesa, idEvento, desde, hasta
-			            );
+        // 1️ Validar contra EVENTO_MESA SOLO si es evento
+        if (esEvento) {
+            try {
+                ResultadoResponse<Boolean> response =
+                        eventoFeignClient.validarHorariosParaReservaConEvento(
+                                idMesa, idEvento, desde, hasta
+                        );
 
-			    if (!response.isValor() || !Boolean.TRUE.equals(response.getData())) {
-			        return List.of();
-			    }
-			} catch (FeignException e) {
-			    return List.of(); // evento no accesible → no habilitar slots
-			}
+                if (!response.isValor() || !Boolean.TRUE.equals(response.getData())) {
+                    return List.of();
+                }
+            } catch (FeignException e) {
+                return List.of(); // evento no accesible → no habilitar slots
+            }
 
-		}
+        }
 
-		List<LocalDateTime> slots = generarSlots(desde, hasta, 30);
+        List<LocalDateTime> slots = generarSlots(desde, hasta, 30);
 
-		return filtrarSlotsDisponibles(idMesa, slots, esEvento);
-	}
+        return filtrarSlotsDisponibles(idMesa, slots, esEvento);
+    }
 
-	// Validar cuando el cliente haya eligido una hora/fecha
-	public boolean mesaOcupadaPorReserva(Integer idMesa, LocalDateTime fechaInicio, boolean esEvento) {
+    // Validar cuando el cliente haya eligido una hora/fecha
+    public boolean mesaOcupadaPorReserva(Integer idMesa, LocalDateTime fechaInicio, boolean esEvento) {
 
-		int duracion = obtenerDuracionHoras(esEvento);
+        int duracion = obtenerDuracionHoras(esEvento);
 
-		return reservaRepository.existeSolapamientoReserva(idMesa, fechaInicio, fechaInicio.plusHours(duracion));
-	}
+        return reservaRepository.existeSolapamientoReserva(idMesa, fechaInicio, fechaInicio.plusHours(duracion));
+    }
+
+
+    public ResultadoResponse<UsuarioFeign> obtenerUsuarioPorReserva(Integer idReserva) {
+
+        validarId(idReserva);
+
+        Reserva reservaObtenida = obtenerReserva(idReserva);
+        ResultadoResponse<UsuarioFeign> cliente = usuarioFeignClient.getUsuarioById(reservaObtenida.getIdUsuario());
+        var clienteData = cliente.getData();
+
+        return ResultadoResponse.success("Se obtuvo al cliente ", clienteData);
+    }
+
+
+    private Reserva obtenerReserva(Integer idReserva) {
+        validarId(idReserva);
+        return reservaRepository.findById(idReserva)
+                .orElseThrow(() -> new RuntimeException("Error al obtener la reserva" + idReserva));
+    }
+
+
+    private void validarId(Integer request) {
+        if (request == null || request <= 0) {
+            throw new IllegalArgumentException("ID invalido");
+        }
+    }
 
 }

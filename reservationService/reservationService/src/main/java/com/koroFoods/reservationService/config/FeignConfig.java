@@ -25,7 +25,9 @@ public class FeignConfig {
                     String authorization = request.getHeader("Authorization");
 
                     if (authorization != null) {
+                        System.out.println("TOKEN -> " + authorization);
                         requestTemplate.header("Authorization", authorization);
+
                     }
                 }
             }
