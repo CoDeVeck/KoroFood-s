@@ -1,5 +1,6 @@
 package com.koroFoods.orderService.repository;
 
+import com.koroFoods.orderService.dto.response.DetalleCantidadPedidos;
 import com.koroFoods.orderService.dto.response.DetalleEstadoCount;
 import com.koroFoods.orderService.model.DetallePedido;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,4 +35,6 @@ public interface IDetallePedidoRepository extends JpaRepository<DetallePedido, I
             where id_pedido = :idPedido
             """,nativeQuery = true)
     DetalleEstadoCount findByIdPedido(Integer idPedido);
+
+
 }
