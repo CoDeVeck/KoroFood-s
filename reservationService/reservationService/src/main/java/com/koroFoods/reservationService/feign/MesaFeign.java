@@ -7,6 +7,6 @@ public class MesaFeign {
     private Integer idMesa;
     private int numeroMesa;
     private int capacidad;
-    private String zona;
+    private String tipo;
     private String estado;
 }

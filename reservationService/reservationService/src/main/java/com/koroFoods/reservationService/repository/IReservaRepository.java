@@ -5,6 +5,7 @@ import com.koroFoods.reservationService.model.Reserva;
 import feign.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,4 +40,5 @@ public interface IReservaRepository extends JpaRepository<Reserva, Integer> {
 	boolean existeSolapamientoReserva(@Param("idMesa") Integer idMesa, @Param("fechaDesde") LocalDateTime fechaDesde,
 			@Param("fechaHasta") LocalDateTime fechaHasta);
 
+	List<Reserva> findByIdUsuario(Integer idUsuario);
 }

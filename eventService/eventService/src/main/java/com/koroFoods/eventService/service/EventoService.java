@@ -213,6 +213,7 @@ public class EventoService {
         dto.setFechaInicio(evento.getFechaInicio());
         dto.setFechaFin(evento.getFechaFin());
         dto.setAforo(calcularAforoEvento(evento.getIdEvento()));
+        dto.setImagen(evento.getImagen());
 
         return dto;
     }
