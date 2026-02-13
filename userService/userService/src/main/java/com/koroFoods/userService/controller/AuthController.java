@@ -89,8 +89,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> obtnerUsuario(Authentication authentication) {
-        String correoCliente = authentication.getName();
+    public ResponseEntity<?> obtnerUsuario(@RequestHeader("X-Username") String correoCliente) {
         Optional<Usuario> usuarioObtenido = usuarioService.obtenerDatosCliente(correoCliente);
 
         if (usuarioObtenido.isEmpty()) {

@@ -27,7 +27,7 @@ export class WebsocketService {
     this.currentUserId = userId;
 
     this.client = new Client({
-      brokerURL: 'ws://localhost:8081/ws',
+      brokerURL: 'ws://localhost:8098/ws',
 
       connectHeaders: {
         Authorization: token ? `Bearer ${token}` : '',

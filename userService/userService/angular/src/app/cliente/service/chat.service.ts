@@ -11,7 +11,7 @@ import { Recepcionista } from '../../shared/response/recepcionistaResponse.model
 })
 export class ChatService {
   private http = inject(HttpClient);
-  private apiUrl = `${enviroment.apiUrls.usuarios}/chat`;
+  private apiUrl = `${enviroment.apigateway}/chat`;
 
   constructor() {}
 

@@ -9,6 +9,7 @@ import com.koroFoods.qualificationService.feign.EventoFeignClient;
 import com.koroFoods.qualificationService.feign.PlatoFeignClient;
 import com.koroFoods.qualificationService.feign.UsuarioFeign;
 import com.koroFoods.qualificationService.feign.UsuarioFeignClient;
+import com.koroFoods.qualificationService.feign.UsuarioPublicoDTO;
 import com.koroFoods.qualificationService.model.Calificacion;
 import com.koroFoods.qualificationService.repository.ICalificacionRepository;
 
@@ -31,27 +32,24 @@ public class CalificacionService {
     
     public ResultadoResponse<List<ResenaListResponse>> listarResenas() {
         List<Calificacion> list = resenaRepository.findAll();
-        
+
         List<ResenaListResponse> listResponse = list.stream()
-            .map(this::convertirAResenaListResponse)
-            .collect(Collectors.toList());
-        
+                .map(resena -> convertirAResenaListResponse(resena, true)) 
+                .collect(Collectors.toList());
+
         return ResultadoResponse.success("Reseñas listadas correctamente", listResponse);
     }
-    
+
     public ResultadoResponse<List<ResenaListResponse>> obtenerResenasPorUsuario(Integer idUsuario) {
         List<Calificacion> resenas = resenaRepository.findByIdUsuario(idUsuario);
-        
-        if (resenas.isEmpty()) {
-            return ResultadoResponse.error("No se encontraron reseñas para el usuario");
-        }
-        
+
         List<ResenaListResponse> listResponse = resenas.stream()
-            .map(this::convertirAResenaListResponse)
-            .collect(Collectors.toList());
-        
+                .map(resena -> convertirAResenaListResponse(resena, false)) 
+                .collect(Collectors.toList());
+
         return ResultadoResponse.success("Reseñas del usuario listadas correctamente", listResponse);
     }
+
     
     public ResultadoResponse<Calificacion> crearResena(ResenaRequest req) {
         try {
@@ -107,8 +105,7 @@ public class CalificacionService {
         return ResultadoResponse.success("Reseña registrada correctamente", r);
     }
 
-    // Método para mapear el listado de las reseñas
-    private ResenaListResponse convertirAResenaListResponse(Calificacion resena) {
+    private ResenaListResponse convertirAResenaListResponse(Calificacion resena, boolean publico) {
         ResenaListResponse response = new ResenaListResponse();
         response.setIdResena(resena.getIdCalificacion());
         response.setIdUsuario(resena.getIdUsuario());
@@ -117,35 +114,67 @@ public class CalificacionService {
         response.setComentario(resena.getComentario());
 
         try {
-            ResultadoResponse<UsuarioFeign> usuario = usuarioFeignClient.getUsuarioById(resena.getIdUsuario());
-            response.setImagenUsuario(usuario.getData().getImagen());
-            response.setNombreUsuarioCompleto(usuario.getData().getNombres() + " "
-                + usuario.getData().getApePaterno() + " "
-                + usuario.getData().getApeMaterno());
+            if(publico) {
+                // Endpoint público SIN token
+                ResultadoResponse<UsuarioPublicoDTO> usuario = usuarioFeignClient.getUserByIdNoauth(resena.getIdUsuario());
+                
+                if(usuario != null && usuario.isValor() && usuario.getData() != null) {
+                    response.setNombreUsuarioCompleto(usuario.getData().getNombreCompleto());
+                    response.setImagenUsuario(usuario.getData().getImagen());
+                } else {
+                    response.setNombreUsuarioCompleto("Usuario no disponible");
+                    response.setImagenUsuario(null);
+                }
+            } else {
+                // Endpoint CON token
+                ResultadoResponse<UsuarioFeign> usuario = usuarioFeignClient.getUsuarioById(resena.getIdUsuario());
+                
+                if(usuario != null && usuario.isValor() && usuario.getData() != null) {
+                    response.setNombreUsuarioCompleto(
+                        usuario.getData().getNombres() + " " +
+                        usuario.getData().getApePaterno() + " " +
+                        usuario.getData().getApeMaterno()
+                    );
+                    response.setImagenUsuario(usuario.getData().getImagen());
+                } else {
+                    response.setNombreUsuarioCompleto("Usuario no disponible");
+                    response.setImagenUsuario(null);
+                }
+            }
         } catch (FeignException e) {
+            // ⚠️ AGREGA LOGS PARA VER EL ERROR REAL
+            System.err.println("Error al obtener usuario: " + e.getMessage());
+            e.printStackTrace();
+            
             response.setImagenUsuario(null);
-            response.setNombreUsuarioCompleto("Usuario no disponible");
+            response.setNombreUsuarioCompleto(publico ? "Usuario anónimo" : "Usuario no disponible");
         }
 
         try {
             switch (resena.getTipoEntidad()) {
                 case PLATO -> {
                     var plato = platoFeignClient.getDishById(resena.getIdEntidad());
-                    response.setImagenEntidad(plato.getData().getImagen());
-                    response.setNombreEntidad(plato.getData().getNombre()); 
+                    if(plato != null && plato.getData() != null) {
+                        response.setImagenEntidad(plato.getData().getImagen());
+                        response.setNombreEntidad(plato.getData().getNombre());
+                    }
                 }
                 case EVENTO -> {
                     var evento = eventoFeignClient.getEventById(resena.getIdEntidad());
-                    response.setImagenEntidad(evento.getData().getImagen());
-                    response.setNombreEntidad(evento.getData().getNombre()); 
+                    if(evento != null && evento.getData() != null) {
+                        response.setImagenEntidad(evento.getData().getImagen());
+                        response.setNombreEntidad(evento.getData().getNombre());
+                    }
                 }
             }
         } catch (FeignException e) {
+            System.err.println("Error al obtener entidad: " + e.getMessage());
             response.setImagenEntidad(null);
             response.setNombreEntidad("Entidad no disponible");
         }
 
         return response;
     }
+
 
 }

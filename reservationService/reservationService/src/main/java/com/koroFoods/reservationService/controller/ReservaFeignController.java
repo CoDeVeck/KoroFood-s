@@ -1,5 +1,6 @@
 package com.koroFoods.reservationService.controller;
 
+import com.koroFoods.reservationService.feign.UsuarioFeign;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,4 +29,14 @@ public class ReservaFeignController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
 		}
 	}
+
+    @GetMapping("/reserva/{idReserva}")
+    public ResponseEntity<ResultadoResponse<UsuarioFeign>> obtenerUsuarioPorReserva(@PathVariable Integer idReserva){
+        ResultadoResponse<UsuarioFeign> response = reservaService.obtenerUsuarioPorReserva(idReserva);
+        if (response.isValor()) {
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
 }

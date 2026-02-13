@@ -939,3 +939,70 @@ background-repeat: no-repeat;
     padding: 2rem 1rem;
   }
 }
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+}
+
+/* Guest View Styles */
+.guest-view {
+  min-height: 100vh;
+  background: #F4EDE4;
+}
+
+.login-prompt-card {
+  background: white;
+  border-radius: 20px;
+  padding: 60px 40px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  margin-bottom: 40px;
+}
+
+.login-prompt-icon {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 30px;
+  background: #E67E22;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-prompt-icon i {
+  font-size: 50px;
+  color: white;
+}
+
+.login-prompt-card h3 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 15px;
+}
+
+.login-prompt-card p {
+  font-size: 16px;
+  color: #718096;
+  margin-bottom: 30px;
+}
+
+.login-prompt-card .btn {
+  padding: 15px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+.login-prompt-card .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}

@@ -143,41 +143,84 @@
           </div>
 
           <!-- Grid de Platos -->
-          <div *ngIf="!loadingPlatos && !errorPlatos" class="platos-grid">
-            <div 
-              *ngFor="let plato of platosFiltradosMetodo()" 
-              class="plato-card"
-              [class.selected]="isPlatoSeleccionado(plato.idPlato)">
-              <div class="plato-imagen">
-                <img [src]="plato.imagen" [alt]="plato.nombre" (error)="onImgError($event)"/>
-                <span class="tipo-badge">{{ obtenerNombreTipo(plato.tipoPlato) }}</span>
-              </div>
-              <div class="plato-info">
-                <h4 class="plato-nombre">{{ plato.nombre }}</h4>
-                <p class="plato-precio">S/ {{ plato.precio.toFixed(2) }}</p>
-              </div>
-              <div class="plato-actions">
-                <button 
-                  class="btn-agregar"
-                  (click)="agregarPlato(plato)"
-                  *ngIf="!isPlatoSeleccionado(plato.idPlato)">
-                  <span>+</span> Agregar
-                </button>
-                <div class="cantidad-control" *ngIf="isPlatoSeleccionado(plato.idPlato)">
-                  <button class="btn-cantidad" (click)="decrementarCantidad(plato.idPlato)">-</button>
-                  <input 
-                    type="number" 
-                    class="cantidad-input"
-                    [value]="getCantidad(plato.idPlato)"
-                    (change)="actualizarCantidad(plato.idPlato, $event)"
-                    min="1">
-                  <button class="btn-cantidad" (click)="incrementarCantidad(plato.idPlato)">+</button>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div *ngIf="!loadingPlatos && !errorPlatos">
+  <div class="platos-grid">
+    <div 
+      *ngFor="let plato of platosFiltradosMetodo()" 
+      class="plato-card"
+      [class.selected]="isPlatoSeleccionado(plato.idPlato)">
+      <div class="plato-imagen">
+        <img [src]="plato.imagen" [alt]="plato.nombre" (error)="onImgError($event)"/>
+        <span class="tipo-badge">{{ obtenerNombreTipo(plato.tipoPlato) }}</span>
+      </div>
+      <div class="plato-info">
+        <h4 class="plato-nombre">{{ plato.nombre }}</h4>
+        <p class="plato-precio">S/ {{ plato.precio.toFixed(2) }}</p>
+      </div>
+      <div class="plato-actions">
+        <button 
+          class="btn-agregar"
+          (click)="agregarPlato(plato)"
+          *ngIf="!isPlatoSeleccionado(plato.idPlato)">
+          <span>+</span> Agregar
+        </button>
+        <div class="cantidad-control" *ngIf="isPlatoSeleccionado(plato.idPlato)">
+          <button class="btn-cantidad" (click)="decrementarCantidad(plato.idPlato)">-</button>
+          <input 
+            type="number" 
+            class="cantidad-input"
+            [value]="getCantidad(plato.idPlato)"
+            (change)="actualizarCantidad(plato.idPlato, $event)"
+            min="1">
+          <button class="btn-cantidad" (click)="incrementarCantidad(plato.idPlato)">+</button>
         </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Controles de paginación -->
+  <div class="pagination-container" *ngIf="totalPaginas > 1">
+    <button 
+      class="btn-pagination"
+      (click)="cambiarPagina(1)"
+      [disabled]="paginaActual === 1">
+      ‹‹
+    </button>
+    
+    <button 
+      class="btn-pagination"
+      (click)="cambiarPagina(paginaActual - 1)"
+      [disabled]="paginaActual === 1">
+      ‹
+    </button>
+
+    <button
+      *ngFor="let pagina of paginasVisibles"
+      class="btn-pagination"
+      [class.active]="pagina === paginaActual"
+      (click)="cambiarPagina(pagina)">
+      {{ pagina }}
+    </button>
+
+    <button 
+      class="btn-pagination"
+      (click)="cambiarPagina(paginaActual + 1)"
+      [disabled]="paginaActual === totalPaginas">
+      ›
+    </button>
+
+    <button 
+      class="btn-pagination"
+      (click)="cambiarPagina(totalPaginas)"
+      [disabled]="paginaActual === totalPaginas">
+      ››
+    </button>
+
+    <span class="pagination-info">
+      Página {{ paginaActual }} de {{ totalPaginas }}
+    </span>
+  </div>
+</div>
         <!-- Resumen de Orden -->
         <div class="orden-resumen">
           <div class="resumen-header">

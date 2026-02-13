@@ -57,7 +57,7 @@
 
 
     <section class="featured-section">
-          <div class="opciones-overlay"></div>
+        <div class="opciones-overlay"></div>
         <div class="featured-header">
             <h2 class="featured-title">Platos Destacados</h2>
             <p class="featured-description">
@@ -86,8 +86,13 @@
                                         <img [src]="plato.imagen" [alt]="plato.nombre" class="plato-image"
                                             (error)="setDefaultImage($event)">
                                         <div class="plato-overlay">
-                                            <!--Falta implementar su etiqueta-->
-                                            <span class="plato-type-badge">{{ plato.tipoPlato }}</span>
+                                            <!-- Etiquetas implementadas -->
+                                            <div class="etiquetas-container">
+                                                <span *ngFor="let etiqueta of plato.etiquetas" class="etiqueta-badge">
+                                                    {{ etiqueta.nombre }}
+                                                </span>
+                                            </div>
+<span class="plato-type-badge">{{ getTipoPlato(plato.tipoPlato) }}</span>
                                         </div>
                                     </div>
                                     <div class="plato-info">
@@ -105,8 +110,6 @@
                         <div [class]="'swiper-button-prev swiper-button-prev-' + getSwiperClass(tipo)"></div>
                         <div [class]="'swiper-button-next swiper-button-next-' + getSwiperClass(tipo)"></div>
 
-                        <!-- Pagination -->
-                        <div [class]="'swiper-pagination swiper-pagination-' + getSwiperClass(tipo)"></div>
                     </div>
                 </div>
 

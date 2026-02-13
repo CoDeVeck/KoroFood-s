@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class DistritoService {
-  private url = `${enviroment.apiUrls.usuarios}/distrito`;
+  private url = `${enviroment.apigateway}/distrito`;
   constructor(private http: HttpClient) {}
 
   listarDistritos(): Observable<Distrito[]> {

@@ -12,12 +12,12 @@ public class GatewayConfig {
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route("usuario-service", r -> r
-                        .path("/auth/**", "/distrito/**", "/cliente/**")
+                        .path("/auth/**", "/distrito/**", "/cliente/**", "/user/feign/**")
                         .uri("lb://userService")
                 )
                 //para el uso de webSockets
                 .route("usuario-service-ws", r -> r
-                        .path("/ws/**")
+                        .path("/ws/**", "/chat/**")
                         .uri("lb:ws://userService")
                 )
                 .route("evento-service", r -> r
@@ -31,6 +31,14 @@ public class GatewayConfig {
                 .route("qualification-service", r -> r
                         .path("/calificacion/**")
                         .uri("lb://qualificationService")
+                )
+                .route("order-service", r -> r
+                        .path("/pedido/**", "/pedido/feign/**")
+                        .uri("lb://orderService")
+                )
+                .route("reservation-service", r -> r
+                        .path("/reserva/**", "/reserva/feign/**")
+                        .uri("lb://reservationService")
                 )
                 .build();
     }

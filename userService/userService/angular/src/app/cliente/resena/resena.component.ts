@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ResenaListResponse } from '../../shared/dto/ResenaListResponse';
 import { ResenaClienteService } from '../service/resenaClienteService';
+import { AuthService } from '../../auth/service/auth.service';
 
 @Component({
   selector: 'app-resena-list',
@@ -23,17 +24,51 @@ export class ResenaComponent implements OnInit {
 
   // Filtros
   verSoloMias = false;
-  idUsuarioActual = 1; // Debe venir del servicio de autenticación
-
+  idUsuarioActual: number | null = null;
   filtroCalificacion: number | null = null;
+
+  // Autenticación
+  isLoggedIn: boolean = false;
+  isLoadingUser: boolean = true;
 
   constructor(
     private resenaService: ResenaClienteService,
+    private authService: AuthService,
     private router: Router,
   ) {}
 
   ngOnInit() {
-    this.cargarResenas();
+    this.verificarAutenticacion();
+  }
+
+  // Verificar si el usuario está autenticado
+  verificarAutenticacion() {
+    const token = this.authService.getToken();
+    
+    if (!token) {
+      this.isLoggedIn = false;
+      this.isLoadingUser = false;
+      this.cargarResenas(); // Cargar todas las reseñas para visitantes
+      console.log('Usuario no autenticado - Mostrando todas las reseñas');
+      return;
+    }
+
+    this.authService.getUsuario().subscribe({
+      next: (response) => {
+        console.log('Usuario autenticado:', response);
+        this.isLoggedIn = true;
+        this.idUsuarioActual = response.idUsuario || response.id;
+        this.isLoadingUser = false;
+        this.cargarResenas(); // Cargar reseñas con funcionalidad completa
+      },
+      error: (error) => {
+        console.error('Error al verificar autenticación:', error);
+        this.isLoggedIn = false;
+        this.isLoadingUser = false;
+        localStorage.removeItem('auth_token');
+        this.cargarResenas(); // Cargar todas las reseñas como visitante
+      },
+    });
   }
 
   cargarResenas() {
@@ -57,6 +92,11 @@ export class ResenaComponent implements OnInit {
   }
 
   cargarMisResenas() {
+    if (!this.isLoggedIn || !this.idUsuarioActual) {
+      this.redirectToLogin();
+      return;
+    }
+
     this.isLoading = true;
     this.error = '';
 
@@ -77,6 +117,11 @@ export class ResenaComponent implements OnInit {
   }
 
   toggleMisResenas() {
+    if (!this.isLoggedIn) {
+      this.redirectToLogin();
+      return;
+    }
+
     this.verSoloMias = !this.verSoloMias;
     this.currentPage = 1;
 
@@ -156,7 +201,17 @@ export class ResenaComponent implements OnInit {
 
   // Navegación
   irACrearResena() {
+    if (!this.isLoggedIn) {
+      this.redirectToLogin();
+      return;
+    }
     this.router.navigate(['/cliente/crear-resenia']);
+  }
+
+  redirectToLogin() {
+    this.router.navigate(['/login'], {
+      queryParams: { returnUrl: '/cliente/resenia' }
+    });
   }
 
   // Helpers
@@ -182,11 +237,17 @@ export class ResenaComponent implements OnInit {
   onImgError(event: any) {
     event.target.src = '/img/user-default.png';
   }
-get maxItem(): number {
-  return Math.min(this.currentPage * this.itemsPerPage, this.resenasFiltradas.length);
-}
+
+  get maxItem(): number {
+    return Math.min(this.currentPage * this.itemsPerPage, this.resenasFiltradas.length);
+  }
 
   onImgErrorEntidad(event: any) {
     event.target.src = '/img/no-imagen.jpg';
+  }
+
+  // Verificar si una reseña es del usuario actual
+  esMiResena(resena: ResenaListResponse): boolean {
+    return this.isLoggedIn && resena.idUsuario === this.idUsuarioActual;
   }
 }

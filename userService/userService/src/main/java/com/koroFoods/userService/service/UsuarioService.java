@@ -3,6 +3,7 @@ package com.koroFoods.userService.service;
 import com.koroFoods.userService.dto.ResultadoResponse;
 import com.koroFoods.userService.dto.SocialUserDataDto;
 import com.koroFoods.userService.dto.UsuarioDtoFeign;
+import com.koroFoods.userService.dto.UsuarioPublicoDTO;
 import com.koroFoods.userService.dto.request.RegistroSocialRequest;
 import com.koroFoods.userService.dto.request.UpdatePasswordRequest;
 import com.koroFoods.userService.dto.response.PerfilClienteResponse;
@@ -86,7 +87,20 @@ public class UsuarioService  {
         return ResultadoResponse.success("Usuario encontrado", dto);
     }
 
+    public ResultadoResponse<UsuarioPublicoDTO> getUsuarioByIdPublic(Integer id){
+    	Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+    	UsuarioPublicoDTO dto = new UsuarioPublicoDTO();
+        dto.setIdUsuario(usuario.getIdUsuario());
+        dto.setNombreCompleto(usuario.getNombres() +" " +
+                usuario.getApePaterno() + " " +
+                usuario.getApeMaterno());
+        dto.setImagen(usuario.getImagen());
+
+        return ResultadoResponse.success("Usuario encontrado", dto);
+    }
+    
     public void actualizarPassword(UpdatePasswordRequest request, Integer id){
 
         Usuario usuarioEncontrado = usuarioRepository.findById(id).orElseThrow(
