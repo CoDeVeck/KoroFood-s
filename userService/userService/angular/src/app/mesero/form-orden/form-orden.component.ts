@@ -11,6 +11,7 @@ import { DetallePedidoRequestDTO } from '../../shared/dto/DetallePedidoRequestDT
 import { PedidoRequestoDto } from '../../shared/dto/PedidoRequestDto';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AlertService } from '../../util/alert.service';
+import { AuthService } from '../../auth/service/auth.service';
 interface PlatoSeleccionado {
   plato: PlatoDto;
   cantidad: number;
@@ -59,7 +60,7 @@ export class FormOrdenComponent implements OnInit {
   paginaActual = 1;
   platosPorPagina = 12; 
   totalPaginas = 0;
-
+  idMesero!: number;
   creandoOrden = false;
   ordenCreada: any = null;
 
@@ -68,9 +69,18 @@ export class FormOrdenComponent implements OnInit {
     private menuService: MenuMeseroService,
     private pedidoService: PedidoMeseroService,
     private router: Router,
+    private authService: AuthService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.authService.getUsuario().subscribe(
+    (user) => {
+      this.idMesero = user.idUsuario;
+      console.log("ID del mesero logueado:", this.idMesero);
+    },
+    (err) => console.error(err)
+  );
+  }
 
   buscarReserva(): void {
     if (!this.reservaSearchId) {
@@ -297,7 +307,7 @@ export class FormOrdenComponent implements OnInit {
 
     const pedidoRequest: PedidoRequestoDto = {
       idMesa: this.reservaEncontrada.mesa,
-      idUsuario: this.reservaEncontrada.idUsuario, // luego se va cambiar por el mesero
+      idUsuario: this.idMesero, // luego se va cambiar por el mesero
       idReserva: this.reservaEncontrada.idReserva,
       detalles: detalles,
     };

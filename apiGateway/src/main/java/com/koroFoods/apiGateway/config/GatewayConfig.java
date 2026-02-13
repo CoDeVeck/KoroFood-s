@@ -17,7 +17,7 @@ public class GatewayConfig {
                 )
                 //para el uso de webSockets
                 .route("usuario-service-ws", r -> r
-                        .path("/ws/**")
+                        .path("/ws/**", "/chat/**")
                         .uri("lb:ws://userService")
                 )
                 .route("evento-service", r -> r
