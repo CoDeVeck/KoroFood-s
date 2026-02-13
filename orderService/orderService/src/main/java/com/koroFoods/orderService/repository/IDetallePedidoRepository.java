@@ -1,5 +1,6 @@
 package com.koroFoods.orderService.repository;
 
+import com.koroFoods.orderService.dto.response.DetalleEstadoCount;
 import com.koroFoods.orderService.model.DetallePedido;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,4 +24,14 @@ public interface IDetallePedidoRepository extends JpaRepository<DetallePedido, I
               END
             """,nativeQuery = true)
     List<DetallePedido> findByIdPedidoDescEstado(Integer idPedido);
+
+    @Query(value = """
+            select
+            SUM(CASE WHEN estado = 'PED' then 1 else 0 END) as pedidos,
+            SUM(CASE WHEN estado = 'ENT' then 1 else 0 END) as entregados,
+            SUM(CASE WHEN estado = 'CAN' then 1 else 0 END) as cancelados
+            from tb_detalle_pedido
+            where id_pedido = :idPedido
+            """,nativeQuery = true)
+    DetalleEstadoCount findByIdPedido(Integer idPedido);
 }

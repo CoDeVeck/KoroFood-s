@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
 import com.koroFoods.orderService.dto.response.DetallePedidoResponse;
+import com.koroFoods.orderService.dto.response.DetallePedidoUsuarioResponse;
 import com.koroFoods.orderService.model.DetallePedido;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -84,6 +85,17 @@ public class PedidoController {
             return ResponseEntity.status(HttpStatus.CREATED).body(cambiado);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cambiado);
+        }
+    }
+
+    @GetMapping("/cliente/{idPedido}")
+    public ResponseEntity<ResultadoResponse<DetallePedidoUsuarioResponse>>obtenerCliente(@PathVariable  Integer idPedido){
+        ResultadoResponse<DetallePedidoUsuarioResponse> cliente = pedidoService.obtenerUsuarioPorPedidoReserva(idPedido);
+
+        if (cliente.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(cliente);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cliente);
         }
     }
 }

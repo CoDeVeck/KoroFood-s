@@ -5,13 +5,12 @@ import com.koroFoods.orderService.dto.PedidoResumenDto;
 import com.koroFoods.orderService.dto.PedidoRequestDTO;
 import com.koroFoods.orderService.dto.ResultadoResponse;
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
+import com.koroFoods.orderService.dto.response.DetalleEstadoCount;
 import com.koroFoods.orderService.dto.response.DetallePedidoResponse;
+import com.koroFoods.orderService.dto.response.DetallePedidoUsuarioResponse;
 import com.koroFoods.orderService.enums.EstadoDetallePedido;
 import com.koroFoods.orderService.enums.EstadoPedido;
-import com.koroFoods.orderService.feign.MesaFeignClient;
-import com.koroFoods.orderService.feign.PlatoFeign;
-import com.koroFoods.orderService.feign.PlatoFeignClient;
-import com.koroFoods.orderService.feign.UsuarioFeignClient;
+import com.koroFoods.orderService.feign.*;
 import com.koroFoods.orderService.model.DetallePedido;
 import com.koroFoods.orderService.model.Pedido;
 import com.koroFoods.orderService.repository.IDetallePedidoRepository;
@@ -35,6 +34,7 @@ public class PedidoService {
     private final MesaFeignClient mesaFeignClient;
     private final UsuarioFeignClient usuarioFeignClient;
     private final PlatoFeignClient platoFeignClient;
+    private final ReservaFeignClient reservaFeignClient;
 
     public ResultadoResponse<List<PedidoResumenDto>> listarPedidos(EstadoPedido estado) {
         List<Pedido> pedidos = pedidoRepository.findByEstadoOpcional(estado);
@@ -278,12 +278,6 @@ public class PedidoService {
          return ResultadoResponse.success("Cancelaste este plato" , dp);
      }
 
-    private void validarId(Integer request){
-        if (request == null ||request <= 0) {
-            throw new IllegalArgumentException("ID invalido");
-        }
-    }
-
     private void validarEstadoParaEntregar(EstadoDetallePedido estado){
         if (estado.equals(EstadoDetallePedido.CAN)|| estado.equals(EstadoDetallePedido.ENT) ){
             throw new RuntimeException("El estado no puede estar cancelado para poder entregar");
@@ -293,6 +287,51 @@ public class PedidoService {
     private void validarEstadoParaCancelar(EstadoDetallePedido estado){
         if (estado.equals(EstadoDetallePedido.ENT) || estado.equals(EstadoDetallePedido.CAN)){
             throw new RuntimeException("El estado no puede estar entregado para poder cancelar");
+        }
+    }
+
+
+    //Obtenemos el cliente existente por el id_reserva que hay en pedido que a la vez relaciona una
+    //reserva con un cliente
+    public ResultadoResponse<DetallePedidoUsuarioResponse> obtenerUsuarioPorPedidoReserva(Integer idPedido) {
+
+        //Validar id
+        validarId(idPedido);
+
+        //Obtener el pedido y al cliente asociado
+        Pedido pedido = obtenerPedido(idPedido);
+        ResultadoResponse<UsuarioFeign> usuarioCliente = obtenerClientePorReserva(pedido.getIdReserva());
+        var usuarioData = usuarioCliente.getData();
+
+        //Obtener datos de una query personalizada
+        DetalleEstadoCount pedidosEstados = detallePedidoRepository.findByIdPedido(idPedido);
+
+
+        DetallePedidoUsuarioResponse response = new DetallePedidoUsuarioResponse();
+        response.setNombres(usuarioData.getNombres());
+        response.setApePaterno(usuarioData.getApePaterno());
+        response.setApeMaterno(usuarioData.getApeMaterno());
+        response.setPedidos(pedidosEstados.getPedidos());
+        response.setEntregados(pedidosEstados.getEntregados());
+        response.setCancelados(pedidosEstados.getCancelados());
+
+        return ResultadoResponse.success("Se obtuvo al cliente: ", response);
+
+    }
+
+    private ResultadoResponse<UsuarioFeign> obtenerClientePorReserva(Integer idUsuario){
+        validarId(idUsuario);
+        UsuarioFeign obtenido = reservaFeignClient.obtenerUsuarioPorReserva(idUsuario).getData();
+
+        return ResultadoResponse.success("Cliente obtenido: " , obtenido);
+
+    }
+
+
+
+    private void validarId(Integer request){
+        if (request == null ||request <= 0) {
+            throw new IllegalArgumentException("ID invalido");
         }
     }
 }
