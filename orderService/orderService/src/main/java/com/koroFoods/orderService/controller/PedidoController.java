@@ -62,7 +62,7 @@ public class PedidoController {
     }
 
     @GetMapping("/list/{pedidoId}")
-    public ResponseEntity<ResultadoResponse<List<DetallePedidoResponse>>> agregarPlatoOrden(@PathVariable Integer pedidoId) {
+    public ResponseEntity<ResultadoResponse<List<DetallePedidoResponse>>> obtenerListaDetallePorPedido(@PathVariable Integer pedidoId) {
         ResultadoResponse<List<DetallePedidoResponse>> lista = detallePedidoService.obtenerDetallePorPedido(pedidoId);
         if (lista.isValor()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(lista);
