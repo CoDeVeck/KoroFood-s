@@ -10,5 +10,5 @@ import com.koroFoods.reservationService.dto.ResultadoResponse;
 public interface PedidoFeignClient {
     
     @GetMapping("/pedido/feign/reserva/{idReserva}")
-    ResultadoResponse<PedidoFeign> getPedidoByReservaId(@PathVariable("idReserva") Integer idReserva);
+    ResultadoResponse<PedidoFeign> getPedidoByIdReserva(@PathVariable("idReserva") Integer idReserva);
 }

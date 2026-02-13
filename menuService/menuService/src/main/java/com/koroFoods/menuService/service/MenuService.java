@@ -95,6 +95,7 @@ public class MenuService {
 		dto.setNombre(dish.getNombre());
 		dto.setTipoPlato(dish.getTipoPlato().toString());
 		dto.setImagen(dish.getImagen());
+        dto.setStock(dish.getStock());
 		dto.setPrecio(dish.getPrecio());
 		return ResultadoResponse.success("Plato encontrado", dto);
 	}
