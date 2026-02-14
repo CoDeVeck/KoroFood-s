@@ -7,7 +7,8 @@ export const enviroment = {
     resenas: 'https://dominio.com/resenas',
     pedido: 'https://dominio.com/pedido',
     reserva: 'https://dominio.com/reserva',
-    mesa: 'https://dominio.com/mesa'
+    mesa: 'https://dominio.com/mesa',
+    pago: 'https://dominio.com/pago'
   },
   githubClientId: 'Ov23liywDIDTbcViyzqf',
   githubRedirectUri: 'https://localhost:4200/auth/login',

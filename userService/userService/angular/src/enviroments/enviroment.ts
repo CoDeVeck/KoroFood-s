@@ -6,6 +6,7 @@ export const enviroment = {
     eventos: 'http://localhost:8088',
     resenas: 'http://localhost:8098', // usando el apigateway
     pedido: 'http://localhost:8086',
+    pago:'http://localhost:8085',
     reserva: 'http://localhost:8083',
     mesa: 'http://localhost:8082',
 

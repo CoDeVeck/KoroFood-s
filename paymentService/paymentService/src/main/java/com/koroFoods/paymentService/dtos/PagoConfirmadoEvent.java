@@ -5,6 +5,8 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.koroFoods.paymentService.enums.MetodoPago;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,7 +20,7 @@ public class PagoConfirmadoEvent {
     private Integer idUsuario;
     private String tipoPago; // DR o PP
     private BigDecimal monto;
-    private String metodoPago;
+    private MetodoPago metodoPago;
     private LocalDateTime fechaPago;
     private String codigoOperacion;
 }

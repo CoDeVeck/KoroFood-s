@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import java.math.BigDecimal;
 
+import com.koroFoods.paymentService.enums.MetodoPago;
+
 
 @Getter
 @Setter
@@ -25,7 +27,7 @@ public class CrearPagoRequest {
     private BigDecimal monto;
 
     @NotNull(message = "El método de pago es obligatorio")
-    private String metodoPago; // "YAPE", "PLIN", "EFECTIVO", "TARJETA"
+    private MetodoPago metodoPago; // "YAPE", "PLIN", "EFECTIVO", "TARJETA"
 
     private String observaciones;
 }

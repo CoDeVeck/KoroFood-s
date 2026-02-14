@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IPagoRepository extends JpaRepository<Pago, Integer> {
 	
-	Optional<Pago> findByReferenciaPago(String referenciaPago);
+	 Optional<Pago> findByReferenciaPago(String referenciaPago);
 
     List<Pago> findByIdUsuario(Integer idUsuario);
 
@@ -22,7 +22,12 @@ public interface IPagoRepository extends JpaRepository<Pago, Integer> {
 
     List<Pago> findByEstado(EstadoPago estado);
 
-    Optional<Pago> findByCodigoOperacion(String codigoOperacion);
-
+    
+    boolean existsByHashImagen(String hashImagen);
+    
     boolean existsByCodigoOperacion(String codigoOperacion);
+    
+    Optional<Pago> findByHashImagen(String hashImagen);
+    
+    Optional<Pago> findByCodigoOperacion(String codigoOperacion);
 }

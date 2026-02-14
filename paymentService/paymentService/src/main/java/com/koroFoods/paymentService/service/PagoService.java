@@ -2,6 +2,8 @@ package com.koroFoods.paymentService.service;
 
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,14 +13,19 @@ import com.koroFoods.paymentService.dtos.PagoAnuladoEvent;
 import com.koroFoods.paymentService.dtos.PagoConfirmadoEvent;
 import com.koroFoods.paymentService.dtos.PagoResponse;
 import com.koroFoods.paymentService.dtos.QRDataResponse;
+import com.koroFoods.paymentService.dtos.SubirCapturaRequest;
 import com.koroFoods.paymentService.enums.EstadoPago;
 import com.koroFoods.paymentService.enums.MetodoPago;
+import com.koroFoods.paymentService.enums.MotivoRechazo;
 import com.koroFoods.paymentService.enums.TipoPago;
 import com.koroFoods.paymentService.exception.BusinessException;
 import com.koroFoods.paymentService.exception.ResourceNotFoundException;
 import com.koroFoods.paymentService.messaging.PagoEventPublisher;
 import com.koroFoods.paymentService.model.Pago;
 import com.koroFoods.paymentService.repository.IPagoRepository;
+import java.security.MessageDigest;
+import java.util.Base64;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,16 +33,26 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PagoService {
 
 	private final IPagoRepository pagoRepository;
     private final PagoEventPublisher eventPublisher;
+    
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private GoogleVisionService googleVisionService;
+
+    @Autowired 
+    private OCRValidationService ocrValidationService;
 
     // Datos del negocio para Yape/Plin
-    private static final String NUMERO_YAPE = "987654321"; // Número de Yape del negocio
-    private static final String NUMERO_PLIN = "987654321"; // Número de Plin del negocio
+    private static final String NUMERO_YAPE = "986425458"; // Número de Yape del negocio
+    private static final String NUMERO_PLIN = "986425458"; // Número de Plin del negocio
     private static final String NOMBRE_NEGOCIO = "KoroFood Restaurant";
 
     @Transactional
@@ -48,7 +65,7 @@ public class PagoService {
         pago.setIdUsuario(request.getIdUsuario());
         pago.setTipoPago(TipoPago.valueOf(request.getTipoPago()));
         pago.setMonto(request.getMonto());
-        pago.setMetodoPago(MetodoPago.valueOf(request.getMetodoPago()));
+        pago.setMetodoPago((request.getMetodoPago()));
         pago.setObservaciones(request.getObservaciones());
         pago.setEstado(EstadoPago.PEN);
 
@@ -159,7 +176,7 @@ public class PagoService {
         }
 
         // Validar método de pago según tipo
-        MetodoPago metodo = MetodoPago.valueOf(request.getMetodoPago());
+        MetodoPago metodo = (request.getMetodoPago());
         if (request.getTipoPago().equals("DR") && metodo == MetodoPago.EFECTIVO) {
             throw new BusinessException("No se acepta efectivo para depósitos de reserva");
         }
@@ -197,7 +214,7 @@ public class PagoService {
                 .idPago(pago.getIdPago())
                 .referenciaPago(pago.getReferenciaPago())
                 .monto(pago.getMonto())
-                .metodoPago(pago.getMetodoPago().name())
+                .metodoPago(pago.getMetodoPago())
                 .numeroDestino(numeroDestino)
                 .nombreDestino(NOMBRE_NEGOCIO)
                 .concepto(concepto)
@@ -214,7 +231,7 @@ public class PagoService {
                 .idUsuario(pago.getIdUsuario())
                 .tipoPago(pago.getTipoPago().name())
                 .monto(pago.getMonto())
-                .metodoPago(pago.getMetodoPago().name())
+                .metodoPago(pago.getMetodoPago())
                 .fechaPago(pago.getFechaPago())
                 .codigoOperacion(pago.getCodigoOperacion())
                 .build();
@@ -255,9 +272,161 @@ public class PagoService {
             case PAG -> "Pagado";
             case ANU -> "Anulado";
             case EXP -> "Expirado";
+            case RECH -> "Rechazado";
         };
     }
 
+   
+    
+    @Transactional
+    public PagoResponse subirCaptura(SubirCapturaRequest request) {
+        // 1. Buscar el pago
+        Pago pago = pagoRepository.findById(request.getIdPago())
+                .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado con ID: " + request.getIdPago()));
+
+        // 2. Validar que esté en estado PENDIENTE
+        if (pago.getEstado() != EstadoPago.PEN) {
+            throw new BusinessException("El pago ya fue procesado. Estado actual: " + pago.getEstado());
+        }
+
+        // 3. Validar que no haya expirado
+        if (pago.getFechaExpiracion() != null && LocalDateTime.now().isAfter(pago.getFechaExpiracion())) {
+            pago.setEstado(EstadoPago.EXP);
+            pagoRepository.save(pago);
+            throw new BusinessException("El pago ha expirado. Por favor, crea una nueva reserva.");
+        }
+
+        // 4. Validar que el método de pago coincida
+        if (!pago.getMetodoPago().name().equals(request.getMetodoPago())) {
+            throw new BusinessException(
+                String.format("Método de pago incorrecto. Esperado: %s, Recibido: %s", 
+                    pago.getMetodoPago(), request.getMetodoPago())
+            );
+        }
+
+        try {
+            // 5. Generar hash SHA256 de la imagen
+            String hash = generarHashImagen(request.getImagenBase64());
+            
+            // 6. Verificar que el hash NO exista (imagen no duplicada)
+            if (pagoRepository.existsByHashImagen(hash)) {
+                pago.setEstado(EstadoPago.RECH);
+                pago.setMotivoRechazo(MotivoRechazo.HASH_DUPLICADO.getMensaje());
+                pagoRepository.save(pago);
+                
+                throw new BusinessException(MotivoRechazo.HASH_DUPLICADO.getMensaje());
+            }
+            
+            pago.setHashImagen(hash);
+            
+            // 7. Subir imagen a Cloudinary
+            log.info("Subiendo imagen a Cloudinary para pago: {}", pago.getReferenciaPago());
+            String urlCaptura = cloudinaryService.subirImagenBase64(
+                request.getImagenBase64(), 
+                pago.getReferenciaPago()
+            );
+            pago.setUrlCaptura(urlCaptura);
+            log.info("Imagen subida exitosamente: {}", urlCaptura);
+            
+            // 8. Extraer texto con Google Vision OCR
+            log.info("Extrayendo texto con Google Vision...");
+            String textoExtraido = googleVisionService.extraerTextoDeURL(urlCaptura);
+            pago.setTextoExtraido(textoExtraido);
+            log.info("Texto extraído ({} caracteres)", textoExtraido.length());
+            
+            // 9. Validar con OCR
+            OCRValidationService.ResultadoOCR resultadoOCR = ocrValidationService.validarTextoOCR(
+                textoExtraido, 
+                pago.getMonto(), 
+                pago.getMetodoPago()
+            );
+            
+            // 10. Guardar datos extraídos
+            pago.setCodigoOperacion(resultadoOCR.getCodigoOperacion());
+            pago.setMontoDetectado(resultadoOCR.getMontoDetectado());
+            pago.setFechaDetectada(resultadoOCR.getFechaDetectada());
+            
+            // 11. Validar resultado
+            if (!resultadoOCR.isValido()) {
+                // Validación falló
+                pago.setEstado(EstadoPago.RECH);
+                pago.setMotivoRechazo(resultadoOCR.getMotivoRechazo().getMensaje());
+                
+                Pago rechazado = pagoRepository.save(pago);
+                
+                log.warn("Pago rechazado: {}", resultadoOCR.getMotivoRechazo());
+                
+                throw new BusinessException(resultadoOCR.getMotivoRechazo().getMensaje());
+            }
+            
+            // 12. Verificar que el código de operación NO exista
+            if (pagoRepository.existsByCodigoOperacion(pago.getCodigoOperacion())) {
+                pago.setEstado(EstadoPago.RECH);
+                pago.setMotivoRechazo(MotivoRechazo.CODIGO_DUPLICADO.getMensaje());
+                pagoRepository.save(pago);
+                
+                throw new BusinessException(MotivoRechazo.CODIGO_DUPLICADO.getMensaje());
+            }
+            
+            // 13. ✅ VALIDACIÓN EXITOSA
+            pago.setEstado(EstadoPago.PAG);
+            pago.setFechaPago(LocalDateTime.now());
+            
+            Pago pagado = pagoRepository.save(pago);
+            
+            log.info(" Pago validado exitosamente: {}", pago.getReferenciaPago());
+            
+            // 14. Publicar evento en RabbitMQ
+            publicarEventoPagoConfirmado(pagado);
+            
+            return mapearAResponse(pagado);
+            
+        } catch (BusinessException e) {
+            // Re-lanzar excepciones de negocio
+            throw e;
+        } catch (Exception e) {
+            // Error técnico (Cloudinary, Google Vision, etc.)
+            log.error("Error técnico al procesar captura", e);
+            
+            pago.setEstado(EstadoPago.RECH);
+            pago.setMotivoRechazo(MotivoRechazo.ERROR_OCR.getMensaje() + ": " + e.getMessage());
+            pagoRepository.save(pago);
+            
+            throw new BusinessException("Error al procesar la captura: " + e.getMessage());
+        }
+    }
+
+    private String generarHashImagen(String base64Image) {
+        try {
+            // Limpiar el prefijo data:image/... si existe
+            String base64Data = base64Image;
+            if (base64Image.contains(",")) {
+                base64Data = base64Image.split(",")[1];
+            }
+            
+            // Decodificar Base64
+            byte[] imageBytes = Base64.getDecoder().decode(base64Data);
+            
+            // Generar hash SHA256
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(imageBytes);
+            
+            // Convertir a hexadecimal
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            
+            return hexString.toString();
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Error al generar hash de imagen", e);
+        }
+    }
+
+    // Actualizar el método mapearAResponse para incluir nuevos campos
     private PagoResponse mapearAResponse(Pago pago) {
         return PagoResponse.builder()
                 .idPago(pago.getIdPago())
@@ -277,6 +446,13 @@ public class PagoService {
                 .fechaCreacion(pago.getFechaCreacion())
                 .fechaExpiracion(pago.getFechaExpiracion())
                 .codigoOperacion(pago.getCodigoOperacion())
+                // ========== AGREGAR ESTOS CAMPOS NUEVOS ==========
+                .urlCaptura(pago.getUrlCaptura())
+                .hashImagen(pago.getHashImagen())
+                .montoDetectado(pago.getMontoDetectado())
+                .fechaDetectada(pago.getFechaDetectada())
+                .motivoRechazo(pago.getMotivoRechazo())
+                // ========== FIN ==========
                 .build();
     }
     

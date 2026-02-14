@@ -29,4 +29,9 @@ public class PagoResponse {
 	private LocalDateTime fechaCreacion;
 	private LocalDateTime fechaExpiracion;
 	private String codigoOperacion;
+	private String urlCaptura;
+	private String hashImagen;
+	private BigDecimal montoDetectado;
+	private LocalDateTime fechaDetectada;
+	private String motivoRechazo;
 }

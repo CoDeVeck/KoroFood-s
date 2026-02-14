@@ -68,6 +68,27 @@ public class Pago {
     @Column(name = "FECHA_EXPIRACION")
     private LocalDateTime fechaExpiracion; // QR válido por X tiempo
 
+    
+    @Column(name = "URL_CAPTURA", length = 500)
+    private String urlCaptura;
+
+    @Column(name = "HASH_IMAGEN", length = 64, unique = true)
+    private String hashImagen;
+
+    @Column(name = "TEXTO_EXTRAIDO")
+    @Lob
+    private String textoExtraido;
+
+    @Column(name = "MONTO_DETECTADO")
+    private BigDecimal montoDetectado;
+
+    @Column(name = "FECHA_DETECTADA")
+    private LocalDateTime fechaDetectada;
+
+    @Column(name = "MOTIVO_RECHAZO")
+    @Lob
+    private String motivoRechazo;
+    
     @PrePersist
     protected void onCreate() {
         this.fechaCreacion = LocalDateTime.now();

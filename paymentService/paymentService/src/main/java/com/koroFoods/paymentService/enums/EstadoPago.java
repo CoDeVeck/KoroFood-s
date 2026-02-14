@@ -4,5 +4,6 @@ public enum EstadoPago {
     PAG,
     ANU,
     PEN,
-    EXP
+    EXP,
+    RECH,
 }

@@ -15,6 +15,7 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +36,15 @@ public class ReservaService {
 
         boolean esEvento = request.getIdEvento() != null;
 
-        LocalDateTime inicio = request.getFechaHora();
+        LocalDateTime inicio;
+        try {
+        	inicio = LocalDateTime.parse(request.getFechaHora());
+        }catch (Exception e) {
+			return ResultadoResponse.error("Formato de fecha invalido");
+		}
+        System.out.println("FECHA RAW → [" + request.getFechaHora() + "]");
+
+        
         LocalDateTime fin = inicio.plusHours(esEvento ? 3 : 2);
 
         if (esEvento) {

@@ -7,6 +7,11 @@ import { ReservaServiceService } from '../service/reserva-service.service';
 import { Zona } from '../../shared/enums/Zona';
 import { FormsModule } from '@angular/forms';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
+import { CrearPagoRequest} from '../../cliente/pago/pagoDto';
+import { ReservaRequest } from '../../shared/request/ReservaRequest';
+import { Router } from '@angular/router';
+import { PagoService } from '../service/pago.service';
+import * as QRCode from 'qrcode';
 
 interface CalendarDay {
   day: number;
@@ -32,6 +37,7 @@ interface TimeSlot {
 export class ReservaComponent implements OnInit {
   currentStep: number = 1;
 
+  qrImagenUrl: string = '';
   // Paso 1: Personas
   personas: number = 1;
   quickNumbers: number[] = [1, 2, 3, 4];
@@ -58,8 +64,16 @@ export class ReservaComponent implements OnInit {
   alternativeTimes: TimeSlot[] = [];
   selectedTime: TimeSlot | null = null;
 
+  
+
   // Paso 5: Métodos de pago
-  metodoPagoSeleccionado: 'tarjeta' | 'yape' | 'plin' | null = null;
+  metodoPagoSeleccionado: 'TARJETA' | 'YAPE' | 'PLIN' | null = null;
+
+  pagoCreado: any = null;
+imagenPreview: string | null = null;
+imagenBase64: string | null = null;
+procesandoPago: boolean = false;
+errorPago: string = '';
 
   // Tarjeta
   datosTarjeta = {
@@ -80,12 +94,24 @@ export class ReservaComponent implements OnInit {
   qrYape: string =
     'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=yape://pago/korofood/deposito/15.00';
 
+   // QR DINÁMICO
+
+  mostrandoQR: boolean = false;
+  idReservaCreada: number | null = null; // Guardar ID de reserva creada
+
+
   // Plin - Número ficticio
-  numeroPlin: string = '987 654 321';
+  numeroPlin: string = '986425458';
+
+   // AGREGAR ESTADOS
+  loading: boolean = false;
+  depositoRequerido: number = 15.00;
 
   constructor(
     private mesasService: MesasServiceService,
     private reservaService: ReservaServiceService, // INYECTAR
+    private pagoService: PagoService, // ✅ INYECTAR
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -376,11 +402,43 @@ export class ReservaComponent implements OnInit {
     return this.mesaSeleccionada ? this.mesaSeleccionada.tipo : '-';
   }
 
-  seleccionarMetodoPago(metodo: 'tarjeta' | 'yape' | 'plin'): void {
-    this.metodoPagoSeleccionado = metodo;
-    this.limpiarErroresTarjeta();
+ seleccionarMetodoPago(metodo: 'TARJETA' | 'YAPE' | 'PLIN'): void {
+  if (this.pagoCreado) return; // No permitir cambio si ya hay un pago creado
+  
+  this.metodoPagoSeleccionado = metodo;
+  this.limpiarErroresTarjeta();
+  this.imagenPreview = null;
+  this.imagenBase64 = null;
+  this.errorPago = '';
+}
+
+onFileSelected(event: any): void {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Validar tipo
+  if (!file.type.startsWith('image/')) {
+    alert('Solo se permiten imágenes');
+    return;
   }
 
+  // Validar tamaño (10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    alert('La imagen no puede superar 10MB');
+    return;
+  }
+
+  this.errorPago = '';
+
+  // Leer imagen
+  const reader = new FileReader();
+  reader.onload = (e: any) => {
+    this.imagenPreview = e.target.result;
+    this.imagenBase64 = e.target.result; // Incluye data:image/...
+  };
+  reader.readAsDataURL(file);
+}
+  
   // Validación de tarjeta
   validarNumeroTarjeta(): void {
     const numero = this.datosTarjeta.numero.replace(/\s/g, '');
@@ -563,35 +621,139 @@ export class ReservaComponent implements OnInit {
       });
   }
 
-  // Validar pago antes de confirmar
-  puedeConfirmarPago(): boolean {
-    if (!this.metodoPagoSeleccionado) {
-      return false;
-    }
+  
 
-    if (this.metodoPagoSeleccionado === 'tarjeta') {
-      return this.tarjetaValida;
-    }
-
-    // Para Yape y Plin, asumimos que el usuario completó el pago
-    return true;
+  construirFechaReservaISO(): string {
+  if (!this.selectedDate || !this.selectedTime) {
+    throw new Error('Fecha u hora no seleccionada');
   }
 
-  // Confirmar pago
+  // Usar el dateTime del slot seleccionado
+  if (this.selectedTime.dateTime) {
+    return this.selectedTime.dateTime;
+  }
+
+  // Fallback
+  const fecha = new Date(this.selectedDate);
+  const [hora, minuto] = this.selectedTime.time.split(':');
+  fecha.setHours(parseInt(hora), parseInt(minuto), 0, 0);
+  return fecha.toISOString();
+}
+
+
+
   confirmarPago(): void {
-    if (!this.puedeConfirmarPago()) {
-      alert('Por favor complete los datos de pago correctamente');
-      return;
-    }
-
-    console.log('Procesando pago...');
-    console.log('Método:', this.metodoPagoSeleccionado);
-
-    if (this.metodoPagoSeleccionado === 'tarjeta') {
-      console.log('Datos de tarjeta:', this.datosTarjeta);
-    }
-
-    // Aquí iría la lógica para procesar el pago
-    alert('¡Pago procesado exitosamente! Reserva confirmada.');
+  if (!this.puedeConfirmarPago()) {
+    alert('Por favor completa todos los datos');
+    return;
   }
+
+  // Si es Yape o Plin, procesar captura
+  if (this.metodoPagoSeleccionado === 'YAPE' || this.metodoPagoSeleccionado === 'PLIN') {
+    this.procesarPagoConCaptura();
+  } else if (this.metodoPagoSeleccionado === 'TARJETA') {
+    // TODO: Implementar pago con tarjeta
+    alert('Pago con tarjeta - En desarrollo');
+  }
+}
+
+procesarPagoConCaptura(): void {
+  if (!this.imagenBase64 || !this.metodoPagoSeleccionado) {
+    alert('Debes subir el comprobante de pago');
+    return;
+  }
+
+  this.procesandoPago = true;
+  this.errorPago = '';
+
+  // 1. Crear reserva primero
+  const reservaRequest = {
+    idUsuario: 1, // TODO: Obtener del auth
+    idMesa: this.mesaSeleccionada!.idMesa!,
+    fechaHora: this.construirFechaReservaISO(),
+    cantidadPersonas: this.personas,
+    observaciones: `Reserva para ${this.personas} personas`
+  };
+
+  this.reservaService.crearReserva(reservaRequest).subscribe({
+    next: (result) => {
+      if (result.valor && result.data) {
+        const idReserva = result.data;
+
+        // 2. Crear pago
+        const pagoRequest = {
+          idReserva: idReserva,
+          idUsuario: 1,
+          tipoPago: 'DR',
+          monto: 15.00,
+          metodoPago: this.metodoPagoSeleccionado!,
+          observaciones: `Depósito - ${this.metodoPagoSeleccionado}`
+        };
+
+        this.pagoService.crearPago(pagoRequest).subscribe({
+          next: (pago) => {
+            this.pagoCreado = pago;
+
+            // 3. Subir captura
+            const capturaRequest = {
+              idPago: pago.idPago,
+              imagenBase64: this.imagenBase64!,
+              metodoPago: this.metodoPagoSeleccionado!
+            };
+
+            this.pagoService.subirCaptura(capturaRequest).subscribe({
+              next: (pagoValidado) => {
+                this.procesandoPago = false;
+
+                if (pagoValidado.estado === 'PAGADO') {
+                  alert('¡Pago confirmado! Tu reserva ha sido registrada.');
+                  // TODO: Redirigir a confirmación
+                  this.router.navigate(['/']);
+                } else if (pagoValidado.estado === 'RECHAZADO') {
+                  this.errorPago = pagoValidado.motivoRechazo || 'Pago rechazado';
+                }
+              },
+              error: (err) => {
+                this.procesandoPago = false;
+                this.errorPago = err.message;
+              }
+            });
+          },
+          error: (err) => {
+            this.procesandoPago = false;
+            alert('Error al crear pago: ' + err.message);
+          }
+        });
+      }
+    },
+    error: (err) => {
+      this.procesandoPago = false;
+      alert('Error al crear reserva: ' + err.message);
+    }
+  });
+}
+
+
+intentarNuevamente(): void {
+  this.imagenPreview = null;
+  this.imagenBase64 = null;
+  this.errorPago = '';
+  this.procesandoPago = false;
+}
+
+// ========== ACTUALIZAR puedeConfirmarPago ==========
+puedeConfirmarPago(): boolean {
+  if (!this.metodoPagoSeleccionado) return false;
+
+  if (this.metodoPagoSeleccionado === 'TARJETA') {
+    return this.tarjetaValida;
+  }
+
+  if (this.metodoPagoSeleccionado === 'YAPE' || this.metodoPagoSeleccionado === 'PLIN') {
+    return this.imagenBase64 !== null;
+  }
+
+  return false;
+}
+
 }
