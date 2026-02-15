@@ -1,6 +1,5 @@
 package com.koroFoods.paymentService.controller;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +22,6 @@ import com.koroFoods.paymentService.exception.BusinessException;
 import com.koroFoods.paymentService.service.CloudinaryService;
 import com.koroFoods.paymentService.service.GoogleVisionService;
 import com.koroFoods.paymentService.service.PagoService;
-import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
