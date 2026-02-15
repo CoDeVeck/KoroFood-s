@@ -9,7 +9,7 @@ import { enviroment } from '@envs/enviroment';
   providedIn: 'root',
 })
 export class GoogleService {
-  googleUrl = `${enviroment.apiUrls.usuarios}/auth/google`;
+  googleUrl = `${enviroment.apigateway}/auth/google`;
   constructor(private http: HttpClient) {}
 
   loginWithGoogle(idToken: string): Observable<SocialAuthResponse> {

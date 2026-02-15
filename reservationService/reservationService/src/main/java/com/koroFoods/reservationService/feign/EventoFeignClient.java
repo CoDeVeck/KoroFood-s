@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.koroFoods.reservationService.dto.ResultadoResponse;
 
-@FeignClient(name = "evento-service", url = "http://localhost:8088/evento/feign")
+@FeignClient(name = "eventService")
 public interface EventoFeignClient {
 
-	@GetMapping("/validar/{id}")
+	@GetMapping("/evento/feign/validar/{id}")
 	ResultadoResponse<EventoFeign> obtenerEvento(@PathVariable Integer id);
 
-	@GetMapping("/ocupaciones")
+	@GetMapping("/evento/feign/ocupaciones")
 	ResultadoResponse<Boolean> validarHorariosParaReservaConEvento(@RequestParam Integer mesaId,
 			@RequestParam Integer eventoId,
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime desde,

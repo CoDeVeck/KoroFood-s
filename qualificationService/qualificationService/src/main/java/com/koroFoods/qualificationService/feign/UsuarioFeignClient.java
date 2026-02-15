@@ -6,8 +6,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.koroFoods.qualificationService.dto.ResultadoResponse;
 
-@FeignClient(name = "user-service", url = "http://localhost:8081/user/feign")
+@FeignClient(name = "userService")
 public interface UsuarioFeignClient {
-	@GetMapping("/{id}")
+	@GetMapping("/user/feign/{id}")
     ResultadoResponse<UsuarioFeign> getUsuarioById(@PathVariable Integer id);
+	
+	@GetMapping("/user/feign/noauth/{id}")
+    ResultadoResponse<UsuarioPublicoDTO> getUserByIdNoauth(@PathVariable Integer id);
+
 }

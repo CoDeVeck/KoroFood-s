@@ -9,7 +9,7 @@ import { ReservaDto } from '../../shared/dto/ReservaDto';
   providedIn: 'root',
 })
 export class ReservaMeseroService {
-  private baseUrl = `${enviroment.apiUrls.reserva}/reserva/feign`;
+  private baseUrl = `${enviroment.apigateway}/reserva/feign`;
 
   constructor(private http: HttpClient) {}
 

@@ -1,17 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { MesaItem, MesaSelectorComponent } from './mesa-selector/mesa-selector.component';
+import {
+  MesaItem,
+  MesaSelectorComponent,
+} from './mesa-selector/mesa-selector.component';
 import { MesaDto } from '../../shared/dto/MesaDto';
 import { MesasServiceService } from '../service/mesas-service.service';
 import { ReservaServiceService } from '../service/reserva-service.service';
 import { Zona } from '../../shared/enums/Zona';
 import { FormsModule } from '@angular/forms';
-import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
-import { CrearPagoRequest} from '../../cliente/pago/pagoDto';
-import { ReservaRequest } from '../../shared/request/ReservaRequest';
 import { Router } from '@angular/router';
-import { PagoService } from '../service/pago.service';
-import * as QRCode from 'qrcode';
+import { ReservaRequest } from '../../shared/request/ReservaRequest';
+
+import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
+
+import { AuthService } from '../../auth/service/auth.service';
+
 
 interface CalendarDay {
   day: number;
@@ -24,7 +28,7 @@ interface CalendarDay {
 interface TimeSlot {
   time: string;
   unavailable?: boolean;
-  dateTime?: string; // Guardar el datetime completo del backend
+  dateTime?: string;
 }
 
 @Component({
@@ -57,23 +61,18 @@ export class ReservaComponent implements OnInit {
   selectedDate: Date | null = null;
 
   // Paso 4: Hora
-  availableTimes: TimeSlot[] = []; // INICIALIZAR VACÍO
-  cargandoSlots: boolean = false; // NUEVO
-  mensajeSlots: string = ''; // NUEVO
-
+  availableTimes: TimeSlot[] = [];
+  cargandoSlots: boolean = false;
+  mensajeSlots: string = '';
   alternativeTimes: TimeSlot[] = [];
   selectedTime: TimeSlot | null = null;
 
-  
 
-  // Paso 5: Métodos de pago
+  // Paso 5: Autenticación y Métodos de pago
+  usuarioAutenticado: boolean = false;
+  idUsuario: number | null = null;
+
   metodoPagoSeleccionado: 'TARJETA' | 'YAPE' | 'PLIN' | null = null;
-
-  pagoCreado: any = null;
-imagenPreview: string | null = null;
-imagenBase64: string | null = null;
-procesandoPago: boolean = false;
-errorPago: string = '';
 
   // Tarjeta
   datosTarjeta = {
@@ -107,15 +106,76 @@ errorPago: string = '';
   loading: boolean = false;
   depositoRequerido: number = 15.00;
 
+  // Estado de procesamiento
+  procesandoPago: boolean = false;
+
+  mostrarAlerta: boolean = false;
+  alertaTipo: 'exito' | 'error' = 'exito';
+  alertaDatos = {
+    idReserva: 0,
+    numeroMesa: 0,
+    fecha: '',
+    hora: '',
+    mensaje: '',
+  };
+
   constructor(
     private mesasService: MesasServiceService,
-    private reservaService: ReservaServiceService, // INYECTAR
-    private pagoService: PagoService, // ✅ INYECTAR
-    private router: Router
+
+    private reservaService: ReservaServiceService,
+    private authService: AuthService,
+    private router: Router,
+
   ) {}
 
   ngOnInit(): void {
     this.generateCalendar();
+    this.verificarSesion();
+  }
+
+  // NUEVO: Verificar si hay sesión activa
+  verificarSesion(): void {
+    this.usuarioAutenticado = this.authService.isLoggedIn();
+
+    if (this.usuarioAutenticado) {
+      this.authService.getUsuario().subscribe({
+        next: (response) => {
+          this.idUsuario = response.idUsuario;
+          console.log('✅ ID Usuario obtenido:', this.idUsuario);
+        },
+        error: (error) => {
+          console.error('❌ Error al obtener usuario:', error);
+          this.usuarioAutenticado = false;
+          this.idUsuario = null;
+        },
+      });
+    } else {
+      this.idUsuario = null;
+    }
+  }
+
+  irALogin(): void {
+    const reservaTemp = {
+      personas: this.personas,
+      mesa: this.mesaSeleccionada,
+      fecha: this.selectedDate,
+      hora: this.selectedTime,
+    };
+    localStorage.setItem('reserva_temporal', JSON.stringify(reservaTemp));
+
+    this.router.navigate(['/login']);
+  }
+
+  irARegistro(): void {
+    const reservaTemp = {
+      personas: this.personas,
+      mesa: this.mesaSeleccionada,
+      fecha: this.selectedDate,
+      hora: this.selectedTime,
+    };
+    localStorage.setItem('reserva_temporal', JSON.stringify(reservaTemp));
+
+    this.router.navigate(['/register']);
   }
 
   // Navegación de pasos
@@ -127,9 +187,10 @@ errorPago: string = '';
       this.currentStep++;
     } else if (this.currentStep === 3 && this.selectedDate) {
       this.currentStep++;
-      this.cargarSlotsDisponibles(); // CARGAR SLOTS AL AVANZAR AL PASO 4
+      this.cargarSlotsDisponibles();
     } else if (this.currentStep === 4 && this.selectedTime) {
       this.currentStep++;
+      this.verificarSesion();
     }
   }
 
@@ -165,32 +226,17 @@ errorPago: string = '';
 
   cargarMesasPorZona(): void {
     this.cargandoMesas = true;
-    console.log(
-      '🔍 Cargando mesas para:',
-      this.zonaSeleccionada,
-      'personas:',
-      this.personas,
-    );
-
     this.mesasService
       .obtenerMesasPorZona(this.zonaSeleccionada as Zona, this.personas)
       .subscribe({
         next: (response) => {
           console.log('✅ Response completo:', response);
-          console.log('📊 Datos:', response.data);
-          console.log('💬 Mensaje:', response.mensaje);
-
           this.mesasDisponibles = response.data;
           this.mensajeMesas = response.mensaje!;
           this.cargandoMesas = false;
         },
         error: (error) => {
-          console.error('❌ Error completo:', error);
-          console.error('📍 Status:', error.status);
-          console.error('📍 StatusText:', error.statusText);
-          console.error('📍 URL:', error.url);
-          console.error('📍 Headers:', error.headers);
-
+          console.error('❌ Error al cargar mesas:', error);
           this.mesasDisponibles = [];
           this.mensajeMesas = 'Error al cargar las mesas disponibles';
           this.cargandoMesas = false;
@@ -203,71 +249,6 @@ errorPago: string = '';
       this.mesaSeleccionada = mesa as MesaDto;
       console.log('Mesa seleccionada:', mesa);
     }
-  }
-
-  cargarSlotsDisponibles(): void {
-    if (!this.mesaSeleccionada || !this.selectedDate) {
-      console.error('❌ Falta mesa o fecha seleccionada');
-      return;
-    }
-
-    this.cargandoSlots = true;
-    this.availableTimes = [];
-    this.selectedTime = null;
-
-    const desde = new Date(this.selectedDate);
-    desde.setHours(12 - 5, 0, 0, 0); // 12:00 - 5 horas = 7:00 (que en UTC será 12:00)
-
-    const hasta = new Date(this.selectedDate);
-    hasta.setHours(23 - 5, 0, 0, 0); // 23:00 - 5 horas = 18:00 (que en UTC será 23:00)
-
-    const desdeISO = desde.toISOString();
-    const hastaISO = hasta.toISOString();
-
-    console.log('🕐 Cargando slots para:');
-    console.log('  Mesa ID:', this.mesaSeleccionada.idMesa);
-    console.log('  Desde:', desdeISO);
-    console.log('  Hasta:', hastaISO);
-
-    this.reservaService
-      .obtenerSlotsDisponibles(
-        this.mesaSeleccionada.idMesa!,
-        desdeISO,
-        hastaISO,
-      )
-      .subscribe({
-        next: (response) => {
-          console.log('✅ Slots recibidos:', response);
-
-          if (response.data && response.data.length > 0) {
-            this.availableTimes = response.data.map((dateTimeStr) => {
-              const date = new Date(dateTimeStr);
-              const hours = date.getHours().toString().padStart(2, '0');
-              const minutes = date.getMinutes().toString().padStart(2, '0');
-
-              return {
-                time: `${hours}:${minutes}`,
-                unavailable: false,
-                dateTime: dateTimeStr,
-              };
-            });
-
-            this.mensajeSlots = response.mensaje || 'Slots cargados';
-            console.log('📅 Slots procesados:', this.availableTimes);
-          } else {
-            this.availableTimes = [];
-            this.mensajeSlots = 'No hay horarios disponibles para esta fecha';
-          }
-
-          this.cargandoSlots = false;
-        },
-        error: (error) => {
-          console.error('❌ Error al cargar slots:', error);
-          this.availableTimes = [];
-          this.mensajeSlots = 'Error al cargar horarios disponibles';
-          this.cargandoSlots = false;
-        },
-      });
   }
 
   // Paso 3: Calendario
@@ -359,7 +340,6 @@ errorPago: string = '';
 
   selectDate(day: CalendarDay): void {
     if (!day.enabled || day.otherMonth) return;
-
     this.selectedDate = day.date;
     this.generateCalendar();
   }
@@ -384,62 +364,88 @@ errorPago: string = '';
     return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]}`;
   }
 
-  // Paso 4: Hora
+  // Paso 4: Cargar slots disponibles
+  cargarSlotsDisponibles(): void {
+    if (!this.mesaSeleccionada || !this.selectedDate) {
+      console.error('❌ Falta mesa o fecha seleccionada');
+      return;
+    }
+
+    this.cargandoSlots = true;
+    this.availableTimes = [];
+    this.selectedTime = null;
+
+    // Construir desde (fecha seleccionada a las 12:00:00)
+    const desde = new Date(this.selectedDate);
+    desde.setHours(12 - 5, 0, 0, 0);
+
+    // Construir hasta (fecha seleccionada a las 23:00:00)
+    const hasta = new Date(this.selectedDate);
+    hasta.setHours(23 - 5, 0, 0, 0);
+
+    const desdeISO = desde.toISOString();
+    const hastaISO = hasta.toISOString();
+
+    this.reservaService
+      .obtenerSlotsDisponibles(
+        this.mesaSeleccionada.idMesa!,
+        desdeISO,
+        hastaISO,
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.data && response.data.length > 0) {
+            this.availableTimes = response.data.map((dateTimeStr) => {
+              const date = new Date(dateTimeStr);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+
+              return {
+                time: `${hours}:${minutes}`,
+                unavailable: false,
+                dateTime: dateTimeStr,
+              };
+            });
+
+            this.mensajeSlots = response.mensaje || 'Slots cargados';
+          } else {
+            this.availableTimes = [];
+            this.mensajeSlots = 'No hay horarios disponibles para esta fecha';
+          }
+
+          this.cargandoSlots = false;
+        },
+        error: (error) => {
+          console.error('❌ Error al cargar slots:', error);
+          this.availableTimes = [];
+          this.mensajeSlots = 'Error al cargar horarios disponibles';
+          this.cargandoSlots = false;
+        },
+      });
+  }
+
   selectTime(time: TimeSlot): void {
     if (time.unavailable) return;
     this.selectedTime = time;
   }
 
-  // Obtener número de mesa para el resumen
-  getMesaNumero(): string {
-    return this.mesaSeleccionada
-      ? `#${this.mesaSeleccionada.numeroMesa}`
-      : 'No seleccionada';
+
+  // Paso 5: Métodos de pago
+  seleccionarMetodoPago(metodo: 'TARJETA' | 'YAPE' | 'PLIN'): void {
+    this.metodoPagoSeleccionado = metodo;
+    this.limpiarErroresTarjeta();
+
+    if (metodo === 'TARJETA' && this.datosTarjeta.numero) {
+      setTimeout(() => {
+        this.validarNumeroTarjeta();
+        this.validarNombreTitular();
+        this.validarFechaExpiracion();
+        this.validarCVV();
+      }, 100);
+    }
   }
 
-  // Obtener zona de la mesa para el resumen
-  getMesaZona(): string {
-    return this.mesaSeleccionada ? this.mesaSeleccionada.tipo : '-';
-  }
 
- seleccionarMetodoPago(metodo: 'TARJETA' | 'YAPE' | 'PLIN'): void {
-  if (this.pagoCreado) return; // No permitir cambio si ya hay un pago creado
-  
-  this.metodoPagoSeleccionado = metodo;
-  this.limpiarErroresTarjeta();
-  this.imagenPreview = null;
-  this.imagenBase64 = null;
-  this.errorPago = '';
-}
-
-onFileSelected(event: any): void {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  // Validar tipo
-  if (!file.type.startsWith('image/')) {
-    alert('Solo se permiten imágenes');
-    return;
-  }
-
-  // Validar tamaño (10MB)
-  if (file.size > 10 * 1024 * 1024) {
-    alert('La imagen no puede superar 10MB');
-    return;
-  }
-
-  this.errorPago = '';
-
-  // Leer imagen
-  const reader = new FileReader();
-  reader.onload = (e: any) => {
-    this.imagenPreview = e.target.result;
-    this.imagenBase64 = e.target.result; // Incluye data:image/...
-  };
-  reader.readAsDataURL(file);
-}
-  
-  // Validación de tarjeta
   validarNumeroTarjeta(): void {
     const numero = this.datosTarjeta.numero.replace(/\s/g, '');
 
@@ -449,8 +455,6 @@ onFileSelected(event: any): void {
       this.erroresTarjeta.numero = 'Solo se permiten números';
     } else if (numero.length < 13 || numero.length > 19) {
       this.erroresTarjeta.numero = 'Número de tarjeta inválido (13-19 dígitos)';
-    } else if (!this.validarLuhn(numero)) {
-      this.erroresTarjeta.numero = 'Número de tarjeta inválido';
     } else {
       this.erroresTarjeta.numero = '';
     }
@@ -514,29 +518,6 @@ onFileSelected(event: any): void {
     this.verificarTarjetaValida();
   }
 
-  // Algoritmo de Luhn para validar número de tarjeta
-  private validarLuhn(numero: string): boolean {
-    let suma = 0;
-    let alternar = false;
-
-    for (let i = numero.length - 1; i >= 0; i--) {
-      let digito = parseInt(numero.charAt(i), 10);
-
-      if (alternar) {
-        digito *= 2;
-        if (digito > 9) {
-          digito -= 9;
-        }
-      }
-
-      suma += digito;
-      alternar = !alternar;
-    }
-
-    return suma % 10 === 0;
-  }
-
-  // Formatear número de tarjeta automáticamente
   formatearNumeroTarjeta(event: any): void {
     let valor = event.target.value.replace(/\s/g, '');
     let valorFormateado = '';
@@ -552,7 +533,6 @@ onFileSelected(event: any): void {
     this.validarNumeroTarjeta();
   }
 
-  // Formatear fecha de expiración automáticamente
   formatearFechaExpiracion(event: any): void {
     let valor = event.target.value.replace(/\D/g, '');
 
@@ -564,7 +544,6 @@ onFileSelected(event: any): void {
     this.validarFechaExpiracion();
   }
 
-  // Solo permitir números
   soloNumeros(event: KeyboardEvent): boolean {
     const charCode = event.which ? event.which : event.keyCode;
     if (charCode > 31 && (charCode < 48 || charCode > 57)) {
@@ -574,7 +553,6 @@ onFileSelected(event: any): void {
     return true;
   }
 
-  // Verificar si todos los campos de tarjeta son válidos
   private verificarTarjetaValida(): void {
     this.tarjetaValida =
       this.datosTarjeta.numero.replace(/\s/g, '').length >= 13 &&
@@ -587,7 +565,6 @@ onFileSelected(event: any): void {
       !this.erroresTarjeta.cvv;
   }
 
-  // Limpiar errores
   private limpiarErroresTarjeta(): void {
     this.erroresTarjeta = {
       numero: '',
@@ -597,7 +574,6 @@ onFileSelected(event: any): void {
     };
   }
 
-  // Limpiar formulario de tarjeta
   limpiarFormularioTarjeta(): void {
     this.datosTarjeta = {
       numero: '',
@@ -609,7 +585,6 @@ onFileSelected(event: any): void {
     this.tarjetaValida = false;
   }
 
-  // Copiar número de Plin
   copiarNumeroPlin(): void {
     navigator.clipboard
       .writeText(this.numeroPlin.replace(/\s/g, ''))
@@ -621,26 +596,23 @@ onFileSelected(event: any): void {
       });
   }
 
-  
 
-  construirFechaReservaISO(): string {
-  if (!this.selectedDate || !this.selectedTime) {
-    throw new Error('Fecha u hora no seleccionada');
+  puedeConfirmarPago(): boolean {
+    // Primero verificar que el usuario esté autenticado
+    if (!this.usuarioAutenticado || !this.idUsuario) {
+      return false;
+    }
+
+    if (!this.metodoPagoSeleccionado) {
+      return false;
+    }
+
+    if (this.metodoPagoSeleccionado === 'TARJETA') {
+      return this.tarjetaValida;
+    }
+
+    return true;
   }
-
-  // Usar el dateTime del slot seleccionado
-  if (this.selectedTime.dateTime) {
-    return this.selectedTime.dateTime;
-  }
-
-  // Fallback
-  const fecha = new Date(this.selectedDate);
-  const [hora, minuto] = this.selectedTime.time.split(':');
-  fecha.setHours(parseInt(hora), parseInt(minuto), 0, 0);
-  return fecha.toISOString();
-}
-
-
 
   confirmarPago(): void {
   if (!this.puedeConfirmarPago()) {
@@ -648,15 +620,119 @@ onFileSelected(event: any): void {
     return;
   }
 
-  // Si es Yape o Plin, procesar captura
-  if (this.metodoPagoSeleccionado === 'YAPE' || this.metodoPagoSeleccionado === 'PLIN') {
-    this.procesarPagoConCaptura();
-  } else if (this.metodoPagoSeleccionado === 'TARJETA') {
-    // TODO: Implementar pago con tarjeta
-    alert('Pago con tarjeta - En desarrollo');
+
+    if (!this.usuarioAutenticado || !this.idUsuario) {
+      alert('Debe iniciar sesión para completar la reserva');
+      return;
+    }
+
+    this.procesandoPago = true;
+
+    // Simular procesamiento de pago (2 segundos)
+    setTimeout(() => {
+      this.crearReserva();
+    }, 2000);
+  }
+
+  getMesaNumero(): string {
+    return this.mesaSeleccionada
+      ? `#${this.mesaSeleccionada.numeroMesa}`
+      : 'No seleccionada';
+  }
+
+  getMesaZona(): string {
+    return this.mesaSeleccionada ? this.mesaSeleccionada.tipo : '-';
+  }
+
+  private crearReserva(): void {
+    if (!this.mesaSeleccionada || !this.selectedTime || !this.idUsuario) {
+      console.error('❌ Faltan datos para crear la reserva');
+      this.procesandoPago = false;
+      return;
+    }
+
+    const reservaRequest: ReservaRequest = {
+      idUsuario: this.idUsuario,
+      idMesa: this.mesaSeleccionada.idMesa!,
+      fechaHora: this.selectedTime.dateTime!,
+      idEvento: null,
+      observaciones: `Reserva para ${this.personas} personas. Pago: ${this.metodoPagoSeleccionado}`,
+    };
+
+    console.log('📤 Enviando reserva:', reservaRequest);
+
+    this.reservaService.crearReserva(reservaRequest).subscribe({
+      next: (response) => {
+        console.log('✅ Reserva creada exitosamente:', response);
+        this.procesandoPago = false;
+
+        this.mostrarAlertaExito(
+          response.data,
+          this.mesaSeleccionada?.numeroMesa,
+          this.formatDate(this.selectedDate!),
+          this.selectedTime?.time,
+        );
+
+        localStorage.removeItem('reserva_temporal');
+
+        // Redireccionar después de 3 segundos
+        setTimeout(() => {
+          this.router.navigate(['/cliente/inicio']);
+        }, 3000);
+      },
+      error: (error) => {
+        console.error('❌ Error al crear reserva:', error);
+        this.procesandoPago = false;
+
+        const mensaje = error.error?.mensaje || 'Error al procesar la reserva';
+        this.mostrarAlertaError(mensaje);
+      },
+    });
+  }
+
+  private mostrarAlertaExito(
+    idReserva: number,
+    numeroMesa: number | undefined,
+    fecha: string,
+    hora: string | undefined,
+  ): void {
+    this.alertaTipo = 'exito';
+    this.alertaDatos = {
+      idReserva: idReserva,
+      numeroMesa: numeroMesa || 0,
+      fecha: fecha,
+      hora: hora || '',
+      mensaje: '',
+    };
+    this.mostrarAlerta = true;
+
+    setTimeout(() => {
+      this.mostrarAlerta = false;
+      setTimeout(() => {
+        this.router.navigate(['/cliente/inicio']);
+      }, 300);
+    }, 3000);
+  }
+
+  private mostrarAlertaError(mensaje: string): void {
+    this.alertaTipo = 'error';
+    this.alertaDatos = {
+      idReserva: 0,
+      numeroMesa: 0,
+      fecha: '',
+      hora: '',
+      mensaje: mensaje,
+    };
+    this.mostrarAlerta = true;
+
+    setTimeout(() => {
+      this.mostrarAlerta = false;
+    }, 4000);
+
   }
 }
 
+/*
 procesarPagoConCaptura(): void {
   if (!this.imagenBase64 || !this.metodoPagoSeleccionado) {
     alert('Debes subir el comprobante de pago');
@@ -731,29 +807,5 @@ procesarPagoConCaptura(): void {
       alert('Error al crear reserva: ' + err.message);
     }
   });
-}
+}*/
 
-
-intentarNuevamente(): void {
-  this.imagenPreview = null;
-  this.imagenBase64 = null;
-  this.errorPago = '';
-  this.procesandoPago = false;
-}
-
-// ========== ACTUALIZAR puedeConfirmarPago ==========
-puedeConfirmarPago(): boolean {
-  if (!this.metodoPagoSeleccionado) return false;
-
-  if (this.metodoPagoSeleccionado === 'TARJETA') {
-    return this.tarjetaValida;
-  }
-
-  if (this.metodoPagoSeleccionado === 'YAPE' || this.metodoPagoSeleccionado === 'PLIN') {
-    return this.imagenBase64 !== null;
-  }
-
-  return false;
-}
-
-}

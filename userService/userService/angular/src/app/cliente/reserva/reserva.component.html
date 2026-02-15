@@ -151,12 +151,29 @@
           </div>
         </div>
 
-        <!-- PASO 5: Confirmar y Pagar (ACTUALIZADO) -->
+
+        <!-- PASO 5: Confirmar -->
         <div *ngIf="currentStep === 5" class="step-content">
           <h2 class="step-title">Confirmar reserva</h2>
 
-          <!-- Información del depósito -->
-          <div class="deposit-info">
+          <!-- Prompt de autenticación - SOLO SI NO HAY SESIÓN -->
+          <div class="auth-prompt" *ngIf="!usuarioAutenticado">
+            <div class="auth-icon">👤</div>
+            <h3>Inicia sesión para continuar</h3>
+            <p>Necesitas una cuenta para completar tu reserva</p>
+            <div class="auth-buttons">
+              <button class="btn-primary" (click)="irALogin()">
+                Iniciar Sesión
+              </button>
+              <button class="btn-secondary" (click)="irARegistro()">
+                Registrarse
+              </button>
+            </div>
+          </div>
+
+          <!-- Información de depósito y métodos de pago -->
+          <div class="deposit-info" *ngIf="usuarioAutenticado">
+
             <h3 class="deposit-title">Depósito requerido</h3>
             <div class="deposit-detail">
               <span>Depósito (deducible de la cuenta final)</span>
@@ -167,17 +184,17 @@
             <p class="payment-label">Métodos de pago</p>
             <div class="payment-methods">
               <button class="payment-btn" [class.active]="metodoPagoSeleccionado === 'TARJETA'"
-                (click)="seleccionarMetodoPago('TARJETA')" [disabled]="pagoCreado !== null">
+                (click)="seleccionarMetodoPago('TARJETA')" >
                 <span class="payment-icon">💳</span>
                 <span>Tarjeta</span>
               </button>
               <button class="payment-btn" [class.active]="metodoPagoSeleccionado === 'YAPE'"
-                (click)="seleccionarMetodoPago('YAPE')" [disabled]="pagoCreado !== null">
+                (click)="seleccionarMetodoPago('YAPE')" >
                 <span class="payment-icon yape">Y</span>
                 <span>Yape</span>
               </button>
               <button class="payment-btn" [class.active]="metodoPagoSeleccionado === 'PLIN'"
-                (click)="seleccionarMetodoPago('PLIN')" [disabled]="pagoCreado !== null">
+                (click)="seleccionarMetodoPago('PLIN')" >
                 <span class="payment-icon plin">P</span>
                 <span>Plin</span>
               </button>
@@ -189,9 +206,18 @@
 
               <div class="form-group">
                 <label>Número de tarjeta</label>
-                <input type="text" class="form-input" [class.error]="erroresTarjeta.numero"
-                  placeholder="1234 5678 9012 3456" [(ngModel)]="datosTarjeta.numero"
-                  (input)="formatearNumeroTarjeta($event)" maxlength="19" />
+
+                <input
+                  type="text"
+                  class="form-input"
+                  [class.error]="erroresTarjeta.numero"
+                  placeholder="1234 5678 9012 3456"
+                  [(ngModel)]="datosTarjeta.numero"
+                  (input)="formatearNumeroTarjeta($event)"
+                  (blur)="validarNumeroTarjeta()"
+                  maxlength="19"
+                />
+
                 <span class="error-message" *ngIf="erroresTarjeta.numero">
                   {{ erroresTarjeta.numero }}
                 </span>
@@ -199,8 +225,18 @@
 
               <div class="form-group">
                 <label>Nombre del titular</label>
-                <input type="text" class="form-input" [class.error]="erroresTarjeta.nombre" placeholder="JUAN PEREZ"
-                  [(ngModel)]="datosTarjeta.nombre" (blur)="validarNombreTitular()" style="text-transform: uppercase" />
+
+                <input
+                  type="text"
+                  class="form-input"
+                  [class.error]="erroresTarjeta.nombre"
+                  placeholder="ALEJANDRO GUILLERMO"
+                  [(ngModel)]="datosTarjeta.nombre"
+                  (input)="validarNombreTitular()"
+                  (blur)="validarNombreTitular()"
+                  style="text-transform: uppercase"
+                />
+
                 <span class="error-message" *ngIf="erroresTarjeta.nombre">
                   {{ erroresTarjeta.nombre }}
                 </span>
@@ -209,19 +245,41 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Fecha de expiración</label>
-                  <input type="text" class="form-input" [class.error]="erroresTarjeta.fechaExpiracion"
-                    placeholder="MM/AA" [(ngModel)]="datosTarjeta.fechaExpiracion"
-                    (input)="formatearFechaExpiracion($event)" maxlength="5" />
-                  <span class="error-message" *ngIf="erroresTarjeta.fechaExpiracion">
+
+                  <input
+                    type="text"
+                    class="form-input"
+                    [class.error]="erroresTarjeta.fechaExpiracion"
+                    placeholder="MM/AA"
+                    [(ngModel)]="datosTarjeta.fechaExpiracion"
+                    (input)="formatearFechaExpiracion($event)"
+                    (blur)="validarFechaExpiracion()"
+                    maxlength="5"
+                  />
+                  <span
+                    class="error-message"
+                    *ngIf="erroresTarjeta.fechaExpiracion"
+                  >
+
                     {{ erroresTarjeta.fechaExpiracion }}
                   </span>
                 </div>
 
                 <div class="form-group">
                   <label>CVV</label>
-                  <input type="password" class="form-input" [class.error]="erroresTarjeta.cvv" placeholder="123"
-                    [(ngModel)]="datosTarjeta.cvv" (keypress)="soloNumeros($event)" (blur)="validarCVV()"
-                    maxlength="4" />
+
+                  <input
+                    type="password"
+                    class="form-input"
+                    [class.error]="erroresTarjeta.cvv"
+                    placeholder="123"
+                    [(ngModel)]="datosTarjeta.cvv"
+                    (keypress)="soloNumeros($event)"
+                    (input)="validarCVV()"
+                    (blur)="validarCVV()"
+                    maxlength="4"
+                  />
+
                   <span class="error-message" *ngIf="erroresTarjeta.cvv">
                     {{ erroresTarjeta.cvv }}
                   </span>
@@ -239,7 +297,7 @@
             <div class="payment-form" *ngIf="metodoPagoSeleccionado === 'YAPE'">
 
               <!-- Mostrar QR si aún no hay captura -->
-              <div *ngIf="!imagenPreview">
+              <div > <!--*ngIf="!imagenPreview" -->
                 <h4 class="payment-form-title">Escanea el código QR con Yape</h4>
                 <div class="qr-container">
                   <img src="assets/yape-qr.jpeg" alt="QR Yape" class="qr-code" />
@@ -270,16 +328,16 @@
                     <i class="bi bi-upload me-2"></i>
                     Subir comprobante de Yape
                   </label>
-                  <input type="file" id="capturaYapeInput" accept="image/*" (change)="onFileSelected($event)"
-                    style="display: none;">
+                  <input type="file" id="capturaYapeInput" accept="image/*" 
+                    style="display: none;"> <!--(change)="onFileSelected($event)-->
                 </div>
               </div>
 
               <!-- Preview de captura subida -->
-              <div *ngIf="imagenPreview && !procesandoPago">
+              <div > <!--*ngIf="imagenPreview && !procesandoPago"-->
                 <h4 class="payment-form-title">Verificar comprobante</h4>
                 <div class="captura-preview-container">
-                  <img [src]="imagenPreview" alt="Comprobante Yape" class="captura-preview">
+                  <img  alt="Comprobante Yape" class="captura-preview">
                 </div>
 
                 <div class="alert alert-warning mt-3">
@@ -308,8 +366,8 @@
                     <i class="bi bi-arrow-repeat me-2"></i>
                     Cambiar imagen
                   </label>
-                  <input type="file" id="capturaYapeInput2" accept="image/*" (change)="onFileSelected($event)"
-                    style="display: none;">
+                  <input type="file" id="capturaYapeInput2" accept="image/*" 
+                    style="display: none;"> <!--(change)="onFileSelected($event)"-->
                 </div>
               </div>
 
@@ -325,10 +383,10 @@
               </div>
 
               <!-- Error de validación -->
-              <div *ngIf="errorPago" class="alert alert-danger mt-3">
+              <div class="alert alert-danger mt-3"> <!-- *ngIf="errorPago"-->
                 <h6><i class="bi bi-x-circle me-2"></i>Pago rechazado</h6>
-                <p class="mb-0">{{ errorPago }}</p>
-                <button class="btn btn-sm btn-outline-danger mt-2" (click)="intentarNuevamente()">
+                <p class="mb-0"></p> <!--{{ errorPago }}-->
+                <button class="btn btn-sm btn-outline-danger mt-2" > <!--(click)="intentarNuevamente()"-->
                   Intentar con otra captura
                 </button>
               </div>
@@ -338,7 +396,7 @@
             <div class="payment-form" *ngIf="metodoPagoSeleccionado === 'PLIN'">
 
               <!-- Mostrar QR si aún no hay captura -->
-              <div *ngIf="!imagenPreview">
+              <div > <!--*ngIf="!imagenPreview"-->
                 <h4 class="payment-form-title">Escanea el código QR con Plin</h4>
                 <div class="qr-container">
                   <img src="../../../assets/plin-qr.jpeg" alt="QR Plin" class="qr-code" />
@@ -369,16 +427,16 @@
                     <i class="bi bi-upload me-2"></i>
                     Subir comprobante de Plin
                   </label>
-                  <input type="file" id="capturaPlinInput" accept="image/*" (change)="onFileSelected($event)"
-                    style="display: none;">
+                  <input type="file" id="capturaPlinInput" accept="image/*" 
+                    style="display: none;"> <!--(change)="onFileSelected($event)"-->
                 </div>
               </div>
 
               <!-- Preview de captura subida -->
-              <div *ngIf="imagenPreview && !procesandoPago">
+              <div > <!--*ngIf="imagenPreview && !procesandoPago"-->
                 <h4 class="payment-form-title">Verificar comprobante</h4>
                 <div class="captura-preview-container">
-                  <img [src]="imagenPreview" alt="Comprobante Plin" class="captura-preview">
+                  <img  alt="Comprobante Plin" class="captura-preview">
                 </div>
 
                 <div class="alert alert-warning mt-3">
@@ -407,8 +465,8 @@
                     <i class="bi bi-arrow-repeat me-2"></i>
                     Cambiar imagen
                   </label>
-                  <input type="file" id="capturaPlinInput2" accept="image/*" (change)="onFileSelected($event)"
-                    style="display: none;">
+                  <input type="file" id="capturaPlinInput2" accept="image/*" 
+                    style="display: none;"> <!--(change)="onFileSelected($event)"-->
                 </div>
               </div>
 
@@ -423,10 +481,10 @@
               </div>
 
               <!-- Error de validación -->
-              <div *ngIf="errorPago" class="alert alert-danger mt-3">
+              <div  class="alert alert-danger mt-3"> <!--*ngIf="errorPago"-->
                 <h6><i class="bi bi-x-circle me-2"></i>Pago rechazado</h6>
-                <p class="mb-0">{{ errorPago }}</p>
-                <button class="btn btn-sm btn-outline-danger mt-2" (click)="intentarNuevamente()">
+                <p class="mb-0"></p> <!--{{ errorPago }}-->
+                <button class="btn btn-sm btn-outline-danger mt-2" > <!--(click)="intentarNuevamente()"-->
                   Intentar con otra captura
                 </button>
               </div>
@@ -437,9 +495,14 @@
           <!-- Botones de navegación -->
           <div class="action-buttons">
             <button class="btn-back" (click)="previousStep()">Atrás</button>
-            <button class="btn-confirm" *ngIf="metodoPagoSeleccionado === 'TARJETA'" (click)="confirmarPago()"
-              [disabled]="!puedeConfirmarPago()">
-              Confirmar y Pagar
+
+            <button
+              class="btn-confirm"
+              [disabled]="!puedeConfirmarPago() || procesandoPago"
+              (click)="confirmarPago()"
+            >
+              {{ procesandoPago ? "Procesando..." : "Confirmar y Pagar" }}
+
             </button>
           </div>
         </div>
@@ -513,4 +576,61 @@
       </div>
     </div>
   </div>
+
+
+  <!-- ALERTA PERSONALIZADA -->
+<div
+  class="koro-alerta"
+  [class.koro-exito]="alertaTipo === 'exito'"
+  [class.koro-error]="alertaTipo === 'error'"
+  [class.koro-mostrar]="mostrarAlerta"
+  *ngIf="mostrarAlerta"
+>
+  <!-- Alerta de Éxito -->
+  <ng-container *ngIf="alertaTipo === 'exito'">
+    <div class="koro-icono">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+        <path
+          d="M8 12l2.5 2.5L16 9"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </svg>
+    </div>
+    <div class="koro-contenido">
+      <h3>¡Reserva Confirmada!</h3>
+      <div class="koro-detalles">
+        <p><strong>Número de reserva:</strong> #{{ alertaDatos.idReserva }}</p>
+        <p><strong>Mesa:</strong> {{ alertaDatos.numeroMesa }}</p>
+        <p><strong>Fecha:</strong> {{ alertaDatos.fecha }}</p>
+        <p><strong>Hora:</strong> {{ alertaDatos.hora }}</p>
+      </div>
+      <p class="koro-mensaje">¡Te esperamos!</p>
+    </div>
+  </ng-container>
+
+  <!-- Alerta de Error -->
+  <ng-container *ngIf="alertaTipo === 'error'">
+    <div class="koro-icono">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+        <path
+          d="M12 8v4M12 16h.01"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </svg>
+    </div>
+    <div class="koro-contenido">
+      <h3>Error en la Reserva</h3>
+      <p class="koro-mensaje">{{ alertaDatos.mensaje }}</p>
+    </div>
+  </ng-container>
+</div>
 </section>
+
+
+

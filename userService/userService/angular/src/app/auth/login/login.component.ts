@@ -382,7 +382,7 @@ export class LoginComponent implements OnInit {
             this.router.navigate(['/recepcionista']);
             break;
           case 'M':
-            this.router.navigate(['/mesero']);
+            this.router.navigate(['/mesero/ordenes']);
             break;
           default:
             this.router.navigate(['/auth/login']);

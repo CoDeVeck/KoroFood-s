@@ -11,7 +11,7 @@ import { Pedido } from '../../shared/model/pedido.model';
   providedIn: 'root',
 })
 export class PedidoMeseroService {
-  private baseUrl = `${enviroment.apiUrls.pedido}/pedido`;
+  private baseUrl = `${enviroment.apigateway}/pedido`;
 
   constructor(private http: HttpClient) {}
 

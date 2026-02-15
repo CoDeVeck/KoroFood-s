@@ -4,10 +4,9 @@ import { AdminLayoutComponent } from '../layout/admin-layout/admin-layout.compon
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { EventoListComponent } from './crudEventos/event-list/evento.list.component';
 import { EventoFormComponent } from './crudEventos/event-form/evento.form.component';
-import { PlatoListComponent } from './crudMenus/menu-list/plato-list.component';
-import { PlatoFormComponent } from './crudMenus/menu-form/plato-form.component';
-import { MesaListComponent } from './crudMesas/mesa-list/mesa-list.component';
-import { MesaFormComponent } from './crudMesas/mesa-form/mesa-form.component';
+
+import { CrudEmpleadosComponent } from './crud-empleados/crud-empleados.component';
+
 
 const routes: Routes = [
   {
@@ -25,14 +24,11 @@ const routes: Routes = [
       { path: 'eventos', component: EventoListComponent },
       { path: 'eventos/nuevo', component: EventoFormComponent },
       { path: 'eventos/editar/:id', component: EventoFormComponent },
-      // Rutas de Menús
-      { path: 'menus', component: PlatoListComponent },
-      { path: 'menus/nuevo', component: PlatoFormComponent },
-      { path: 'menus/editar/:id', component: PlatoFormComponent },
-      // Mesas
-      { path: 'mesas', component: MesaListComponent },
-      { path: 'mesas/nuevo', component: MesaFormComponent },
-      { path: 'mesas/editar/:id', component: MesaFormComponent },
+
+      {
+        path:'empleado', component:CrudEmpleadosComponent
+      }
+
     ]
   }
 ];

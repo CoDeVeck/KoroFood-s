@@ -19,7 +19,7 @@ export interface PageResponse<T> {
 })
 export class MensajeService {
   private http = inject(HttpClient);
-  private apiUrl = `${enviroment.apiUrls.usuarios}/chat`;
+  private apiUrl = `${enviroment.apigateway}/chat`;
   constructor() {}
 
   obtenerMensajes(

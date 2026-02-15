@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class GithubService {
-  private githubUrl = `${enviroment.apiUrls.usuarios}/auth/github`;
+  private githubUrl = `${enviroment.apigateway}/auth/github`;
 
   constructor(private httpClient: HttpClient) {}
 

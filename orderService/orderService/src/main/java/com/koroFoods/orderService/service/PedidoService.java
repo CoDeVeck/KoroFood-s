@@ -4,11 +4,13 @@ import com.koroFoods.orderService.dto.DetallePedidoRequestDTO;
 import com.koroFoods.orderService.dto.PedidoResumenDto;
 import com.koroFoods.orderService.dto.PedidoRequestDTO;
 import com.koroFoods.orderService.dto.ResultadoResponse;
+import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
+import com.koroFoods.orderService.dto.response.DetalleEstadoCount;
+import com.koroFoods.orderService.dto.response.DetallePedidoResponse;
+import com.koroFoods.orderService.dto.response.DetallePedidoUsuarioResponse;
 import com.koroFoods.orderService.enums.EstadoDetallePedido;
 import com.koroFoods.orderService.enums.EstadoPedido;
-import com.koroFoods.orderService.feign.MesaFeignClient;
-import com.koroFoods.orderService.feign.PlatoFeignClient;
-import com.koroFoods.orderService.feign.UsuarioFeignClient;
+import com.koroFoods.orderService.feign.*;
 import com.koroFoods.orderService.model.DetallePedido;
 import com.koroFoods.orderService.model.Pedido;
 import com.koroFoods.orderService.repository.IDetallePedidoRepository;
@@ -26,98 +28,107 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class PedidoService {
-	private final IPedidoRepository pedidoRepository;
-	private final IDetallePedidoRepository detallePedidoRepository;
-	private final MesaFeignClient mesaFeignClient;
-	private final UsuarioFeignClient usuarioFeignClient;
-	private final PlatoFeignClient platoFeignClient;
 
-	public ResultadoResponse<List<PedidoResumenDto>> listarPedidos(EstadoPedido estado) {
-		List<Pedido> pedidos = pedidoRepository.findByEstadoOpcional(estado);
+    private final IPedidoRepository pedidoRepository;
+    private final IDetallePedidoRepository detallePedidoRepository;
+    private final MesaFeignClient mesaFeignClient;
+    private final UsuarioFeignClient usuarioFeignClient;
+    private final PlatoFeignClient platoFeignClient;
+    private final ReservaFeignClient reservaFeignClient;
 
-		List<PedidoResumenDto> dtos = pedidos.stream().map(pedido -> {
-			PedidoResumenDto dto = new PedidoResumenDto();
-			dto.setIdPedido(pedido.getIdPedido());
-			dto.setIdMesa(pedido.getIdMesa());
-			dto.setFechaHora(pedido.getFechaHora());
-			dto.setEstado(pedido.getEstado());
-			dto.setTotal(pedido.getTotal());
-			return dto;
-		}).toList();
+    public ResultadoResponse<List<PedidoResumenDto>> listarPedidos(EstadoPedido estado) {
+        List<Pedido> pedidos = pedidoRepository.findByEstadoOpcional(estado);
 
-		return ResultadoResponse.success("Listado encontrado", dtos);
-	}
-	
-	public ResultadoResponse<PedidoResumenDto> obtenerPedidoPorReserva(Integer idReserva){
-	    Pedido pedido = pedidoRepository.findByIdReserva(idReserva);
-	    
-	    if (pedido == null) {
-	        return ResultadoResponse.success("No existe pedido para esta reserva", null);
-	    }
-	    
-	    PedidoResumenDto dto = new PedidoResumenDto();
-	    dto.setIdPedido(pedido.getIdPedido());
-	    dto.setFechaHora(pedido.getFechaHora());
-	    dto.setTotal(pedido.getTotal());
-	    dto.setIdMesa(pedido.getIdMesa());
-	    dto.setEstado(pedido.getEstado());
-	    
-	    return ResultadoResponse.success("Pedido encontrado", dto);
-	}
+        List<PedidoResumenDto> dtos = pedidos.stream().map(pedido -> {
+            PedidoResumenDto dto = new PedidoResumenDto();
+            dto.setIdPedido(pedido.getIdPedido());
+            dto.setIdMesa(pedido.getIdMesa());
+            dto.setFechaHora(pedido.getFechaHora());
+            dto.setEstado(pedido.getEstado());
+            dto.setTotal(pedido.getTotal());
+            return dto;
+        }).toList();
 
-	@Transactional
-	public ResultadoResponse<Pedido> crearPedido(PedidoRequestDTO dto) {
-		var mesaResp = mesaFeignClient.getTableById(dto.getIdMesa());
-		if (!mesaResp.isValor() || mesaResp.getData() == null) {
-			throw new RuntimeException("La mesa no existe");
-		}
+        return ResultadoResponse.success("Listado encontrado", dtos);
+    }
 
-		var usuarioResp = usuarioFeignClient.getUsuarioById(dto.getIdUsuario());
-		if (!usuarioResp.isValor() || usuarioResp.getData() == null) {
-			throw new RuntimeException("El usuario no existe");
-		}
+    public ResultadoResponse<PedidoResumenDto> obtenerPedidoPorReserva(Integer idReserva) {
+        Pedido pedido = pedidoRepository.findByIdReserva(idReserva);
 
-		Pedido pedido = new Pedido();
-		pedido.setIdMesa(dto.getIdMesa());
-		pedido.setIdUsuario(dto.getIdUsuario());
-		pedido.setIdReserva(dto.getIdReserva());
-		pedido.setFechaHora(LocalDateTime.now());
-		pedido.setEstado(EstadoPedido.EP);
-		pedido.setSubtotal(BigDecimal.ZERO);
-		pedido.setTotal(BigDecimal.ZERO);
+        if (pedido == null) {
+            return ResultadoResponse.success("No existe pedido para esta reserva", null);
+        }
 
-		pedido = pedidoRepository.save(pedido);
+        PedidoResumenDto dto = new PedidoResumenDto();
+        dto.setIdPedido(pedido.getIdPedido());
+        dto.setFechaHora(pedido.getFechaHora());
+        dto.setTotal(pedido.getTotal());
+        dto.setIdMesa(pedido.getIdMesa());
+        dto.setEstado(pedido.getEstado());
 
-		BigDecimal subtotalPedido = BigDecimal.ZERO;
+        return ResultadoResponse.success("Pedido encontrado", dto);
+    }
 
-		for (DetallePedidoRequestDTO d : dto.getDetalles()) {
-			var platoResp = platoFeignClient.getDishById(d.getIdPlato());
-			if (!platoResp.isValor() || platoResp.getData() == null) {
-				throw new RuntimeException("El plato con ID " + d.getIdPlato() + " no existe.");
-			}
+    @Transactional
+    public ResultadoResponse<Pedido> crearPedido(PedidoRequestDTO dto) {
+        var mesaResp = mesaFeignClient.getTableById(dto.getIdMesa());
+        if (!mesaResp.isValor() || mesaResp.getData() == null) {
+            throw new RuntimeException("La mesa no existe");
+        }
 
-			BigDecimal precioUnit = platoResp.getData().getPrecio();
-			BigDecimal subtotal = precioUnit.multiply(BigDecimal.valueOf(d.getCantidad()));
+        var usuarioResp = usuarioFeignClient.getUsuarioById(dto.getIdUsuario());
+        if (!usuarioResp.isValor() || usuarioResp.getData() == null) {
+            throw new RuntimeException("El usuario no existe");
+        }
 
-			DetallePedido detalle = new DetallePedido();
-			detalle.setIdPedido(pedido.getIdPedido());
-			detalle.setIdPlato(d.getIdPlato());
-			detalle.setCantidad(d.getCantidad());
-			detalle.setPrecioUnitario(precioUnit);
-			detalle.setSubtotal(subtotal);
-			detalle.setEstado(EstadoDetallePedido.PED);
+        Pedido pedido = new Pedido();
+        pedido.setIdMesa(dto.getIdMesa());
+        pedido.setIdUsuario(dto.getIdUsuario());
+        pedido.setIdReserva(dto.getIdReserva());
+        pedido.setFechaHora(LocalDateTime.now());
+        pedido.setEstado(EstadoPedido.EP);
+        pedido.setSubtotal(BigDecimal.ZERO);
+        pedido.setTotal(BigDecimal.ZERO);
 
-			detallePedidoRepository.save(detalle);
-			platoFeignClient.substractStockOrder(d.getIdPlato(), d.getCantidad());
+        pedido = pedidoRepository.save(pedido);
 
-			subtotalPedido = subtotalPedido.add(subtotal);
-		}
+        BigDecimal subtotalPedido = BigDecimal.ZERO;
 
-		pedido.setSubtotal(subtotalPedido);
-		pedido.setTotal(subtotalPedido);
-		pedidoRepository.save(pedido);
+        for (DetallePedidoRequestDTO d : dto.getDetalles()) {
+            var platoResp = platoFeignClient.getDishById(d.getIdPlato());
+            if (!platoResp.isValor() || platoResp.getData() == null) {
+                throw new RuntimeException("El plato con ID " + d.getIdPlato() + " no existe.");
+            }
 
-		return ResultadoResponse.success("El pedido fue generado satisfactoriamente.", pedido);
-	}
+            BigDecimal precioUnit = platoResp.getData().getPrecio();
+            BigDecimal subtotal = precioUnit.multiply(BigDecimal.valueOf(d.getCantidad()));
 
+            DetallePedido detalle = new DetallePedido();
+            detalle.setIdPedido(pedido.getIdPedido());
+            detalle.setIdPlato(d.getIdPlato());
+            detalle.setCantidad(d.getCantidad());
+            detalle.setPrecioUnitario(precioUnit);
+            detalle.setSubtotal(subtotal);
+            detalle.setEstado(EstadoDetallePedido.PED);
+
+            detallePedidoRepository.save(detalle);
+            platoFeignClient.substractStockOrder(d.getIdPlato(), d.getCantidad());
+
+            subtotalPedido = subtotalPedido.add(subtotal);
+        }
+
+        pedido.setSubtotal(subtotalPedido);
+        pedido.setTotal(subtotalPedido);
+        pedidoRepository.save(pedido);
+
+        return ResultadoResponse.success("El pedido fue generado satisfactoriamente.", pedido);
+    }
+
+
+
+    private void validarId(Integer request){
+        if (request == null ||request <= 0) {
+            throw new IllegalArgumentException("ID invalido");
+        }
+    }
 }

@@ -9,8 +9,8 @@ import { PlatoDto } from '../../shared/dto/PlatoDto';
   providedIn: 'root',
 })
 export class MenuClienteService {
-  private baseUrl = `${enviroment.apiUrls.menu}/menu/feign`;
-  private baseUrlService = `${enviroment.apiUrls.menu}/menu`;
+  private baseUrl = `${enviroment.apigateway}/menu/feign`;
+  private baseUrlService = `${enviroment.apigateway}/menu`;
 
   constructor(private http: HttpClient) {}
   listarPlatos(): Observable<ResultadoResponse<PlatoDto[]>> {
