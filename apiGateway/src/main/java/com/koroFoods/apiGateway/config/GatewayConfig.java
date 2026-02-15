@@ -40,6 +40,10 @@ public class GatewayConfig {
                         .path("/reserva/**", "/reserva/feign/**")
                         .uri("lb://reservationService")
                 )
+                .route("payment-service", r -> r
+                        .path("/pago/**", "/pago/feign/**")
+                        .uri("lb://paymentService")
+                )
                 .build();
     }
 
