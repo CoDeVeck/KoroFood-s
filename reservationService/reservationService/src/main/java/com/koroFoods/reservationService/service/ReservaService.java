@@ -43,7 +43,13 @@ public class ReservaService {
 
 		boolean esEvento = request.getIdEvento() != null;
 
-		LocalDateTime inicio = request.getFechaHora();
+		LocalDateTime inicio;
+        try {
+        	inicio = LocalDateTime.parse(request.getFechaHora());
+        }catch (Exception e) {
+			return ResultadoResponse.error("Formato de fecha invalido");
+		}
+        System.out.println("FECHA RAW → [" + request.getFechaHora() + "]");
 		LocalDateTime fin = inicio.plusHours(esEvento ? 3 : 2);
 
 		if (esEvento) {
@@ -68,7 +74,7 @@ public class ReservaService {
 		reserva.setIdEvento(request.getIdEvento());
 		reserva.setTipoReserva(reserva.getIdEvento() != null ? TipoReserva.ESPECIAL : TipoReserva.SIMPLE);
 		reserva.setFechaHora(inicio);
-		reserva.setEstado(EstadoReserva.PENDIENTE);
+		reserva.setEstado(EstadoReserva.PAGADA);
 		reserva.setFechaRegistro(LocalDateTime.now());
 		reserva.setObservaciones(request.getObservaciones());
 		reserva.setVerificado(false);
