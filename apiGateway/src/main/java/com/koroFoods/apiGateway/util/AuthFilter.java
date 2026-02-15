@@ -25,12 +25,13 @@ public class AuthFilter implements GlobalFilter, Ordered {
             "/auth/google",
             "/auth/social/register",
             "/cliente/index",
-            "/evento/feign",
+            "/evento/feign/**",
             "/menu/feign",
             "/menu",
             "/calificacion",
             "/user/feign/noauth/**",
-            "/ws/**"
+            "/ws/**",
+            "/pago/feign"
         );
 
     @Override
@@ -51,9 +52,10 @@ public class AuthFilter implements GlobalFilter, Ordered {
         System.out.println("Origin: " + request.getHeaders().getFirst("Origin"));
         System.out.println("=================================================");
         
-        if ("OPTIONS".equals(method)) {
-            System.out.println("Petición OPTIONS (CORS preflight), dejando pasar SIN validar JWT");
-            return chain.filter(exchange);
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            System.out.println("Preflight OPTIONS - dejando pasar al CorsFilter");
+            exchange.getResponse().setStatusCode(HttpStatus.OK);
+            return exchange.getResponse().setComplete();
         }
         
         if (isPublicPath(path)) {

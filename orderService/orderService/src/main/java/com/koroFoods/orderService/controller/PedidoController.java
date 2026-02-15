@@ -3,9 +3,11 @@ package com.koroFoods.orderService.controller;
 import java.util.List;
 
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
+import com.koroFoods.orderService.dto.response.DetallePedidoMeseroResponse;
 import com.koroFoods.orderService.dto.response.DetallePedidoResponse;
 import com.koroFoods.orderService.dto.response.DetallePedidoUsuarioResponse;
 import com.koroFoods.orderService.model.DetallePedido;
+import com.koroFoods.orderService.service.DetallePedidoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +25,9 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/pedido")
 public class PedidoController {
+
     private final PedidoService pedidoService;
+    private final DetallePedidoService detallePedidoService;
 
     @GetMapping
     public ResponseEntity<ResultadoResponse<List<PedidoResumenDto>>> list(
@@ -49,7 +53,7 @@ public class PedidoController {
 
     @PostMapping("/newPlato")
     public ResponseEntity<ResultadoResponse<DetallePedido>> agregarPlatoOrden(@RequestBody DetallePedidoRequest request) {
-        ResultadoResponse<DetallePedido> resultado = pedidoService.registrarPlato(request);
+        ResultadoResponse<DetallePedido> resultado = detallePedidoService.registrarPlato(request);
         if (resultado.isValor()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
         } else {
@@ -58,8 +62,8 @@ public class PedidoController {
     }
 
     @GetMapping("/list/{pedidoId}")
-    public ResponseEntity<ResultadoResponse<List<DetallePedidoResponse>>> agregarPlatoOrden(@PathVariable Integer pedidoId) {
-        ResultadoResponse<List<DetallePedidoResponse>> lista = pedidoService.obtenerDetallePorPedido(pedidoId);
+    public ResponseEntity<ResultadoResponse<List<DetallePedidoResponse>>> obtenerListaDetallePorPedido(@PathVariable Integer pedidoId) {
+        ResultadoResponse<List<DetallePedidoResponse>> lista = detallePedidoService.obtenerDetallePorPedido(pedidoId);
         if (lista.isValor()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(lista);
         } else {
@@ -69,7 +73,7 @@ public class PedidoController {
 
     @PutMapping("/ent/{idDetalle}")
     public ResponseEntity<ResultadoResponse<DetallePedido>> cambiarEstadoEntregado(@PathVariable Integer idDetalle){
-        ResultadoResponse<DetallePedido> cambiado = pedidoService.cambiarEstadoAEntregado(idDetalle);
+        ResultadoResponse<DetallePedido> cambiado = detallePedidoService.cambiarEstadoAEntregado(idDetalle);
         if (cambiado.isValor()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(cambiado);
         } else {
@@ -79,7 +83,7 @@ public class PedidoController {
 
     @PutMapping("/can/{idDetalle}")
     public ResponseEntity<ResultadoResponse<DetallePedido>> cambiarEstadoCancelado(@PathVariable Integer idDetalle){
-        ResultadoResponse<DetallePedido> cambiado = pedidoService.cambiarEstadoACancelado(idDetalle);
+        ResultadoResponse<DetallePedido> cambiado = detallePedidoService.cambiarEstadoACancelado(idDetalle);
         if (cambiado.isValor()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(cambiado);
         } else {
@@ -89,7 +93,18 @@ public class PedidoController {
 
     @GetMapping("/cliente/{idPedido}")
     public ResponseEntity<ResultadoResponse<DetallePedidoUsuarioResponse>>obtenerCliente(@PathVariable  Integer idPedido){
-        ResultadoResponse<DetallePedidoUsuarioResponse> cliente = pedidoService.obtenerUsuarioPorPedidoReserva(idPedido);
+        ResultadoResponse<DetallePedidoUsuarioResponse> cliente = detallePedidoService.obtenerUsuarioPorPedidoReserva(idPedido);
+
+        if (cliente.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(cliente);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cliente);
+        }
+    }
+
+    @GetMapping("/mesero/{idUsuario}")
+    public ResponseEntity<ResultadoResponse<DetallePedidoMeseroResponse>>obtenerMesero(@PathVariable  Integer idUsuario){
+        ResultadoResponse<DetallePedidoMeseroResponse> cliente = detallePedidoService.obtenerUsuarioPorPedido(idUsuario);
 
         if (cliente.isValor()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(cliente);

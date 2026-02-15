@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,8 +34,17 @@ public class Etiqueta {
 	private String descripcion;
 	
     @Column(name="ACTIVO")
-    private Boolean activo;
+    private Boolean activo; // = true
+
 	
 	@Column(name = "FECHA_REGISTRO")
 	private LocalDateTime fechaRegistro;
+	
+	@PrePersist
+	protected void onCreate() {
+		this.fechaRegistro = LocalDateTime.now();
+		if(this.activo == null) {
+			this.activo = true;
+		}
+	}
 }
