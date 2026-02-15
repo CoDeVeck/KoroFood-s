@@ -213,9 +213,11 @@ public class DetallePedidoService {
 
         var platoObtenido = platoFeignClient.getDishById(dp.getIdPlato());
         var platoData = platoObtenido.getData();
+        var pedido = obtenerPedido(dp.getIdPedido());
 
         DetallePedidoResponse rs = new DetallePedidoResponse();
 
+        rs.setIdReserva(pedido.getIdReserva());
         rs.setIdDetalle(dp.getIdDetalle());
         rs.setIdPedido(dp.getIdPedido());
         rs.setIdPlato(dp.getIdPlato());

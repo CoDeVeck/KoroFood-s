@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class DetallePedidoResponse {
 
+    private Integer idReserva;
     private Integer idDetalle;
     private Integer idPedido;
     private Integer idPlato;

@@ -112,5 +112,17 @@ public class PedidoController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cliente);
         }
     }
+
+    @GetMapping("/{idUsuario}/list")
+    public ResponseEntity<ResultadoResponse<List<Pedido>>>obtenerPedidosDelCliente
+            (@PathVariable  Integer idUsuario){
+        ResultadoResponse<List<Pedido>> pedidos = pedidoService.obtenerPedidoDelCliente(idUsuario);
+
+        if (pedidos.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(pedidos);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pedidos);
+        }
+    }
 }
 

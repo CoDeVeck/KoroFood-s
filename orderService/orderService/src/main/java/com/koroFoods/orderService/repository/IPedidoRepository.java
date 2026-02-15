@@ -30,4 +30,8 @@ public interface IPedidoRepository extends JpaRepository<Pedido, Integer> {
             where id_usuario = :idUsuario
             """,nativeQuery = true)
     DetalleCantidadPedidos obtenerCantidadDePedidos(Integer idUsuario);
+
+
+
+    List<Pedido>findByIdReservaIn(List<Integer> idReserva);
 }
