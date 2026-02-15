@@ -225,6 +225,19 @@ public class ReservaService {
                 .orElseThrow(() -> new RuntimeException("Error al obtener la reserva" + idReserva));
     }
 
+    public ResultadoResponse<List<Reserva>> obtenerReservaPorIdCliente(Integer idCliente){
+        validarId(idCliente);
+
+        List<Reserva> lista = reservaRepository.findByIdUsuario(idCliente);
+
+        if (lista.isEmpty()){
+            return ResultadoResponse.error("Error al obtener lista: ", null);
+        }
+
+        return ResultadoResponse.success("Se obtuvo " + lista.size() + " reservas: ", lista);
+    }
+
+
 
     private void validarId(Integer request) {
         if (request == null || request <= 0) {
