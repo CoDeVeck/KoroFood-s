@@ -15,6 +15,8 @@ import { ReservaRequest } from '../../shared/request/ReservaRequest';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 
 import { AuthService } from '../../auth/service/auth.service';
+import { PagoService } from '../service/pago.service';
+import { CrearPagoRequest, SubirCapturaRequest } from '../pago/pagoDto';
 
 
 interface CalendarDay {
@@ -89,15 +91,16 @@ export class ReservaComponent implements OnInit {
   };
   tarjetaValida: boolean = false;
 
-  // Yape - QR ficticio
-  qrYape: string =
-    'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=yape://pago/korofood/deposito/15.00';
 
-   // QR DINÁMICO
+  // Captura de pago
+pagoCreado: any = null;
+imagenPreview: string | null = null;
+imagenBase64: string | null = null;
+errorPago: string = '';
 
-  mostrandoQR: boolean = false;
-  idReservaCreada: number | null = null; // Guardar ID de reserva creada
-
+// QRs estáticos
+qrYapeUrl: string = 'assets/yape-qr.jpeg';
+qrPlinUrl: string = 'assets/plin-qr.jpeg';
 
   // Plin - Número ficticio
   numeroPlin: string = '986425458';
@@ -125,6 +128,7 @@ export class ReservaComponent implements OnInit {
     private reservaService: ReservaServiceService,
     private authService: AuthService,
     private router: Router,
+    private pagoService: PagoService
 
   ) {}
 
@@ -596,8 +600,61 @@ export class ReservaComponent implements OnInit {
       });
   }
 
+  // ========== MÉTODOS DE CAPTURA DE PAGO ==========
 
-  puedeConfirmarPago(): boolean {
+onFileSelected(event: any): void {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Validar tipo
+  if (!file.type.startsWith('image/')) {
+    alert('Solo se permiten imágenes');
+    return;
+  }
+
+  // Validar tamaño (10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    alert('La imagen no puede superar 10MB');
+    return;
+  }
+
+  this.errorPago = '';
+
+  // Leer imagen
+  const reader = new FileReader();
+  reader.onload = (e: any) => {
+    this.imagenPreview = e.target.result;
+    this.imagenBase64 = e.target.result; // Incluye data:image/...
+  };
+  reader.readAsDataURL(file);
+}
+
+intentarNuevamente(): void {
+  this.imagenPreview = null;
+  this.imagenBase64 = null;
+  this.errorPago = '';
+  this.procesandoPago = false;
+}
+
+construirFechaReservaISO(): string {
+  if (!this.selectedDate || !this.selectedTime) {
+    throw new Error('Fecha u hora no seleccionada');
+  }
+
+  // Usar el dateTime del slot seleccionado
+  if (this.selectedTime.dateTime) {
+    return this.selectedTime.dateTime;
+  }
+
+  // Fallback
+  const fecha = new Date(this.selectedDate);
+  const [hora, minuto] = this.selectedTime.time.split(':');
+  fecha.setHours(parseInt(hora), parseInt(minuto), 0, 0);
+  return fecha.toISOString();
+}
+
+
+  /*puedeConfirmarPago(): boolean {
     // Primero verificar que el usuario esté autenticado
     if (!this.usuarioAutenticado || !this.idUsuario) {
       return false;
@@ -612,13 +669,36 @@ export class ReservaComponent implements OnInit {
     }
 
     return true;
+  }*/
+
+
+  puedeConfirmarPago(): boolean {
+  // Verificar autenticación
+  if (!this.usuarioAutenticado || !this.idUsuario) {
+    return false;
   }
 
-  confirmarPago(): void {
+  if (!this.metodoPagoSeleccionado) {
+    return false;
+  }
+
+  if (this.metodoPagoSeleccionado === 'TARJETA') {
+    return this.tarjetaValida;
+  }
+
+  if (this.metodoPagoSeleccionado === 'YAPE' || this.metodoPagoSeleccionado === 'PLIN') {
+    return this.imagenBase64 !== null;
+  }
+
+  return false;
+}
+
+ /* confirmarPago(): void {
   if (!this.puedeConfirmarPago()) {
     alert('Por favor completa todos los datos');
     return;
   }
+
 
 
     if (!this.usuarioAutenticado || !this.idUsuario) {
@@ -633,6 +713,158 @@ export class ReservaComponent implements OnInit {
       this.crearReserva();
     }, 2000);
   }
+*/
+  confirmarPago(): void {
+  if (!this.puedeConfirmarPago()) {
+    alert('Por favor completa todos los datos');
+    return;
+  }
+
+  if (!this.usuarioAutenticado || !this.idUsuario) {
+    alert('Debe iniciar sesión para completar la reserva');
+    return;
+  }
+
+  // Si es Yape o Plin CON captura
+  if ((this.metodoPagoSeleccionado === 'YAPE' || this.metodoPagoSeleccionado === 'PLIN') && this.imagenBase64) {
+    this.procesarPagoConCaptura();
+  } else {
+    // Si es tarjeta o método sin captura
+    this.procesandoPago = true;
+    setTimeout(() => {
+      this.crearReserva();
+    }, 2000);
+  }
+}
+
+
+procesarPagoConCaptura(): void {
+  // VALIDAR TODO AL INICIO
+  if (!this.imagenBase64) {
+    alert('Debes subir el comprobante de pago');
+    return;
+  }
+
+  if (!this.metodoPagoSeleccionado) {
+    alert('Debes seleccionar un método de pago');
+    return;
+  }
+
+  if (!this.idUsuario) {
+    alert('Error: No se pudo obtener el ID de usuario');
+    this.router.navigate(['/login']);
+    return;
+  }
+
+  // AHORA TypeScript sabe que ninguno es null
+  this.procesandoPago = true;
+  this.errorPago = '';
+
+  // 1. Crear reserva primero
+  const reservaRequest: ReservaRequest = {
+    idUsuario: this.idUsuario, // Ya no es null
+    idMesa: this.mesaSeleccionada!.idMesa!,
+    fechaHora: this.construirFechaReservaISO(),
+    idEvento: null,
+    observaciones: `Reserva para ${this.personas} personas`
+  };
+
+  console.log('Creando reserva:', reservaRequest);
+
+  this.reservaService.crearReserva(reservaRequest).subscribe({
+    next: (resultReserva) => {
+      console.log('Reserva creada:', resultReserva);
+
+      if (resultReserva.valor && resultReserva.data) {
+        const idReserva = resultReserva.data;
+
+        // 2. Crear pago - USAR variables locales para TypeScript
+        const metodoPago = this.metodoPagoSeleccionado!; // Ya validado arriba
+        const idUsuario = this.idUsuario!; // Ya validado arriba
+        const imagenBase64 = this.imagenBase64!; // Ya validado arriba
+
+        const pagoRequest: CrearPagoRequest = {
+          idReserva: idReserva,
+          idUsuario: idUsuario,
+          tipoPago: 'DR',
+          monto: 15.00,
+          metodoPago: metodoPago,
+          observaciones: `Depósito - ${metodoPago}`
+        };
+
+        console.log('💳 Creando pago:', pagoRequest);
+
+        // TODO: Descomentar cuando tengas el servicio de pago
+        
+        this.pagoService.crearPago(pagoRequest).subscribe({
+          next: (pago) => {
+            this.pagoCreado = pago;
+            console.log('✅ Pago creado:', pago);
+
+            // 3. Subir captura
+            const capturaRequest: SubirCapturaRequest = {
+              idPago: pago.idPago,
+              imagenBase64: imagenBase64,
+              metodoPago: metodoPago
+            };
+
+            console.log('Subiendo captura:', capturaRequest);
+
+            this.pagoService.subirCaptura(capturaRequest).subscribe({
+              next: (pagoValidado) => {
+                this.procesandoPago = false;
+                console.log('Pago validado:', pagoValidado);
+
+                if (pagoValidado.estado === 'PAGADO') {
+                  this.mostrarAlertaExito(
+                    idReserva,
+                    this.mesaSeleccionada?.numeroMesa,
+                    this.formatDate(this.selectedDate!),
+                    this.selectedTime?.time
+                  );
+
+                  setTimeout(() => {
+                    this.router.navigate(['/cliente/inicio']);
+                  }, 3000);
+                } else if (pagoValidado.estado === 'RECHAZADO') {
+                  this.errorPago = pagoValidado.motivoRechazo || 'Pago rechazado';
+                }
+              },
+              error: (err) => {
+                this.procesandoPago = false;
+                this.errorPago = err.message;
+                console.error('Error al validar pago:', err);
+              }
+            });
+          },
+          error: (err) => {
+            this.procesandoPago = false;
+            alert('Error al crear pago: ' + err.message);
+            console.error('Error al crear pago:', err);
+          }
+        });
+        
+
+        // TEMPORAL: Mientras no esté el servicio de pago
+        this.procesandoPago = false;
+        this.mostrarAlertaExito(
+          idReserva,
+          this.mesaSeleccionada?.numeroMesa,
+          this.formatDate(this.selectedDate!),
+          this.selectedTime?.time
+        );
+        setTimeout(() => {
+          this.router.navigate(['/cliente/inicio']);
+        }, 3000);
+      }
+    },
+    error: (err) => {
+      this.procesandoPago = false;
+      alert('Error al crear reserva: ' + err.message);
+      console.error('Error al crear reserva:', err);
+    }
+  });
+}
 
   getMesaNumero(): string {
     return this.mesaSeleccionada
@@ -646,7 +878,7 @@ export class ReservaComponent implements OnInit {
 
   private crearReserva(): void {
     if (!this.mesaSeleccionada || !this.selectedTime || !this.idUsuario) {
-      console.error('❌ Faltan datos para crear la reserva');
+      console.error('Faltan datos para crear la reserva');
       this.procesandoPago = false;
       return;
     }
@@ -659,11 +891,11 @@ export class ReservaComponent implements OnInit {
       observaciones: `Reserva para ${this.personas} personas. Pago: ${this.metodoPagoSeleccionado}`,
     };
 
-    console.log('📤 Enviando reserva:', reservaRequest);
+    console.log('Enviando reserva:', reservaRequest);
 
     this.reservaService.crearReserva(reservaRequest).subscribe({
       next: (response) => {
-        console.log('✅ Reserva creada exitosamente:', response);
+        console.log('Reserva creada exitosamente:', response);
         this.procesandoPago = false;
 
         this.mostrarAlertaExito(
@@ -681,7 +913,7 @@ export class ReservaComponent implements OnInit {
         }, 3000);
       },
       error: (error) => {
-        console.error('❌ Error al crear reserva:', error);
+        console.error('Error al crear reserva:', error);
         this.procesandoPago = false;
 
         const mensaje = error.error?.mensaje || 'Error al procesar la reserva';
@@ -731,81 +963,4 @@ export class ReservaComponent implements OnInit {
 
   }
 }
-
-/*
-procesarPagoConCaptura(): void {
-  if (!this.imagenBase64 || !this.metodoPagoSeleccionado) {
-    alert('Debes subir el comprobante de pago');
-    return;
-  }
-
-  this.procesandoPago = true;
-  this.errorPago = '';
-
-  // 1. Crear reserva primero
-  const reservaRequest = {
-    idUsuario: 1, // TODO: Obtener del auth
-    idMesa: this.mesaSeleccionada!.idMesa!,
-    fechaHora: this.construirFechaReservaISO(),
-    cantidadPersonas: this.personas,
-    observaciones: `Reserva para ${this.personas} personas`
-  };
-
-  this.reservaService.crearReserva(reservaRequest).subscribe({
-    next: (result) => {
-      if (result.valor && result.data) {
-        const idReserva = result.data;
-
-        // 2. Crear pago
-        const pagoRequest = {
-          idReserva: idReserva,
-          idUsuario: 1,
-          tipoPago: 'DR',
-          monto: 15.00,
-          metodoPago: this.metodoPagoSeleccionado!,
-          observaciones: `Depósito - ${this.metodoPagoSeleccionado}`
-        };
-
-        this.pagoService.crearPago(pagoRequest).subscribe({
-          next: (pago) => {
-            this.pagoCreado = pago;
-
-            // 3. Subir captura
-            const capturaRequest = {
-              idPago: pago.idPago,
-              imagenBase64: this.imagenBase64!,
-              metodoPago: this.metodoPagoSeleccionado!
-            };
-
-            this.pagoService.subirCaptura(capturaRequest).subscribe({
-              next: (pagoValidado) => {
-                this.procesandoPago = false;
-
-                if (pagoValidado.estado === 'PAGADO') {
-                  alert('¡Pago confirmado! Tu reserva ha sido registrada.');
-                  // TODO: Redirigir a confirmación
-                  this.router.navigate(['/']);
-                } else if (pagoValidado.estado === 'RECHAZADO') {
-                  this.errorPago = pagoValidado.motivoRechazo || 'Pago rechazado';
-                }
-              },
-              error: (err) => {
-                this.procesandoPago = false;
-                this.errorPago = err.message;
-              }
-            });
-          },
-          error: (err) => {
-            this.procesandoPago = false;
-            alert('Error al crear pago: ' + err.message);
-          }
-        });
-      }
-    },
-    error: (err) => {
-      this.procesandoPago = false;
-      alert('Error al crear reserva: ' + err.message);
-    }
-  });
-}*/
 
