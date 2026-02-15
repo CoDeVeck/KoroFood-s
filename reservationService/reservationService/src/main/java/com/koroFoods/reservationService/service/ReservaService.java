@@ -166,6 +166,20 @@ public class ReservaService {
 
 		return ResultadoResponse.success("Reservas obtenidas correctamente", response);
 	}
+	
+	public ResultadoResponse<Integer> cancelarReservaPagada(Integer idReserva) {
+	    Optional<Reserva> optional = reservaRepository.findReservaPagadaById(idReserva);
+
+	    if (optional.isEmpty()) {
+	        return ResultadoResponse.error("No se encontró una reserva PAGADA con el ID: " + idReserva);
+	    }
+
+	    Reserva reserva = optional.get();
+	    reserva.setEstado(EstadoReserva.CANCELADA);
+	    reservaRepository.save(reserva);
+
+	    return ResultadoResponse.success("Reserva cancelada correctamente", reserva.getIdReserva());
+	}
 
 	/*
 	 * Reserva Simple----- Horario local (12:00 – 23:00) generarSlots

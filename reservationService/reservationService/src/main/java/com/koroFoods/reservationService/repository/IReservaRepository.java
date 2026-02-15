@@ -41,4 +41,11 @@ public interface IReservaRepository extends JpaRepository<Reserva, Integer> {
 			@Param("fechaHasta") LocalDateTime fechaHasta);
 
 	List<Reserva> findByIdUsuario(Integer idUsuario);
+
+	@Query("""
+			    SELECT r FROM Reserva r
+			    WHERE r.estado = 'PAGADA'
+			    AND r.idReserva = :idReserva
+			""")
+	Optional<Reserva> findReservaPagadaById(@Param("idReserva") Integer idReserva);
 }
