@@ -1,13 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
 
 import { EventoFeignReserva } from '../../shared/dto/EventoFeignReserva';
 import { EventoConMesaDto } from '../../shared/dto/EventoConMesaDto';
 import { EventoDto } from '../../shared/dto/EventoDto';
 import { EventoClienteService } from '../service/eventoClienteService';
+import { ReservaServiceService } from '../service/reserva-service.service';
+import { ReservaRequest } from '../../shared/request/ReservaRequest';
+import { AuthService } from '../../auth/service/auth.service';
+
 @Component({
   selector: 'app-eventos-tematicos',
   standalone: true,
@@ -53,13 +56,41 @@ export class EventosTematicosComponent implements OnInit {
   alertaTipo: 'exito' | 'error' = 'exito';
   alertaDatos: { mensaje?: string } = {};
 
+  // Propiedades para autenticación
+  usuarioAutenticado = false;
+  idUsuario: number | null = null;
+
   constructor(
     private eventoService: EventoClienteService,
+    private reservaService: ReservaServiceService,
+    private authService: AuthService,
     private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.cargarEventos();
+    this.verificarSesion();
+  }
+
+  // NUEVO: Verificar sesión del usuario
+  verificarSesion(): void {
+    this.usuarioAutenticado = this.authService.isLoggedIn();
+
+    if (this.usuarioAutenticado) {
+      this.authService.getUsuario().subscribe({
+        next: (response) => {
+          this.idUsuario = response.idUsuario;
+          console.log('✅ ID Usuario obtenido:', this.idUsuario);
+        },
+        error: (error) => {
+          console.error('❌ Error al obtener usuario:', error);
+          this.usuarioAutenticado = false;
+          this.idUsuario = null;
+        },
+      });
+    } else {
+      this.idUsuario = null;
+    }
   }
 
   cargarEventos(): void {
@@ -172,6 +203,23 @@ export class EventosTematicosComponent implements OnInit {
   }
 
   irAPago(): void {
+    // Verificar autenticación antes de ir al pago
+    if (!this.usuarioAutenticado || !this.idUsuario) {
+      alert('Debe iniciar sesión para completar la reserva');
+      // Guardar reserva temporal
+      const reservaTemp = {
+        evento: this.eventoDetalle,
+        personas: this.cantidadPersonas,
+        mesa: this.mesaSeleccionada,
+      };
+      localStorage.setItem(
+        'reserva_evento_temporal',
+        JSON.stringify(reservaTemp),
+      );
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.paso = 5;
     this.metodoPago = 'TARJETA';
     this.imagenPreview = null;
@@ -254,6 +302,11 @@ export class EventosTematicosComponent implements OnInit {
   }
 
   puedeConfirmarPago(): boolean {
+    // Verificar que esté autenticado
+    if (!this.usuarioAutenticado || !this.idUsuario) {
+      return false;
+    }
+
     if (this.metodoPago === 'TARJETA')
       return !!(
         this.datosTarjeta.numero &&
@@ -264,20 +317,69 @@ export class EventosTematicosComponent implements OnInit {
     return !!this.imagenPreview;
   }
 
+  // MÉTODO MEJORADO: Confirmar pago y crear reserva de evento
   confirmarPago(): void {
     if (!this.puedeConfirmarPago() || this.procesandoPago) return;
+
+    if (!this.usuarioAutenticado || !this.idUsuario) {
+      alert('Debe iniciar sesión para completar la reserva');
+      return;
+    }
+
+    if (!this.mesaSeleccionada || !this.eventoDetalle) {
+      console.error('Faltan datos para crear la reserva');
+      return;
+    }
+
     this.procesandoPago = true;
     this.errorPago = null;
-    // TODO: Reemplazar con llamada real al backend
-    setTimeout(() => {
-      this.procesandoPago = false;
-      this.mostrarAlerta = true;
-      this.alertaTipo = 'exito';
-      setTimeout(() => {
-        this.mostrarAlerta = false;
-        this.router.navigate(['/cliente']);
-      }, 4000);
-    }, 2000);
+
+    // Construir el request de reserva para eventos
+    const reservaRequest: ReservaRequest = {
+      idUsuario: this.idUsuario,
+      idMesa: this.mesaSeleccionada.idMesa,
+      fechaHora: this.eventoDetalle.fechaInicio,
+      idEvento: this.eventoDetalle.idEvento,
+      observaciones: `Reserva para ${this.cantidadPersonas} persona(s). Pago: ${this.metodoPago}`,
+    };
+
+    console.log('📝 Enviando reserva de evento:', reservaRequest);
+
+    // Llamar al servicio de reservas
+    this.reservaService.crearReserva(reservaRequest).subscribe({
+      next: (response) => {
+        console.log('✅ Reserva creada exitosamente:', response);
+        this.procesandoPago = false;
+
+        if (response.valor && response.data) {
+          // Mostrar alerta de éxito
+          this.mostrarAlertaExito();
+
+          // Limpiar datos temporales
+          localStorage.removeItem('reserva_evento_temporal');
+
+          // Redirigir después de 3 segundos
+          setTimeout(() => {
+            this.mostrarAlerta = false;
+            setTimeout(() => {
+              this.router.navigate(['/cliente/inicio']);
+            }, 300);
+          }, 3000);
+        } else {
+          this.mostrarAlertaError(
+            response.mensaje || 'Error al procesar la reserva',
+          );
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error al crear reserva:', error);
+        this.procesandoPago = false;
+        const mensaje =
+          error.error?.mensaje ||
+          'Error al procesar la reserva. Por favor, intente nuevamente.';
+        this.mostrarAlertaError(mensaje);
+      },
+    });
   }
 
   onFileSelected(event: Event): void {
@@ -409,5 +511,26 @@ export class EventosTematicosComponent implements OnInit {
       'dic',
     ];
     return `${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // MÉTODOS PARA ALERTAS MEJORADAS
+  // ═══════════════════════════════════════════════════════════════════
+
+  private mostrarAlertaExito(): void {
+    this.alertaTipo = 'exito';
+    this.alertaDatos = {};
+    this.mostrarAlerta = true;
+  }
+
+  private mostrarAlertaError(mensaje: string): void {
+    this.alertaTipo = 'error';
+    this.alertaDatos = { mensaje: mensaje };
+    this.mostrarAlerta = true;
+
+    // Ocultar alerta de error después de 4 segundos
+    setTimeout(() => {
+      this.mostrarAlerta = false;
+    }, 4000);
   }
 }
