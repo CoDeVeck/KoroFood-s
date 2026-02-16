@@ -1,47 +1,76 @@
 <div class="layout-wrapper">
   <!-- Header/Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
-    <div class="justify-content-between d-flex align-items-center w-100 px-md-3">
+  <nav
+    class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm"
+  >
+    <div
+      class="justify-content-between d-flex align-items-center w-100 px-md-3"
+    >
       <a class="navbar-brand d-flex align-items-center" href="#">
         <span class="brand-icon">🍜</span>
         <span class="brand-text">KoroFood</span>
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mx-auto">
           <li class="nav-item">
-            <a class="nav-link nav-link-custom" [routerLink]="['/cliente/inicio']" routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }">
+            <a
+              class="nav-link nav-link-custom"
+              [routerLink]="['/cliente/inicio']"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
               Inicio
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link nav-link-custom" [routerLink]="['/cliente/menu']" routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }">
+            <a
+              class="nav-link nav-link-custom"
+              [routerLink]="['/cliente/menu']"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
               Menú
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link nav-link-custom" [routerLink]="['/cliente/reserva']" routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }">
+            <a
+              class="nav-link nav-link-custom"
+              [routerLink]="['/cliente/reserva']"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
               Reserva
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link nav-link-custom" [routerLink]="['/cliente/resenia']" routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }">
+            <a
+              class="nav-link nav-link-custom"
+              [routerLink]="['/cliente/resenia']"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
               Reseñas
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link nav-link-custom" [routerLink]="['/cliente/contacto']" routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }">
+            <a
+              class="nav-link nav-link-custom"
+              [routerLink]="['/cliente/contacto']"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
               Contacto
             </a>
           </li>
@@ -49,7 +78,11 @@
 
         <div class="d-flex align-items-center gap-3">
           <div class="dropdown" *ngIf="isLoggedIn">
-            <button class="btn btn-cuenta dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <button
+              class="btn btn-cuenta dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+            >
               <i class="bi bi-person-circle"></i> Cuenta
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
@@ -61,6 +94,11 @@
               <li>
                 <a class="dropdown-item" (click)="navigateToReservations()">
                   <i class="bi bi-calendar-check"></i> Mis Reservas
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" (click)="navigateToPedidos()">
+                  <i class="fa-solid fa-bowl-food"></i> Mis Pedidos
                 </a>
               </li>
               <li>

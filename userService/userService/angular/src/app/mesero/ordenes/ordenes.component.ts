@@ -1,8 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { interval, Subscription, forkJoin } from 'rxjs';
 import { PedidoResumenDto } from '../../shared/dto/PedidoResumenDto';
 import { CommonModule } from '@angular/common';
 import { PedidoMeseroService } from '../service/pedidoMeseroService';
+import { Router } from '@angular/router';
 
 interface FilterTab {
   label: string;
@@ -13,7 +14,7 @@ interface FilterTab {
   selector: 'app-ordenes',
   imports: [CommonModule],
   templateUrl: './ordenes.component.html',
-  styleUrl: './ordenes.component.css'
+  styleUrl: './ordenes.component.css',
 })
 export class OrdenesComponent implements OnInit, OnDestroy {
   pedidos: PedidoResumenDto[] = [];
@@ -21,26 +22,26 @@ export class OrdenesComponent implements OnInit, OnDestroy {
   loading = false;
   error: string | null = null;
   selectedFilter = 'todos';
-  
+
   // Cache para contadores
   contadores: { [key: string]: number } = {
-    'todos': 0,
-    'EP': 0
+    todos: 0,
+    EP: 0,
   };
-  
+
   filterTabs: FilterTab[] = [
     { label: 'Todos', value: 'todos' },
-    { label: 'En Proceso', value: 'EP' }
+    { label: 'En Proceso', value: 'EP' },
   ];
 
   private refreshSubscription?: Subscription;
-
+  private router = inject(Router);
   constructor(private pedidoService: PedidoMeseroService) {}
 
   ngOnInit(): void {
     this.cargarPedidos();
     this.cargarContadores();
-    
+
     // Auto-refresh cada 30 segundos
     this.refreshSubscription = interval(30000).subscribe(() => {
       this.cargarPedidos(true);
@@ -58,7 +59,7 @@ export class OrdenesComponent implements OnInit, OnDestroy {
     // Carga todos los contadores en paralelo
     forkJoin({
       todos: this.pedidoService.listarPedidos(),
-      pendientes: this.pedidoService.listarPedidos('EP')
+      pendientes: this.pedidoService.listarPedidos('EP'),
     }).subscribe({
       next: (results) => {
         this.contadores['todos'] = results.todos.data?.length || 0;
@@ -66,7 +67,7 @@ export class OrdenesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error al cargar contadores:', err);
-      }
+      },
     });
   }
 
@@ -77,7 +78,8 @@ export class OrdenesComponent implements OnInit, OnDestroy {
     this.error = null;
 
     // Si hay un filtro activo diferente de 'todos', usar el filtro en el backend
-    const estadoFiltro = this.selectedFilter !== 'todos' ? this.selectedFilter : undefined;
+    const estadoFiltro =
+      this.selectedFilter !== 'todos' ? this.selectedFilter : undefined;
 
     this.pedidoService.listarPedidos(estadoFiltro).subscribe({
       next: (response) => {
@@ -93,7 +95,7 @@ export class OrdenesComponent implements OnInit, OnDestroy {
         this.error = 'No se pudo conectar con el servidor';
         this.loading = false;
         console.error('Error al cargar pedidos:', err);
-      }
+      },
     });
   }
 
@@ -108,14 +110,14 @@ export class OrdenesComponent implements OnInit, OnDestroy {
 
   getEstadoClass(estado: string): string {
     const estadoMap: { [key: string]: string } = {
-      'EP': 'estado-pendiente'
+      EP: 'estado-pendiente',
     };
     return estadoMap[estado] || 'estado-default';
   }
 
   getEstadoLabel(estado: string): string {
     const estadoLabels: { [key: string]: string } = {
-      'EP': 'En Proceso'
+      EP: 'En Proceso',
     };
     return estadoLabels[estado] || estado;
   }
@@ -123,29 +125,29 @@ export class OrdenesComponent implements OnInit, OnDestroy {
   formatFecha(fechaHora: string): string {
     const fecha = new Date(fechaHora);
     const hoy = new Date();
-    
+
     if (fecha.toDateString() === hoy.toDateString()) {
       return 'Hoy';
     }
-    
+
     const ayer = new Date(hoy);
     ayer.setDate(ayer.getDate() - 1);
     if (fecha.toDateString() === ayer.toDateString()) {
       return 'Ayer';
     }
-    
-    return fecha.toLocaleDateString('es-PE', { 
-      day: '2-digit', 
-      month: 'short' 
+
+    return fecha.toLocaleDateString('es-PE', {
+      day: '2-digit',
+      month: 'short',
     });
   }
 
   formatHora(fechaHora: string): string {
     const fecha = new Date(fechaHora);
-    return fecha.toLocaleTimeString('es-PE', { 
-      hour: '2-digit', 
+    return fecha.toLocaleTimeString('es-PE', {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: true 
+      hour12: true,
     });
   }
 
@@ -154,7 +156,7 @@ export class OrdenesComponent implements OnInit, OnDestroy {
     const ahora = new Date();
     const diffMs = ahora.getTime() - fecha.getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    
+
     if (diffMins < 1) {
       return 'Hace unos segundos';
     } else if (diffMins < 60) {
@@ -165,7 +167,8 @@ export class OrdenesComponent implements OnInit, OnDestroy {
     }
   }
 
-  verDetalle(pedido: PedidoResumenDto): void {
-    console.log('Ver detalle del pedido:', pedido);
+  verDetalle(idPedido: number): void {
+    console.log('Ver detalle del pedido:', idPedido);
+    this.router.navigate(['/mesero/ordenes', idPedido]);
   }
 }

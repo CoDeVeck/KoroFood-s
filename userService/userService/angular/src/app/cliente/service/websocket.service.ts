@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { Client, StompSubscription } from '@stomp/stompjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Mensaje } from '../../shared/document/mensaje.model';
+import { PedidoWebSocketMessage } from '../pedido/detalle-pedido/detalle-pedido.component';
+
+// Interfaces para pedidos
 
 @Injectable({
   providedIn: 'root',
@@ -96,7 +99,6 @@ export class WebsocketService {
     console.log(`Conectado al chat ${chatId}!`);
   }
 
-  //Desuscribirse de un chat
   unsubscribeFromChat(): void {
     if (this.chatSubscription) {
       this.chatSubscription.unsubscribe();
@@ -105,7 +107,6 @@ export class WebsocketService {
     }
   }
 
-  //Suscribirse a una cola personal del cliente util para notificaciones generales
   private subscribeToUserQueue(userId: number): void {
     if (!this.client || !this.client.connected) {
       return;
@@ -150,22 +151,19 @@ export class WebsocketService {
     console.log('Mensaje enviando: ', message);
   }
 
-  //Para escuchar o recibir los mensajes en tiempo real
+  // Observables para componentes
   onMessage(): Observable<Mensaje | null> {
     return this.messageSubject$.asObservable();
   }
 
-  //Notificaciones de los mensajes recibidos posible integracion proximamente
   onNotification(): Observable<Mensaje | null> {
     return this.notificationSubject$.asObservable();
   }
 
-  //Estado de la conexion true/false
   isConnected(): Observable<boolean> {
     return this.connected$.asObservable();
   }
 
-  //Verifica si esta conectado
   get connected(): boolean {
     return this.connected$.value;
   }

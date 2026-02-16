@@ -50,6 +50,16 @@ export class ClienteLayoutComponent {
     }
   }
 
+  navigateToPedidos(): void {
+    if (this.isLoggedIn) {
+      this.router.navigate(['/cliente/pedido']);
+    } else {
+      this.router.navigate(['/auth/login'], {
+        queryParams: { returnUrl: '/cliente/pedido' },
+      });
+    }
+  }
+
   navigateToChats(): void {
     if (this.isLoggedIn) {
       this.router.navigate(['/cliente/chat']);
