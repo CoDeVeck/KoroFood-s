@@ -24,8 +24,7 @@ public class DetallePedidoResponse {
     private String nombre;
     private Integer cantidad;
 
-    @Enumerated(EnumType.STRING)
-    private EstadoDetallePedido estado;
+    private String estado;
     private BigDecimal precioUnitario;
-    private BigDecimal subtotal;
+    private BigDecimal subTotal;
 }

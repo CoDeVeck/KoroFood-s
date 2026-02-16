@@ -36,7 +36,7 @@ public class Pedido {
     private LocalDateTime fechaHora;
 
     @Column(name = "SUBTOTAL")
-    private BigDecimal subtotal;
+    private BigDecimal subTotal;
     
     @Column(name = "TOTAL")
     private BigDecimal total;

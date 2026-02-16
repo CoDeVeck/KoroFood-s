@@ -87,7 +87,7 @@ public class PedidoService {
         pedido.setIdReserva(dto.getIdReserva());
         pedido.setFechaHora(LocalDateTime.now());
         pedido.setEstado(EstadoPedido.EP);
-        pedido.setSubtotal(BigDecimal.ZERO);
+        pedido.setSubTotal(BigDecimal.ZERO);
         pedido.setTotal(BigDecimal.ZERO);
 
         pedido = pedidoRepository.save(pedido);
@@ -117,7 +117,7 @@ public class PedidoService {
             subtotalPedido = subtotalPedido.add(subtotal);
         }
 
-        pedido.setSubtotal(subtotalPedido);
+        pedido.setSubTotal(subtotalPedido);
         pedido.setTotal(subtotalPedido);
         pedidoRepository.save(pedido);
 

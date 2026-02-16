@@ -11,7 +11,6 @@ import com.koroFoods.orderService.repository.IDetallePedidoRepository;
 import com.koroFoods.orderService.repository.IPedidoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -97,6 +96,9 @@ public class DetallePedidoService {
         validarEstadoParaCancelar(dp.getEstado());
 
         dp.setEstado(EstadoDetallePedido.CAN);
+
+        reducirSubTotalDelPedido(dp.getIdPedido(), dp.getIdDetalle());
+
         detallePedidoRepository.save(dp);
 
         return ResultadoResponse.success("Cancelaste este plato", dp);
@@ -112,6 +114,32 @@ public class DetallePedidoService {
         if (estado.equals(EstadoDetallePedido.ENT) || estado.equals(EstadoDetallePedido.CAN)) {
             throw new RuntimeException("El estado no puede estar entregado para poder cancelar");
         }
+    }
+
+    private void reducirSubTotalDelPedido(Integer idPedido, Integer idDetalle){
+
+        validarId(idPedido);
+        validarId(idDetalle);
+
+        //Obtenemos las entidades a actualizar
+        DetallePedido dpObtenido = obtenerDetallePedido(idDetalle);
+        Pedido pedidoObtenido = obtenerPedido(idPedido);
+
+        BigDecimal subTotalDetalle = dpObtenido.getSubtotal();
+
+        BigDecimal nuevoSubTotal = pedidoObtenido.getSubTotal().subtract(subTotalDetalle);
+        BigDecimal nuevoTotal = pedidoObtenido.getTotal().subtract(subTotalDetalle);
+
+        pedidoObtenido.setSubTotal(nuevoSubTotal);
+        pedidoObtenido.setTotal(nuevoTotal);
+        pedidoRepository.save(pedidoObtenido);
+
+    }
+
+    private DetallePedido obtenerDetallePedido(Integer idDetalle){
+        validarId(idDetalle);
+        return detallePedidoRepository.findById(idDetalle)
+                .orElseThrow(() -> new RuntimeException("Detalle de pedido no encontrado"));
     }
 
     @Transactional
@@ -188,7 +216,7 @@ public class DetallePedidoService {
     }
 
     private void actualizarTotalesPedido(Pedido pedido, BigDecimal nuevoSubtotal) {
-        pedido.setSubtotal(pedido.getSubtotal().add(nuevoSubtotal));
+        pedido.setSubTotal(pedido.getSubTotal().add(nuevoSubtotal));
         pedido.setTotal(pedido.getTotal().add(nuevoSubtotal));
         pedidoRepository.save(pedido);
     }
@@ -226,9 +254,9 @@ public class DetallePedidoService {
         rs.setNombre(platoData.getNombre());
 
         rs.setCantidad(dp.getCantidad());
-        rs.setEstado(dp.getEstado());
+        rs.setEstado(dp.getEstado().toString());
         rs.setPrecioUnitario(dp.getPrecioUnitario());
-        rs.setSubtotal(dp.getSubtotal());
+        rs.setSubTotal(dp.getSubtotal());
         return rs;
     }
 
