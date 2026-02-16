@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { MeseroLayoutComponent } from '../layout/mesero-layout/mesero-layout.component';
 import { OrdenesComponent } from './ordenes/ordenes.component';
 import { FormOrdenComponent } from './form-orden/form-orden.component';
+import { DetalleOrdenesComponent } from './ordenes/detalle-ordenes/detalle-ordenes.component';
 
 const routes: Routes = [
   {
@@ -13,6 +14,11 @@ const routes: Routes = [
         path: 'ordenes',
         component: OrdenesComponent,
         data: { title: 'Ordenes' },
+      },
+      {
+        path: 'ordenes/:id',
+        component: DetalleOrdenesComponent,
+        data: { title: 'Detalle Orden' },
       },
       {
         path: 'nueva-orden',
