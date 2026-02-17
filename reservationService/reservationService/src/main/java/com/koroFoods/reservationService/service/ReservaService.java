@@ -41,48 +41,65 @@ public class ReservaService {
 
 	public ResultadoResponse<Integer> registrarReserva(ReservaRequest request) {
 
-		boolean esEvento = request.getIdEvento() != null;
+	    boolean esEvento = request.getIdEvento() != null;
 
-		LocalDateTime inicio;
-        try {
-        	inicio = LocalDateTime.parse(request.getFechaHora());
-        }catch (Exception e) {
-			return ResultadoResponse.error("Formato de fecha invalido");
-		}
-        System.out.println("FECHA RAW → [" + request.getFechaHora() + "]");
-		LocalDateTime fin = inicio.plusHours(esEvento ? 3 : 2);
+	    LocalDateTime inicio;
+	    LocalDateTime fin;
 
-		if (esEvento) {
-			ResultadoResponse<Boolean> response = eventoFeignClient
-					.validarHorariosParaReservaConEvento(request.getIdMesa(), request.getIdEvento(), inicio, fin);
+	    try {
+	        inicio = LocalDateTime.parse(request.getFechaHora());
+	    } catch (Exception e) {
+	        return ResultadoResponse.error("Formato de fecha invalido");
+	    }
 
-			if (!response.isValor() || !Boolean.TRUE.equals(response.getData())) {
-				return ResultadoResponse.error("La mesa no está asignada al evento seleccionado");
-			}
+	    if (esEvento) {
+	        ResultadoResponse<EventoFeign> eventoResponse = eventoFeignClient
+	                .obtenerEvento(request.getIdEvento());
 
-		}
+	        if (eventoResponse == null || eventoResponse.getData() == null) {
+	            return ResultadoResponse.error("No se pudo obtener la información del evento");
+	        }
 
-		boolean ocupada = reservaRepository.existeSolapamientoReserva(request.getIdMesa(), inicio, fin);
+	        EventoFeign evento = eventoResponse.getData();
+	        inicio = evento.getFechaInicio();
+	        fin = evento.getFechaFin();
 
-		if (ocupada) {
-			return ResultadoResponse.error("La mesa ya se encuentra reservada en el horario seleccionado");
-		}
+	        ResultadoResponse<Boolean> validacion = eventoFeignClient
+	                .validarHorariosParaReservaConEvento(
+	                        request.getIdMesa(),
+	                        request.getIdEvento(),
+	                        inicio,
+	                        fin
+	                );
 
-		Reserva reserva = new Reserva();
-		reserva.setIdUsuario(request.getIdUsuario());
-		reserva.setIdMesa(request.getIdMesa());
-		reserva.setIdEvento(request.getIdEvento());
-		reserva.setTipoReserva(reserva.getIdEvento() != null ? TipoReserva.ESPECIAL : TipoReserva.SIMPLE);
-		reserva.setFechaHora(inicio);
-		reserva.setEstado(EstadoReserva.PAGADA);
-		reserva.setFechaRegistro(LocalDateTime.now());
-		reserva.setObservaciones(request.getObservaciones());
-		reserva.setVerificado(false);
+	        if (validacion == null || !validacion.isValor() || !Boolean.TRUE.equals(validacion.getData())) {
+	            return ResultadoResponse.error("La mesa no está asignada al evento seleccionado");
+	        }
 
-		reservaRepository.save(reserva);
+	    } else {
+	        fin = inicio.plusHours(2);
+	    }
 
-		return ResultadoResponse.success("Reserva registrada correctamente.",
-				reserva.getIdReserva());
+	    boolean ocupada = reservaRepository.existeSolapamientoReserva(request.getIdMesa(), inicio, fin);
+
+	    if (ocupada) {
+	        return ResultadoResponse.error("La mesa ya se encuentra reservada en el horario seleccionado");
+	    }
+
+	    Reserva reserva = new Reserva();
+	    reserva.setIdUsuario(request.getIdUsuario());
+	    reserva.setIdMesa(request.getIdMesa());
+	    reserva.setIdEvento(request.getIdEvento());
+	    reserva.setTipoReserva(esEvento ? TipoReserva.ESPECIAL : TipoReserva.SIMPLE);
+	    reserva.setFechaHora(inicio);
+	    reserva.setEstado(EstadoReserva.PAGADA);
+	    reserva.setFechaRegistro(LocalDateTime.now());
+	    reserva.setObservaciones(request.getObservaciones());
+	    reserva.setVerificado(false);
+
+	    reservaRepository.save(reserva);
+
+	    return ResultadoResponse.success("Reserva registrada correctamente.", reserva.getIdReserva());
 	}
 	
 	public ResultadoResponse<List<Integer>> obtenerMesasOcupadas(

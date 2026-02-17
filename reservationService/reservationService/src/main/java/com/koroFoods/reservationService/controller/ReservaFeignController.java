@@ -21,9 +21,6 @@ import com.koroFoods.reservationService.service.ReservaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
-import java.util.List;
-
 @RestController
 @RequestMapping("/reserva/feign")
 @RequiredArgsConstructor
