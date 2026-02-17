@@ -11,6 +11,8 @@ import { PerfilComponent } from './perfil/perfil.component';
 import { ChatContainerComponent } from './chat/chat-container.component';
 import { EventosTematicosComponent } from './eventos-tematicos/eventos-tematicos.component';
 import { MisReservasComponent } from './mis-reservas/mis-reservas.component';
+import { ListaPedidosComponent } from './pedido/lista-pedidos/lista-pedidos.component';
+import { DetallePedidoComponent } from './pedido/detalle-pedido/detalle-pedido.component';
 
 const routes: Routes = [
   //Ruta para el chat sin layout
@@ -54,6 +56,16 @@ const routes: Routes = [
         path: 'reserva',
         component: ReservaComponent,
         data: { title: 'Reserva' },
+      },
+      {
+        path: 'pedido',
+        component: ListaPedidosComponent,
+        data: { title: 'Pedido' },
+      },
+      {
+        path: 'pedido/:id',
+        component: DetallePedidoComponent,
+        data: { title: 'Detalle Pedido' },
       },
       {
         path: 'perfil',

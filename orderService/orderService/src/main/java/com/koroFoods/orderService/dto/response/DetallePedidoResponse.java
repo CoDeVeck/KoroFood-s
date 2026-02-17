@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class DetallePedidoResponse {
 
+    private Integer idReserva;
     private Integer idDetalle;
     private Integer idPedido;
     private Integer idPlato;
@@ -23,8 +24,7 @@ public class DetallePedidoResponse {
     private String nombre;
     private Integer cantidad;
 
-    @Enumerated(EnumType.STRING)
-    private EstadoDetallePedido estado;
+    private String estado;
     private BigDecimal precioUnitario;
-    private BigDecimal subtotal;
+    private BigDecimal subTotal;
 }

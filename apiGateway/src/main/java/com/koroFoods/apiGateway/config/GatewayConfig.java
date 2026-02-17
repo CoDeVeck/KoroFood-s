@@ -12,7 +12,12 @@ public class GatewayConfig {
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route("usuario-service", r -> r
-                        .path("/auth/**", "/distrito/**", "/cliente/**", "/user/feign/**")
+                        .path("/auth/**",
+                                "/distrito/**",
+                                "/cliente/**",
+                                "/user/feign/**",
+                                "/auth/google",
+                                "/auth/github")
                         .uri("lb://userService")
                 )
                 //para el uso de webSockets

@@ -34,12 +34,14 @@ public class SocketController {
             @Payload DetallePedidoRequest request
     ) {
         try {
+            log.info("MENSAJE RECIBIDO - Pedido: {}, Request: {}", idPedido, request);
             log.info("Cliente agregando plato al pedido: {}", idPedido);
 
             //Registramos el plato
             ResultadoResponse<DetallePedido> dResponse = detallePedidoService.registrarPlato(request);
 
             if (dResponse.isValor()) {
+                log.info("✅ Plato registrado exitosamente");
                 //Obtener la lista actualizada para la visualización del mesero y el cliente tambien
                 ResultadoResponse<List<DetallePedidoResponse>> detallesActualizados =
                         detallePedidoService.obtenerDetallePorPedido(idPedido);
@@ -112,7 +114,7 @@ public class SocketController {
                         "/topic/pedido/" + idPedido + "/cliente",
                         Map.of(
                                 "detalles", detallesActualizado.getData(),
-                                "infoCliente", infoCliente.getData()
+                                "infoMesero", infoMesero.getData()
                         )
                 );
 
@@ -167,7 +169,7 @@ public class SocketController {
                         "/topic/pedido/" + idPedido + "/cliente",
                         Map.of(
                                 "detalles", detallesActualizado.getData(),
-                                "infoCliente", infoMesero.getData()
+                                "infoMesero", infoMesero.getData()
                         )
                 );
 

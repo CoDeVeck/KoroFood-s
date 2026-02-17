@@ -206,6 +206,19 @@ public class ReservaService {
 	 * filtrarSlotsDisponibles usuario elige mesaOcupadaPorReserva
 	 *
 	 */
+    public ResultadoResponse<List<Reserva>> obtenerReservaPorIdCliente(Integer idCliente){
+        validarId(idCliente);
+
+        List<Reserva> lista = reservaRepository.findByIdUsuario(idCliente);
+
+        if (lista.isEmpty()){
+            return ResultadoResponse.error("Error al obtener lista: ", null);
+        }
+
+        return ResultadoResponse.success("Se obtuvo " + lista.size() + " reservas: ", lista);
+    }
+
+
 
 	private int obtenerDuracionHoras(boolean esEvento) {
 		return esEvento ? 3 : 2;

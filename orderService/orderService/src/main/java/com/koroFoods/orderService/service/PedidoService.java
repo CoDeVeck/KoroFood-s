@@ -87,7 +87,7 @@ public class PedidoService {
         pedido.setIdReserva(dto.getIdReserva());
         pedido.setFechaHora(LocalDateTime.now());
         pedido.setEstado(EstadoPedido.EP);
-        pedido.setSubtotal(BigDecimal.ZERO);
+        pedido.setSubTotal(BigDecimal.ZERO);
         pedido.setTotal(BigDecimal.ZERO);
 
         pedido = pedidoRepository.save(pedido);
@@ -117,14 +117,40 @@ public class PedidoService {
             subtotalPedido = subtotalPedido.add(subtotal);
         }
 
-        pedido.setSubtotal(subtotalPedido);
+        pedido.setSubTotal(subtotalPedido);
         pedido.setTotal(subtotalPedido);
         pedidoRepository.save(pedido);
 
         return ResultadoResponse.success("El pedido fue generado satisfactoriamente.", pedido);
     }
 
+    public ResultadoResponse<List<Pedido>> obtenerPedidoDelCliente(Integer idCliente){
+        validarId(idCliente);
 
+        //Obtener las reservas del cliente
+        ResultadoResponse<List<ReservaFeign>> reservasResponse = reservaFeignClient.obtenerListaDeReservasPorCliente(idCliente);
+        var reservaData = reservasResponse.getData();
+
+
+        //Sacar de las  reservas los IDS y poder filtrar despues
+        List<Integer> idsReservas = reservaData.stream()
+                .map(ReservaFeign::getIdReserva)
+                .toList();
+
+        if (idsReservas.isEmpty()) {
+            return ResultadoResponse.error("El cliente no tiene reservas", null);
+        }
+
+        List<Pedido> pedidos = pedidoRepository.findByIdReservaIn(idsReservas);
+
+        if (pedidos.isEmpty()){
+            return ResultadoResponse.error("No se encontro pedidos",null);
+        }
+
+        return ResultadoResponse.success("Pedidos encontrados: " +  pedidos.size() ,pedidos);
+
+
+    }
 
     private void validarId(Integer request){
         if (request == null ||request <= 0) {
