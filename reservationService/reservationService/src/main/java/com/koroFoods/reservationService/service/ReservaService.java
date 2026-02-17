@@ -81,10 +81,18 @@ public class ReservaService {
 
 		reservaRepository.save(reserva);
 
-		return ResultadoResponse.success("Reserva registrada correctamente. Pendiente de pago.",
+		return ResultadoResponse.success("Reserva registrada correctamente.",
 				reserva.getIdReserva());
 	}
+	
+	public ResultadoResponse<List<Integer>> obtenerMesasOcupadas(
+	        List<Integer> idsMesas, LocalDateTime inicio, LocalDateTime fin) {
 
+	    List<Integer> ocupadas = reservaRepository.findMesasOcupadasEnRango(idsMesas, inicio, fin);
+	    return ResultadoResponse.success("Mesas ocupadas en el rango indicado", ocupadas);
+	}
+	
+	
 	public ResultadoResponse<ReservaDtoFeing> getReservationByID(String codigo) {
 		Optional<Reserva> optionalReserva = reservaRepository.findReservaAsistidaById(codigo);
 

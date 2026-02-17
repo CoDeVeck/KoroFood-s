@@ -11,6 +11,7 @@ import com.koroFoods.eventService.dtos.TematicResponse;
 import com.koroFoods.eventService.exception.BusinessException;
 import com.koroFoods.eventService.exception.ResourceNotFoundException;
 import com.koroFoods.eventService.feign.IMesaFeignClient;
+import com.koroFoods.eventService.feign.IReservaFeignClient;
 import com.koroFoods.eventService.feign.MesaFeign;
 import com.koroFoods.eventService.model.Evento;
 import com.koroFoods.eventService.model.EventoMesa;
@@ -23,7 +24,9 @@ import lombok.RequiredArgsConstructor;
 
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -40,6 +43,7 @@ public class EventoService {
     private final IEventoMesaRepository eventoMesaRepository;
     
     private final IMesaFeignClient mesaClient;
+    private final IReservaFeignClient reservaFeignClient;
     
     
     @Transactional
@@ -222,21 +226,31 @@ public class EventoService {
         List<EventoMesa> eventoMesas = eventoMesaRepository
             .findByEvento_IdEventoAndActivoTrue(idEvento);
 
-        if (eventoMesas.isEmpty()) {
-            return 0;
-        }
+        if (eventoMesas.isEmpty()) return 0;
+
+        LocalDateTime inicio = eventoMesas.get(0).getFechaDesde();
+        LocalDateTime fin = eventoMesas.get(0).getFechaHasta();
 
         List<Integer> idsMesas = eventoMesas.stream()
             .map(EventoMesa::getIdMesa)
             .collect(Collectors.toList());
 
-        ResultadoResponse<List<MesaFeign>> response = mesaClient.obtenerMesasPorIds(idsMesas);
-
-        if (!response.isValor() || response.getData() == null) {
-            throw new BusinessException("No se pudo obtener información de las mesas para calcular el aforo");
+        ResultadoResponse<List<MesaFeign>> mesasResponse = mesaClient.obtenerMesasPorIds(idsMesas);
+        if (!mesasResponse.isValor() || mesasResponse.getData() == null) {
+            throw new BusinessException("No se pudo obtener información de las mesas");
         }
 
-        return response.getData().stream()
+        ResultadoResponse<List<Integer>> ocupadasResponse = reservaFeignClient
+            .obtenerMesasOcupadas(idsMesas, inicio, fin);
+
+        List<Integer> mesasOcupadas = (ocupadasResponse != null && ocupadasResponse.getData() != null)
+            ? ocupadasResponse.getData()
+            : List.of();
+
+        Set<Integer> ocupadasSet = new HashSet<>(mesasOcupadas);
+
+        return mesasResponse.getData().stream()
+            .filter(mesa -> !ocupadasSet.contains(mesa.getIdMesa()))
             .mapToInt(MesaFeign::getCapacidad)
             .sum();
     }

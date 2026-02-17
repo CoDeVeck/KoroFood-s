@@ -37,7 +37,7 @@ public class GatewayConfig {
                         .uri("lb://orderService")
                 )
                 .route("reservation-service", r -> r
-                        .path("/reserva/**", "/reserva/feign/**")
+                        .path("/reserva/**", "/reserva/feign/**", "/verificacion/**")
                         .uri("lb://reservationService")
                 )
                 .route("payment-service", r -> r

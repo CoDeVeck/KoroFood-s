@@ -8,7 +8,7 @@ export const enviroment = {
     resenas: 'http://localhost:8098', // usando el apigateway
     pedido: 'http://localhost:8086',
     pago:'http://localhost:8098',
-    reserva: 'http://localhost:8098',
+    reserva: 'http://localhost:8098', // reserva y codigo de verificacion
 
     mesas: 'http://localhost:8082',
     usuarioSoap: 'http://localhost:8093'

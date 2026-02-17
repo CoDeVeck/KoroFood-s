@@ -47,8 +47,8 @@ export class EventosTematicosComponent implements OnInit {
   loading = false;
   errorPago: string | null = null;
 
-  qrYapeUrl = '/img/qr-yape.png';
-  qrPlinUrl = '/img/qr-plin.png';
+  qrYapeUrl = '/assets/yape-qr.jpeg';
+  qrPlinUrl = '/assets/qr-plin.jpeg';
 
   datosTarjeta = { numero: '', nombre: '', fechaExpiracion: '', cvv: '' };
 
@@ -72,7 +72,6 @@ export class EventosTematicosComponent implements OnInit {
     this.verificarSesion();
   }
 
-  // NUEVO: Verificar sesión del usuario
   verificarSesion(): void {
     this.usuarioAutenticado = this.authService.isLoggedIn();
 

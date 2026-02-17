@@ -10,6 +10,7 @@ import { ReservaComponent } from './reserva/reserva.component';
 import { PerfilComponent } from './perfil/perfil.component';
 import { ChatContainerComponent } from './chat/chat-container.component';
 import { EventosTematicosComponent } from './eventos-tematicos/eventos-tematicos.component';
+import { MisReservasComponent } from './mis-reservas/mis-reservas.component';
 
 const routes: Routes = [
   //Ruta para el chat sin layout
@@ -63,6 +64,11 @@ const routes: Routes = [
         path: 'eventos-tematicos',
         component: EventosTematicosComponent,
         data: { title: 'Eventos' },
+      },
+      {
+        path: 'mis-reservas',
+        component: MisReservasComponent,
+        data: { title: 'Historial Reservas' },
       }
     ],
   },

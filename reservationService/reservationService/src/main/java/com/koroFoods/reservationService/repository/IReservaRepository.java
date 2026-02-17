@@ -48,4 +48,25 @@ public interface IReservaRepository extends JpaRepository<Reserva, Integer> {
 			    AND r.idReserva = :idReserva
 			""")
 	Optional<Reserva> findReservaPagadaById(@Param("idReserva") Integer idReserva);
+	
+	@Query(value = """
+	        SELECT r.ID_MESA
+	        FROM TB_RESERVA r
+	        WHERE r.ID_MESA IN (:idsMesas)
+	          AND r.ESTADO IN ('PAGADA', 'ASISTIDA')
+	          AND r.FECHA_RESERVA < :fechaHasta
+	          AND (
+	                CASE
+	                    WHEN r.ID_EVENTO IS NOT NULL
+	                        THEN r.FECHA_RESERVA + INTERVAL '3 hour'
+	                    ELSE
+	                        r.FECHA_RESERVA + INTERVAL '2 hour'
+	                END
+	              ) > :fechaDesde
+	        """, nativeQuery = true)
+	List<Integer> findMesasOcupadasEnRango(
+	        @Param("idsMesas") List<Integer> idsMesas,
+	        @Param("fechaDesde") LocalDateTime fechaDesde,
+	        @Param("fechaHasta") LocalDateTime fechaHasta
+	);
 }
