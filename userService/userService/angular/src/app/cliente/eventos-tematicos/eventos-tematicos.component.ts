@@ -48,7 +48,7 @@ export class EventosTematicosComponent implements OnInit {
   errorPago: string | null = null;
 
   qrYapeUrl = '/assets/yape-qr.jpeg';
-  qrPlinUrl = '/assets/qr-plin.jpeg';
+  qrPlinUrl = '/assets/plin-qr.jpeg';
 
   datosTarjeta = { numero: '', nombre: '', fechaExpiracion: '', cvv: '' };
 
@@ -164,6 +164,12 @@ export class EventosTematicosComponent implements OnInit {
     if (this.filtroAforo !== null && this.filtroAforo > 0)
       r = r.filter((e) => (e.aforo ?? 0) >= this.filtroAforo!);
     this.eventosFiltrados = r;
+  }
+
+  seleccionarMetodoPago(metodo: 'TARJETA' | 'YAPE' | 'PLIN'): void {
+    this.metodoPago = metodo;
+    this.imagenPreview = null;
+    this.errorPago = null;
   }
 
   limpiarFiltros(): void {
