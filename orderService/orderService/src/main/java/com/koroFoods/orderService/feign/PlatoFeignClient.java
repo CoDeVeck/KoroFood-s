@@ -16,7 +16,7 @@ public interface PlatoFeignClient {
     ResultadoResponse<PlatoFeign> substractStockOrder(
 			@PathVariable Integer idPlato, @PathVariable Integer cantidadVendida);
 
-    @PatchMapping("/menu/feign/newStock")
+    @PutMapping("/menu/feign/newStock")
     ResultadoResponse<PlatoFeign>incrementarStock(
             @RequestBody IncrementarStock request
             );
