@@ -4,6 +4,7 @@ import com.koroFoods.menuService.dto.EtiquetaDtoFeign;
 import com.koroFoods.menuService.dto.PlatoDtoFeign;
 import com.koroFoods.menuService.dto.ResultadoResponse;
 import com.koroFoods.menuService.dto.request.IncrementarStock;
+import com.koroFoods.menuService.dto.request.PlatoStockDto;
 import com.koroFoods.menuService.model.Plato;
 import com.koroFoods.menuService.repository.IMenuRepository;
 
@@ -528,12 +529,14 @@ public class MenuService {
 	}
 
 
-    public ResultadoResponse<Plato> aumentarStock(IncrementarStock request){
+    public ResultadoResponse<PlatoStockDto> aumentarStock(IncrementarStock request){
+
+        PlatoStockDto response = new PlatoStockDto();
 
         validarId(request.getIdPlato());
 
         if (request.getCantidad() <= 0){
-            log.error("ERROR no se puede devolver {} platos. ", request.getCantidad());
+
             throw  new RuntimeException("Tienes que poner una cantidad a devolver");
         }
 
@@ -543,7 +546,11 @@ public class MenuService {
         actualizar.setStock(aumentar);
         menuRepository.save(actualizar);
 
-        return ResultadoResponse.success(String.format("Se actualizo el plato {} nuevo stock {}", actualizar.getNombre(), actualizar.getStock()), actualizar );
+        response.setIdPlato(actualizar.getIdPlato());
+        response.setNombre(actualizar.getNombre());
+        response.setCantidad(actualizar.getStock());
+
+        return ResultadoResponse.success("Se actualizo el stock: ", response );
 
     }
 

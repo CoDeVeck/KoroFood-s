@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.koroFoods.menuService.dto.request.IncrementarStock;
+import com.koroFoods.menuService.dto.request.PlatoStockDto;
 import com.koroFoods.menuService.model.Plato;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -58,9 +59,9 @@ public class MenuFeignController {
 		return ResponseEntity.ok(dish);
 	}
 
-    @PatchMapping("/newStock")
-    public ResponseEntity<ResultadoResponse<Plato>> incrementarStock(@RequestBody IncrementarStock request){
-        ResultadoResponse<Plato> resultado = menuService.aumentarStock(request);
+    @PutMapping("/newStock")
+    public ResponseEntity<ResultadoResponse<PlatoStockDto>> incrementarStock(@RequestBody IncrementarStock request){
+        ResultadoResponse<PlatoStockDto> resultado = menuService.aumentarStock(request);
 
         if(resultado.isValor()) {
             return ResponseEntity.status(HttpStatus.OK).body(resultado);
