@@ -165,5 +165,112 @@
         </div>
       </div>
     </div>
+
+    <div class="menu-section">
+      <div class="menu-header">
+        <div>
+          <h2>🍽️ Menú</h2>
+          <p class="menu-subtitle">
+            Selecciona platos para agregar a tu pedido
+          </p>
+        </div>
+        <div class="loading-platos" *ngIf="loadingPlatos">
+          <div class="spinner-small"></div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filtros-container">
+        <div class="filtro-busqueda">
+          <input
+            type="text"
+            placeholder="🔍 Buscar plato..."
+            [(ngModel)]="filtroNombre"
+            (input)="aplicarFiltros()"
+            class="filtro-input"
+          />
+        </div>
+
+        <div class="filtro-tipo">
+          <select
+            [(ngModel)]="filtroTipo"
+            (change)="aplicarFiltros()"
+            class="filtro-select"
+          >
+            <option *ngFor="let tipo of tiposPlato" [value]="tipo.value">
+              {{ tipo.label }}
+            </option>
+          </select>
+        </div>
+
+        <button class="btn-limpiar" (click)="limpiarFiltros()">
+          🔄 Limpiar
+        </button>
+
+        <div class="resultados-info">
+          <span>{{ platosFiltrados.length }} plato(s)</span>
+        </div>
+      </div>
+
+      <!-- Grid de platos -->
+      <div class="platos-grid">
+        <div *ngFor="let plato of platosFiltrados" class="plato-card">
+          <div class="plato-imagen">
+            <img [src]="plato.imagen" [alt]="plato.nombre" />
+            <span class="plato-tipo-badge">{{
+              getTipoPlatoLabel(plato.tipoPlato)
+            }}</span>
+          </div>
+          <div class="plato-info">
+            <h3>{{ plato.nombre }}</h3>
+
+            <!-- Etiquetas -->
+            <div
+              class="etiquetas"
+              *ngIf="plato.etiquetas && plato.etiquetas.length > 0"
+            >
+              <span *ngFor="let etiqueta of plato.etiquetas" class="etiqueta">
+                {{ etiqueta.nombre }}
+              </span>
+            </div>
+
+            <p class="plato-precio">S/ {{ plato.precio | number: "1.2-2" }}</p>
+
+            <div class="cantidad-control">
+              <button
+                class="btn-cantidad"
+                (click)="decrementarCantidad(plato.idPlato)"
+              >
+                -
+              </button>
+              <input
+                type="number"
+                [value]="getCantidad(plato.idPlato)"
+                min="1"
+                readonly
+                class="cantidad-input"
+              />
+              <button
+                class="btn-cantidad"
+                (click)="incrementarCantidad(plato.idPlato)"
+              >
+                +
+              </button>
+            </div>
+
+            <button class="btn-agregar" (click)="agregarPlato(plato.idPlato)">
+              ➕ Agregar
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="platosFiltrados.length === 0" class="no-platos">
+          <p>No se encontraron platos</p>
+          <button class="btn-limpiar" (click)="limpiarFiltros()">
+            🔄 Mostrar todos
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
