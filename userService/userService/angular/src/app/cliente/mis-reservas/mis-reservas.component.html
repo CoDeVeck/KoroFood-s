@@ -72,10 +72,6 @@
   <!-- Lista de Reservas -->
   <div class="reservas-grid" *ngIf="!loading && !error">
     <div class="reserva-card" *ngFor="let reserva of reservasFiltradas" (click)="verDetalle(reserva)">
-      <!-- Label de tipo de reserva -->
-      <div class="tipo-label" [ngClass]="getTipoReservaClass(reserva.tipoReserva)">
-        {{ reserva.tipoReserva }}
-      </div>
 
       <!-- Header de la card -->
       <div class="card-header">

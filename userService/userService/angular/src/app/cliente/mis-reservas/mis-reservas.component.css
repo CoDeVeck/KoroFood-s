@@ -517,10 +517,122 @@
     }
 }
 
+/* MODAL DETALLE - REDUCIDO Y MÁS COMPACTO */
 .modal-detalle {
-    max-width: 800px;
+    max-width: 550px;
+    /* Reducido de 800px a 550px */
 }
 
+.modal-detalle .modal-header {
+    padding: 1.25rem 1.5rem;
+    /* Reducido padding */
+}
+
+.modal-detalle .modal-header h2 {
+    font-size: 1.5rem;
+    /* Reducido de 1.75rem a 1.5rem */
+}
+
+.modal-detalle .modal-body {
+    padding: 1.5rem;
+    /* Reducido de 2rem a 1.5rem */
+}
+
+/* Secciones más compactas */
+.modal-detalle .detalle-section {
+    margin-bottom: 1.25rem;
+    /* Reducido de 2rem a 1.25rem */
+}
+
+.modal-detalle .detalle-section h3 {
+    font-size: 1.1rem;
+    /* Reducido de 1.25rem a 1.1rem */
+    margin: 0 0 0.75rem 0;
+    /* Reducido margen inferior */
+    padding-bottom: 0.35rem;
+    /* Reducido padding */
+}
+
+/* Grid más compacto */
+.modal-detalle .detalle-grid {
+    gap: 1rem;
+    /* Reducido de 1.5rem a 1rem */
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    /* Columnas más pequeñas */
+}
+
+/* Items más compactos */
+.modal-detalle .detalle-item {
+    gap: 0.25rem;
+    /* Reducido gap */
+    padding: 0.5rem;
+    /* Añadido padding interno */
+    background: var(--cream);
+    border-radius: var(--radius-sm);
+}
+
+.modal-detalle .detalle-label {
+    font-size: 0.7rem;
+    /* Ligeramente más pequeño */
+}
+
+.modal-detalle .detalle-valor {
+    font-size: 0.9rem;
+    /* Ligeramente más pequeño */
+}
+
+/* Evento nombre más compacto */
+.modal-detalle .evento-nombre {
+    font-size: 1rem;
+    /* Reducido de 1.125rem */
+}
+
+/* Observaciones más compactas */
+.modal-detalle .observaciones-texto {
+    padding: 0.75rem;
+    /* Reducido padding */
+    font-size: 0.9rem;
+    /* Fuente más pequeña */
+}
+
+/* Botones de acción más compactos */
+.modal-detalle .modal-actions {
+    gap: 0.75rem;
+    /* Reducido gap */
+    margin-top: 1.5rem;
+    /* Reducido margen superior */
+}
+
+.modal-detalle .btn-modal {
+    min-width: 140px;
+    /* Reducido de 180px */
+    padding: 0.75rem 1rem;
+    /* Reducido padding */
+    font-size: 0.9rem;
+    /* Fuente más pequeña */
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .modal-detalle {
+        max-width: 95%;
+    }
+
+    .modal-detalle .detalle-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .modal-detalle .modal-actions {
+        flex-direction: column;
+    }
+
+    .modal-detalle .btn-modal {
+        width: 100%;
+    }
+}
+
+/* Modal Header general (para otros modales) */
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -562,7 +674,7 @@
     line-height: 1.6;
 }
 
-/* Detalle de Reserva */
+/* Detalle de Reserva (estilos base) */
 .detalle-section {
     margin-bottom: 2rem;
 }

@@ -211,7 +211,6 @@
         <div *ngIf="currentStep === 5" class="step-content">
           <h2 class="step-title">Confirmar reserva</h2>
 
-          <!-- Prompt de autenticación - SOLO SI NO HAY SESIÓN -->
           <div class="auth-prompt" *ngIf="!usuarioAutenticado">
             <div class="auth-icon">👤</div>
             <h3>Inicia sesión para continuar</h3>
@@ -650,7 +649,9 @@
           </div>
         </div>
 
-        <!-- Resumen (Sidebar) -->
+
+      </div>
+              <!-- Resumen (Sidebar) -->
         <div class="summary-card">
           <h3 class="summary-title">Resumen de Reserva</h3>
 
@@ -719,10 +720,11 @@
             </div>
           </div>
         </div>
-      </div>
     </div>
   </div>
 
+
+</section>
   <!-- ALERTA PERSONALIZADA -->
   <div
     class="koro-alerta"
@@ -767,21 +769,6 @@
     <!-- Alerta de Error -->
     <ng-container *ngIf="alertaTipo === 'error'">
       <div class="koro-icono">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-          <circle
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="2"
-          />
-          <path
-            d="M12 8v4M12 16h.01"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
       </div>
       <div class="koro-contenido">
         <h3>Error en la Reserva</h3>
@@ -789,4 +776,3 @@
       </div>
     </ng-container>
   </div>
-</section>

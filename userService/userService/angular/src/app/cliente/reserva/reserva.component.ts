@@ -888,7 +888,7 @@ procesarPagoConCaptura(): void {
       idMesa: this.mesaSeleccionada.idMesa!,
       fechaHora: this.selectedTime.dateTime!,
       idEvento: null,
-      observaciones: `Reserva para ${this.personas} personas. Pago: ${this.metodoPagoSeleccionado}`,
+      observaciones: `Reserva para ${this.personas} persona(s).`,
     };
 
     console.log('Enviando reserva:', reservaRequest);

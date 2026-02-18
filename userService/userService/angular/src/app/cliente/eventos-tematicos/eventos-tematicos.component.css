@@ -1851,164 +1851,187 @@
 .btn-confirm {
     padding: 0.75rem 2rem;
 }
-
 /* =============================================
-   ALERTA FLOTANTE - MEJORADA Y CENTRADA
+   ALERTA FLOTANTE - KOROFOOD STYLE
    ============================================= */
 
+/* Contenedor principal - overlay completo */
 .koro-alerta {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
     transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-        visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-family: var(--font-sans);
-    pointer-events: none;
+        visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    font-family: var(--font-sans, 'Montserrat', sans-serif) !important;
+    pointer-events: none !important;
 }
 
+/* Estado visible */
 .koro-alerta.koro-mostrar {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: all;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: all !important;
 }
 
-/* Overlay semitransparente */
+/* Backdrop semitransparente (color naranja como el original) */
 .koro-alerta::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
-    animation: fadeIn 0.3s ease;
+    content: '' !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 9998 !important;
+    animation: fadeIn 0.3s ease !important;
 }
 
 /* Contenedor de la alerta - centrado */
 .koro-alerta>*:not(style):not(script) {
-    position: relative;
-    z-index: 10000;
-    max-width: 500px;
-    width: 90%;
-    animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative !important;
+    z-index: 10000 !important;
+    max-width: 450px !important;
+    width: 90% !important;
+    background: white !important;
+    border-radius: 16px !important;
+    padding: 32px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    text-align: center !important;
+    transform: scale(0.9) !important;
+    opacity: 0 !important;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
-/* Estilo base del contenido */
-.koro-exito,
-.koro-error {
-    background: white;
-    border-radius: 20px;
-    padding: 2.5rem 2rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    border: 3px solid transparent;
+/* Animación de entrada para el contenido */
+.koro-alerta.koro-mostrar>*:not(style):not(script) {
+    transform: scale(1) !important;
+    opacity: 1 !important;
 }
 
-.koro-exito {
-    border-color: var(--success);
+/* Icono de la alerta */
+.koro-alerta .koro-icono {
+    text-align: center !important;
+    margin-bottom: 20px !important;
 }
 
-.koro-error {
-    border-color: var(--error);
+/* Colores del icono según tipo */
+.koro-alerta.koro-exito .koro-icono {
+    color: #10b981 !important;
+    /* Verde éxito */
 }
 
-/* Icono mejorado */
-.koro-icono {
-    margin-bottom: 1.5rem;
-    animation: bounce 0.6s ease;
+.koro-alerta.koro-error .koro-icono {
+    color: #ef4444 !important;
+    /* Rojo error */
 }
 
-.koro-icono svg {
-    width: 72px;
-    height: 72px;
-    stroke-width: 2.5;
+/* Animación del icono */
+@keyframes koroIconoEntrada {
+    0% {
+        transform: scale(0) rotate(-180deg);
+    }
+
+    50% {
+        transform: scale(1.1) rotate(10deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
 }
 
-.koro-exito .koro-icono svg {
-    color: var(--success);
+/* Título de la alerta */
+.koro-alerta .koro-contenido h3 {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    margin: 0 0 16px 0 !important;
+    color: #1f2937 !important;
+    font-family: var(--font-serif, 'Playfair Display', serif) !important;
 }
 
-.koro-error .koro-icono svg {
-    color: var(--error);
+/* Contenedor de detalles */
+.koro-alerta .koro-detalles {
+    background: #f9fafb !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    margin: 20px 0 !important;
+    text-align: left !important;
 }
 
-/* Contenido */
-.koro-contenido h3 {
-    font-family: var(--font-serif);
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--brown-dark);
-    margin-bottom: 1.25rem;
-    line-height: 1.3;
+/* Líneas de detalles */
+.koro-alerta .koro-detalles p {
+    margin: 8px 0 !important;
+    color: #4b5563 !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
 }
 
-.koro-detalles {
-    background: var(--cream);
-    border-radius: 12px;
-    padding: 1.25rem;
-    margin: 1.25rem 0;
-    text-align: left;
+.koro-alerta .koro-detalles p strong {
+    color: #1f2937 !important;
+    font-weight: 600 !important;
 }
 
-.koro-detalles p {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px dashed rgba(193, 123, 75, 0.2);
-    font-size: 0.95rem;
-    color: var(--brown-medium);
-    margin: 0;
+/* Mensaje principal */
+.koro-alerta .koro-mensaje {
+    font-size: 18px !important;
+    color: #6b7280 !important;
+    margin: 16px 0 0 0 !important;
+    font-weight: 500 !important;
 }
 
-.koro-detalles p:last-child {
-    border-bottom: none;
+.koro-alerta.koro-exito .koro-mensaje {
+    color: #059669 !important;
 }
 
-.koro-detalles p strong {
-    color: var(--brown-dark);
-    font-weight: 600;
+.koro-alerta.koro-error .koro-mensaje {
+    color: #dc2626 !important;
 }
 
-.koro-mensaje {
-    font-size: 1rem;
-    color: var(--brown-medium);
-    margin-top: 1rem;
-    margin-bottom: 0;
-    line-height: 1.5;
-}
-
-/* Barra de progreso - duración reducida a 3 segundos */
+/* Barra de progreso */
 .koro-alerta::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-    transform: scaleX(0);
-    transform-origin: left;
-    animation: progressBar 3s linear forwards;
-    z-index: 10001;
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    height: 4px !important;
+    background: linear-gradient(90deg, #10b981, #059669) !important;
+    border-radius: 0 0 16px 16px !important;
+    animation: koroProgreso 3s linear forwards !important;
+    z-index: 10001 !important;
+    width: 100% !important;
 }
 
-/* Animaciones */
+.koro-alerta.koro-error::after {
+    background: linear-gradient(90deg, #ef4444, #dc2626) !important;
+    animation: koroProgreso 4s linear forwards !important;
+}
+
+/* Animación de la barra de progreso */
+@keyframes koroProgreso {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+/* Animación de fadeIn para el backdrop */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -2019,94 +2042,47 @@
     }
 }
 
-@keyframes scaleIn {
-    from {
-        opacity: 0;
-        transform: scale(0.8);
-    }
+/* =============================================
+   MEDIA QUERIES - RESPONSIVE
+   ============================================= */
 
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-@keyframes bounce {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-@keyframes progressBar {
-    from {
-        transform: scaleX(0);
-    }
-
-    to {
-        transform: scaleX(1);
-    }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
     .koro-alerta>*:not(style):not(script) {
-        max-width: 420px;
+        padding: 24px !important;
+        width: 95% !important;
     }
 
-    .koro-exito,
-    .koro-error {
-        padding: 2rem 1.5rem;
+    .koro-alerta .koro-contenido h3 {
+        font-size: 20px !important;
     }
 
-    .koro-contenido h3 {
-        font-size: 1.5rem;
+    .koro-alerta .koro-icono svg {
+        width: 48px !important;
+        height: 48px !important;
     }
 
-    .koro-icono svg {
-        width: 64px;
-        height: 64px;
-    }
-
-    .koro-detalles {
-        padding: 1rem;
+    .koro-alerta .koro-detalles p {
+        font-size: 14px !important;
     }
 }
 
 @media (max-width: 480px) {
     .koro-alerta>*:not(style):not(script) {
-        max-width: 95%;
+        padding: 20px !important;
     }
 
-    .koro-exito,
-    .koro-error {
-        padding: 1.75rem 1.25rem;
+    .koro-alerta .koro-detalles {
+        padding: 15px !important;
     }
 
-    .koro-contenido h3 {
-        font-size: 1.35rem;
+    .koro-alerta .koro-detalles p {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 4px !important;
     }
 
-    .koro-icono svg {
-        width: 56px;
-        height: 56px;
-    }
-
-    .koro-detalles p {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.35rem;
-        font-size: 0.9rem;
-    }
-
-    .koro-detalles p span,
-    .koro-detalles p strong {
-        width: 100%;
+    .koro-alerta .koro-mensaje {
+        font-size: 16px !important;
     }
 }
 

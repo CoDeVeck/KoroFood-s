@@ -339,7 +339,7 @@ export class EventosTematicosComponent implements OnInit {
       idMesa: this.mesaSeleccionada.idMesa,
       fechaHora: this.eventoDetalle.fechaInicio,
       idEvento: this.eventoDetalle.idEvento,
-      observaciones: `Reserva para ${this.cantidadPersonas} persona(s). Pago: ${this.metodoPago}`,
+      observaciones: `Reserva para ${this.cantidadPersonas} persona(s).`,
     };
 
     console.log('📝 Enviando reserva de evento:', reservaRequest);
