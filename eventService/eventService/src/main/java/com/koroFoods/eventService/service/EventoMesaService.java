@@ -8,6 +8,7 @@ import com.koroFoods.eventService.dtos.ResultadoResponse;
 import com.koroFoods.eventService.exception.BusinessException;
 import com.koroFoods.eventService.exception.ResourceNotFoundException;
 import com.koroFoods.eventService.feign.IMesaFeignClient;
+import com.koroFoods.eventService.feign.IReservaFeignClient;
 import com.koroFoods.eventService.feign.MesaFeign;
 import com.koroFoods.eventService.model.Evento;
 import com.koroFoods.eventService.model.EventoMesa;
@@ -17,8 +18,11 @@ import com.koroFoods.eventService.repository.IEventoRepository;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -34,6 +38,7 @@ public class EventoMesaService {
 	private final IMesaFeignClient mesaFeignClient;
 
 	private final EventoService eventoService;
+	private final IReservaFeignClient reservaFeignClient;
 
 	@Transactional
 	public EventTableResponse asignarMesaAEvento(EventTableRequest request) {
@@ -132,61 +137,82 @@ public class EventoMesaService {
 		return eventoMesaRepository.mesaAsignadaAlEvento(idMesa, idEvento, desde, hasta);
 	}
 
-	public ResultadoResponse<List<EventoConMesaDto>> listarMesasPorEventoParaReserva(
-	        Integer idEvento, 
-	        Integer cantidadPersonas) {
+public ResultadoResponse<List<EventoConMesaDto>> listarMesasPorEventoParaReserva(
+        Integer idEvento,
+        Integer cantidadPersonas) {
 
-	    List<EventoMesa> eventosMesas = eventoMesaRepository
-	            .findByEvento_IdEventoAndActivoTrue(idEvento);
+    List<EventoMesa> eventosMesas = eventoMesaRepository
+            .findByEvento_IdEventoAndActivoTrue(idEvento);
 
-	    if (eventosMesas.isEmpty()) {
-	        return ResultadoResponse.error("No se encontraron mesas disponibles para este evento");
-	    }
+    if (eventosMesas.isEmpty()) {
+        return ResultadoResponse.error("No se encontraron mesas disponibles para este evento");
+    }
 
-	    EventResponse eventoResponse = eventoService.buscarPorId(idEvento);
+    EventResponse eventoResponse = eventoService.buscarPorId(idEvento);
 
-	    Integer capacidadRequerida = null;
-	    if (cantidadPersonas != null) {
-	        capacidadRequerida = calcularCapacidadPar(cantidadPersonas);
-	    }
+    List<Integer> idsMesas = eventosMesas.stream()
+            .map(EventoMesa::getIdMesa)
+            .collect(Collectors.toList());
 
-	    final Integer capacidadFinal = capacidadRequerida;
+    List<Integer> mesasOcupadas = new ArrayList<>();
+    ResultadoResponse<List<Integer>> ocupadasResponse = reservaFeignClient.obtenerMesasOcupadas(
+            idsMesas,
+            eventoResponse.getFechaInicio(),
+            eventoResponse.getFechaFin()
+    );
 
-	    List<EventoConMesaDto> mesasFiltradas = eventosMesas.stream()
-	            .map(eventoMesa -> {
-	                ResultadoResponse<MesaFeign> mesaResponse = 
-	                        mesaFeignClient.obtenerMesaPorId(eventoMesa.getIdMesa());
+    if (ocupadasResponse != null && ocupadasResponse.getData() != null) {
+        mesasOcupadas = ocupadasResponse.getData();
+    }
 
-	                if (mesaResponse != null && mesaResponse.getData() != null) {
-	                    MesaFeign mesa = mesaResponse.getData();
+    final Set<Integer> mesasOcupadasSet = new HashSet<>(mesasOcupadas);
 
-	                    if (capacidadFinal != null && mesa.getCapacidad() != capacidadFinal) {
-	                        return null;
-	                    }
+    Integer capacidadRequerida = null;
+    if (cantidadPersonas != null) {
+        capacidadRequerida = calcularCapacidadPar(cantidadPersonas);
+    }
 
-	                    return mapearEventoMesaReserva(eventoMesa, eventoResponse, mesa);
-	                }
+    final Integer capacidadFinal = capacidadRequerida;
 
-	                return null;
-	            })
-	            .filter(Objects::nonNull)
-	            .collect(Collectors.toList());
+    List<EventoConMesaDto> mesasFiltradas = eventosMesas.stream()
+            .map(eventoMesa -> {
+                // Excluir mesas que ya tienen reserva
+                if (mesasOcupadasSet.contains(eventoMesa.getIdMesa())) {
+                    return null;
+                }
 
-	    if (mesasFiltradas.isEmpty()) {
-	        String mensaje = cantidadPersonas != null 
-	                ? String.format("No se encontraron mesas con capacidad para %d personas", cantidadPersonas)
-	                : "No se encontraron mesas disponibles";
-	        return ResultadoResponse.error(mensaje);
-	    }
+                ResultadoResponse<MesaFeign> mesaResponse =
+                        mesaFeignClient.obtenerMesaPorId(eventoMesa.getIdMesa());
 
-	    String mensaje = cantidadPersonas != null
-	            ? String.format("Se encontraron %d mesa(s) con capacidad para %d personas", 
-	                    mesasFiltradas.size(), cantidadPersonas)
-	            : String.format("Se encontraron %d mesa(s) disponibles", mesasFiltradas.size());
+                if (mesaResponse != null && mesaResponse.getData() != null) {
+                    MesaFeign mesa = mesaResponse.getData();
 
-	    return ResultadoResponse.success(mensaje, mesasFiltradas);
-	}
+                    if (capacidadFinal != null && mesa.getCapacidad() != capacidadFinal) {
+                        return null;
+                    }
 
+                    return mapearEventoMesaReserva(eventoMesa, eventoResponse, mesa);
+                }
+
+                return null;
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+
+    if (mesasFiltradas.isEmpty()) {
+        String mensaje = cantidadPersonas != null
+                ? String.format("No se encontraron mesas con capacidad para %d personas", cantidadPersonas)
+                : "No se encontraron mesas disponibles";
+        return ResultadoResponse.error(mensaje);
+    }
+
+    String mensaje = cantidadPersonas != null
+            ? String.format("Se encontraron %d mesa(s) con capacidad para %d personas",
+                    mesasFiltradas.size(), cantidadPersonas)
+            : String.format("Se encontraron %d mesa(s) disponibles", mesasFiltradas.size());
+
+    return ResultadoResponse.success(mensaje, mesasFiltradas);
+}
 	private Integer calcularCapacidadPar(Integer cantidadPersonas) {
 		if (cantidadPersonas == null || cantidadPersonas <= 0) {
 			return null;

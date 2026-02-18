@@ -1,6 +1,11 @@
 package com.koroFoods.reservationService.controller;
 
 import com.koroFoods.reservationService.feign.UsuarioFeign;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import com.koroFoods.reservationService.model.Reserva;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +19,7 @@ import com.koroFoods.reservationService.dto.ResultadoResponse;
 import com.koroFoods.reservationService.service.ReservaService;
 
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/reserva/feign")
@@ -42,6 +46,16 @@ public class ReservaFeignController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
+    
+    @GetMapping("/mesas-ocupadas")
+    public ResponseEntity<ResultadoResponse<List<Integer>>> obtenerMesasOcupadas(
+            @RequestParam List<Integer> idsMesas,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fin) {
+
+        return ResponseEntity.ok(reservaService.obtenerMesasOcupadas(idsMesas, inicio, fin));
+    }
+    
 
     @GetMapping("/list/{idCliente}")
     public ResponseEntity<ResultadoResponse<List<Reserva>>> obtenerListaDeReservasPorCliente(@PathVariable Integer idCliente){

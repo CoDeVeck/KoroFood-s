@@ -1,7 +1,7 @@
-export enum EstadoReserva{
-     
-    PEN = 'PEN', // PENDIENTE
-    PAG = 'PAG', // PAGADO
-    ASI = 'ASI', // ASISTIDO
-    CAN = 'CAN'  // CANCELADO
+export enum EstadoReserva {
+  PENDIENTE = 'PENDIENTE', // PENDIENTE
+  PAGADA = 'PAGADA', // PAGADO
+  ASISTIDA = 'ASISTIDA', // ASISTIDO
+  CANCELADA = 'CANCELADA', // CANCELADA
+  VENCIDA = 'VENCIDA'
 }

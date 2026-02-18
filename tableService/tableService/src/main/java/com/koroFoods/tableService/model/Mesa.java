@@ -23,10 +23,10 @@ public class Mesa {
     private Integer idMesa;
 
     @Column(name = "NUMERO_MESA")
-    private int numeroMesa;
+    private Integer numeroMesa;
 
     @Column(name = "CAPACIDAD")
-    private int capacidad;
+    private Integer capacidad;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ZONA")

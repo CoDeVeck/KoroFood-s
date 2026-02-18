@@ -9,6 +9,6 @@ import com.koroFoods.reservationService.dto.ResultadoResponse;
 @FeignClient(name = "tableService")
 public interface MesaFeignClient {
 
-	@GetMapping("/mesa/feign/{/id}")
+	@GetMapping("/mesa/feign/{id}")
 	ResultadoResponse<MesaFeign> obtenerMesaPorId(@PathVariable Integer id);
 }

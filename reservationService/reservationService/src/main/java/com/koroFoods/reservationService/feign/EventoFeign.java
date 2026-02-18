@@ -14,5 +14,6 @@ public class EventoFeign {
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
     private Integer aforo;
+    private String imagen;
 	
 }

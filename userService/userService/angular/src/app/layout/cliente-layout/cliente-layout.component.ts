@@ -42,10 +42,10 @@ export class ClienteLayoutComponent {
 
   navigateToReservations(): void {
     if (this.isLoggedIn) {
-      this.router.navigate(['/cliente/reserva']);
+      this.router.navigate(['/cliente/mis-reservas']);
     } else {
       this.router.navigate(['/auth/login'], {
-        queryParams: { returnUrl: '/cliente/reserva' },
+        queryParams: { returnUrl: '/cliente/mis-reservas' },
       });
     }
   }
