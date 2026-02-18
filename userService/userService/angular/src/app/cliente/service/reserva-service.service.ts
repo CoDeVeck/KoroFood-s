@@ -5,6 +5,9 @@ import { ReservaRequest } from '../../shared/request/ReservaRequest';
 import { Observable } from 'rxjs';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 import { Reserva } from '../../shared/model/reserva.model';
+import { ReservaResponseDTO } from '../../shared/dto/ReservaResponseDTO';
+
+
 
 @Injectable({
   providedIn: 'root',
@@ -57,6 +60,23 @@ export class ReservaServiceService {
     return this.http.get<ResultadoResponse<string[]>>(
       `${this.baseUrl}/slots-disponibles`,
       { params },
+    );
+  }
+
+  // LISTAR RESERVAS DEL CLIENTE
+  listarMisReservas(
+    idUsuario: number,
+  ): Observable<ResultadoResponse<ReservaResponseDTO[]>> {
+    return this.http.get<ResultadoResponse<ReservaResponseDTO[]>>(
+      `${this.baseUrl}/mis-reservas/${idUsuario}`,
+    );
+  }
+
+  // CANCELAR RESERVA
+  cancelarReserva(idReserva: number): Observable<ResultadoResponse<number>> {
+    return this.http.patch<ResultadoResponse<number>>(
+      `${this.baseUrl}/cancelar/${idReserva}`,
+      {}, // PATCH necesita body, aunque esté vacío
     );
   }
 }

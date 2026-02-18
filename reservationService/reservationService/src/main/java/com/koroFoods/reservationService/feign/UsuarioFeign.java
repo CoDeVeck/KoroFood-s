@@ -11,4 +11,12 @@ public class UsuarioFeign {
     private String correo;
     private String imagen;
     private String telefono;
+    
+    public String getNombreCompleto() {
+        return String.format("%s %s %s", 
+            nombres != null ? nombres : "",
+            apePaterno != null ? apePaterno : "",
+            apeMaterno != null ? apeMaterno : ""
+        ).trim();
+    }
 }
