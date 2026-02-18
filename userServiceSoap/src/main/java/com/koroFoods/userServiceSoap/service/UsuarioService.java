@@ -44,18 +44,18 @@ public class UsuarioService {
         List<Integer> rolesPermitidos = Arrays.asList(2, 3);
 
         if (idRol != null && activo != null) {
-            return usuarioRepository.findByRol_IdRolInAndActivo(rolesPermitidos, activo);
+            return usuarioRepository.findByRol_IdRolInAndActivoOrderByFechaRegistroDesc(rolesPermitidos, activo);
         }
 
         if (idRol != null) {
-            return usuarioRepository.findByRol_IdRolIn(rolesPermitidos);
+            return usuarioRepository.findByRol_IdRolInOrderByFechaRegistroDesc(rolesPermitidos);
         }
 
         if (activo != null) {
-            return usuarioRepository.findByRol_IdRolInAndActivo(rolesPermitidos, activo);
+            return usuarioRepository.findByRol_IdRolInAndActivoOrderByFechaRegistroDesc(rolesPermitidos, activo);
         }
 
-        return usuarioRepository.findByRol_IdRolIn(rolesPermitidos);
+        return usuarioRepository.findByRol_IdRolInOrderByFechaRegistroDesc(rolesPermitidos);
     }
 
 

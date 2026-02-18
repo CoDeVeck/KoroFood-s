@@ -11,7 +11,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class UsuarioSoapService {
-  private url = `${enviroment.apiUrls.usuarioSoap}/ws`;
+  private url = `${enviroment.apigateway}/soap`;
   private readonly NAMESPACE = 'http://koroFoods.com/usuario';
 
   private headers = new HttpHeaders({
