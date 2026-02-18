@@ -2,6 +2,7 @@ package com.koroFoods.orderService.service;
 
 import com.koroFoods.orderService.dto.ResultadoResponse;
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
+import com.koroFoods.orderService.dto.request.IncrementarStock;
 import com.koroFoods.orderService.dto.response.*;
 import com.koroFoods.orderService.enums.EstadoDetallePedido;
 import com.koroFoods.orderService.feign.*;
@@ -11,11 +12,13 @@ import com.koroFoods.orderService.repository.IDetallePedidoRepository;
 import com.koroFoods.orderService.repository.IPedidoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DetallePedidoService {
@@ -130,10 +133,25 @@ public class DetallePedidoService {
         BigDecimal nuevoSubTotal = pedidoObtenido.getSubTotal().subtract(subTotalDetalle);
         BigDecimal nuevoTotal = pedidoObtenido.getTotal().subtract(subTotalDetalle);
 
+        aumentarStockDelPlatoCancelado(idDetalle);
+
         pedidoObtenido.setSubTotal(nuevoSubTotal);
         pedidoObtenido.setTotal(nuevoTotal);
         pedidoRepository.save(pedidoObtenido);
 
+    }
+
+    private void aumentarStockDelPlatoCancelado(Integer idDetalle){
+        validarId(idDetalle);
+
+        DetallePedido pd = obtenerDetallePedido(idDetalle);
+
+        IncrementarStock request = new IncrementarStock();
+
+        request.setIdPlato(pd.getIdPlato());
+        request.setCantidad(pd.getCantidad());
+
+        platoFeignClient.incrementarStock(request);
     }
 
     private DetallePedido obtenerDetallePedido(Integer idDetalle){
@@ -293,6 +311,7 @@ public class DetallePedidoService {
 
     private void validarId(Integer request) {
         if (request == null || request <= 0) {
+            log.error("Error al obtener con ID: {}", request);
             throw new IllegalArgumentException("ID invalido");
         }
     }
