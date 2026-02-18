@@ -15,7 +15,7 @@ public class HistorialUsuarioResponse {
     private Integer receptorId;
     private String nombre;
     private String apePaterno;
-    private String fotoUrl;
+    private String imagen;
     private String ultimoMensaje;
     private LocalDateTime fechaUltimoMensaje;
 }
