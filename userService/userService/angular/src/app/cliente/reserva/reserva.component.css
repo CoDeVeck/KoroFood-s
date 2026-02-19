@@ -8,6 +8,29 @@
 }
 
 /* =================================
+   VARIABLES CSS - Paleta de colores
+   ================================= */
+:root {
+  --primary: #C17B4B;
+  --primary-dark: #9E5E34;
+  --primary-light: #E5D3C0;
+  --secondary: #4A6B5E;
+  --accent: #D49B6A;
+  --brown-dark: #3A2C24;
+  --brown-medium: #6B4F3F;
+  --brown-light: #B7A187;
+  --cream: #FBF6F0;
+  --cream-dark: #F5EBE0;
+  --success: #2B7A4B;
+  --warning: #D98C4A;
+  --error: #B4433C;
+  --white: #FFFFFF;
+  --shadow-sm: 0 4px 12px rgba(58, 44, 36, 0.08);
+  --shadow-md: 0 8px 24px rgba(58, 44, 36, 0.12);
+  --shadow-lg: 0 16px 32px rgba(58, 44, 36, 0.16);
+}
+
+/* =================================
    HERO SECTION
    ================================= */
 .hero-section {
@@ -95,79 +118,142 @@
 }
 
 /* =================================
-   STEPPER
+   STEPPER - Estilo Mejorado
    ================================= */
 .stepper {
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-bottom: 50px;
-  gap: 0;
+  justify-content: center;
+  margin-bottom: 3rem;
+  padding: 1rem;
+  background: var(--white, #FFFFFF);
+  border-radius: 100px;
+  box-shadow: var(--shadow-sm, 0 4px 12px rgba(58, 44, 36, 0.08));
 }
 
 .step {
   display: flex;
   align-items: center;
   position: relative;
+  flex: 1;
+  max-width: 150px;
 }
 
 .step-number {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: #E8DDD0;
-  color: #8B7355;
+  background: #F5EBE0;
+  /* --cream-dark */
+  color: #6B4F3F;
+  /* --brown-medium */
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 1.1rem;
-  position: relative;
-  z-index: 2;
+  font-size: 1rem;
   transition: all 0.3s ease;
+  z-index: 2;
 }
 
 .step.active .step-number {
-  background: #C67C4E;
+  background: #C17B4B;
+  /* --primary */
   color: white;
+  box-shadow: 0 4px 12px rgba(193, 123, 75, 0.3);
 }
 
 .step.completed .step-number {
-  background: #4CAF50;
+  background: #2B7A4B;
+  /* --success */
   color: white;
 }
 
 .step-label {
-  position: absolute;
-  top: 60px;
-  left: 50%;
-  transform: translateX(-50%);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #B7A187;
+  /* --brown-light */
+  margin-left: 8px;
   white-space: nowrap;
-  color: #8B7355;
-  font-size: 0.9rem;
-  width: max-content;
 }
 
 .step.active .step-label {
-  color: #C67C4E;
+  color: #C17B4B;
+  /* --primary */
   font-weight: 600;
 }
 
 .step-line {
-  width: 100px;
-  height: 3px;
-  background: #E8DDD0;
-  margin: 0 -10px;
-  transition: all 0.3s ease;
-}
-
-.step.completed .step-line {
-  background: #4CAF50;
+  flex: 1;
+  height: 2px;
+  background: #F5EBE0;
+  /* --cream-dark */
+  margin: 0 1rem;
 }
 
 .step:last-child .step-line {
   display: none;
 }
+
+.step.completed .step-line {
+  background: #2B7A4B;
+  /* --success */
+}
+
+/* =================================
+   Media Queries para Stepper
+   ================================= */
+@media (max-width: 768px) {
+  .stepper {
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding: 1rem;
+    border-radius: 50px;
+    gap: 0.5rem;
+  }
+
+  .step {
+    min-width: 100px;
+    flex: 0 0 auto;
+  }
+
+  .step-line {
+    width: 40px;
+    margin: 0 0.5rem;
+  }
+
+  .step-label {
+    font-size: 0.7rem;
+    margin-left: 4px;
+  }
+
+  .step-number {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stepper {
+    padding: 0.75rem;
+  }
+
+  .step {
+    min-width: 80px;
+  }
+
+  .step-label {
+    display: none;
+    /* Ocultar labels en móviles muy pequeños */
+  }
+
+  .step-line {
+    width: 30px;
+  }
+}
+
 /* =================================
    CONTENT WRAPPER - CORREGIDO
    ================================= */

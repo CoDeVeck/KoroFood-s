@@ -1,12 +1,15 @@
 package com.koroFoods.paymentService.repository;
 
+import com.koroFoods.paymentService.dtos.response.GraficoTresData;
 import com.koroFoods.paymentService.enums.EstadoPago;
 import com.koroFoods.paymentService.model.Pago;
 
 import java.util.List;
 import java.util.Optional;
 
+import feign.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -30,4 +33,15 @@ public interface IPagoRepository extends JpaRepository<Pago, Integer> {
     Optional<Pago> findByHashImagen(String hashImagen);
     
     Optional<Pago> findByCodigoOperacion(String codigoOperacion);
+
+    @Query(value = """
+            SELECT
+            SUM(CASE WHEN metodo_pago = 'Yape' then 1 else 0 end) as pagoYape,
+            SUM(CASE WHEN metodo_pago = 'Tarjeta' then 1 else 0 end) as pagoTarjeta,
+            SUM(CASE WHEN metodo_pago = 'Efectivo' then 1 else 0 end) as pagoEfectivo,
+            SUM(CASE WHEN metodo_pago = 'Plin' then 1 else 0 end) as pagoPlin
+            FROM tb_pago
+            WHERE DATE_PART('month', fecha_pago) = :mes
+            """,nativeQuery = true)
+    GraficoTresData graficoTresList(@Param("mes")Integer mes);
 }

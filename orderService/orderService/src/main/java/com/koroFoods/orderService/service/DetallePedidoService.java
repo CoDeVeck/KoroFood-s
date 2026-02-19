@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -314,6 +315,24 @@ public class DetallePedidoService {
             log.error("Error al obtener con ID: {}", request);
             throw new IllegalArgumentException("ID invalido");
         }
+    }
+
+    public ResultadoResponse<List<GraficoUnoListResponse>> grafico1(Integer mes){
+
+        List<GraficoUnoData> data = detallePedidoRepository.graficoUnoList(mes);
+        List<GraficoUnoListResponse> list = new ArrayList<>();
+        for(var plato : data){
+            ResultadoResponse<PlatoFeign> plat = platoFeignClient.getDishById(plato.getIdPlato());
+            var platoData = plat.getData();
+
+            list.add(new GraficoUnoListResponse(
+                    plato.getIdPlato(),
+                    plato.getCantidadPlatos(),
+                    platoData.getNombre()
+            ));
+        }
+
+        return ResultadoResponse.success("Se obtuvo el grafico 1: ", list);
     }
 
 

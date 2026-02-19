@@ -13,7 +13,7 @@ import { ReservaResponseDTO } from '../../shared/dto/ReservaResponseDTO';
   providedIn: 'root',
 })
 export class ReservaServiceService {
-  private baseUrl = `${enviroment.apiUrls.reserva}/reserva`;
+  private baseUrl = `${enviroment.apigateway}/reserva`;
 
   constructor(private http: HttpClient) {}
 

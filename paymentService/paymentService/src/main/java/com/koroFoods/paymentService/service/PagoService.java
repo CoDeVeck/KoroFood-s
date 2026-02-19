@@ -1,6 +1,8 @@
 package com.koroFoods.paymentService.service;
 
 
+import com.koroFoods.paymentService.dtos.response.GraficoTresData;
+import com.koroFoods.paymentService.dtos.response.ResultadoResponse;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -456,5 +458,15 @@ public class PagoService {
                 .build();
     }
     
-    
+
+    public ResultadoResponse<GraficoTresData> graficoTresList(Integer mes){
+        GraficoTresData data = pagoRepository.graficoTresList(mes);
+
+        if (data != null){
+         log.info("Se obtuvo la lista: {}", data);
+         return  ResultadoResponse.success("Lista obtenida: ", data);
+        }
+        log.error("No se obtuvbo la lista {}", (Object) null);
+        return  ResultadoResponse.error("Lista obtenida: ",  null);
+    }
 }
