@@ -50,7 +50,7 @@ export class SupportChatComponent implements OnInit, OnDestroy {
       'Contamos con dos tipos de reserva, simple y especial. ¿De cuál necesitas información?',
     tolerancia:
       'Tenemos un tiempo de tolerancia promedio de 2 horas. Pasado ese tiempo, tu mesa podría ser reasignada. Por favor, avísanos si llegarás tarde enviando un mensaje a recepcionista.',
-    pago: 'Después de realizar el pago anticipado, recibirás una confirmación por email con los detalles de tu reserva. El pago garantiza tu mesa y puede incluir un menú degustación según el plan elegido.',
+    pago: 'Después de realizar el pago anticipado de S/ 15.00, podrás revisar el apartado de "Mis Reservas" y solicitar el medio por el cual quieres tu codigo de verificacion para validar tu reserva',
   };
 
   constructor(private chatbotService: ChatbotService) {}
