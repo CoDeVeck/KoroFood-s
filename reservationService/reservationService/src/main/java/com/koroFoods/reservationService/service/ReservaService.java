@@ -5,6 +5,8 @@ import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ReservaResponse;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
 import com.koroFoods.reservationService.dto.response.Grafico2Data;
+import com.koroFoods.reservationService.dto.response.GraficoCuatroData;
+import com.koroFoods.reservationService.dto.response.GraficoCuatroList;
 import com.koroFoods.reservationService.enums.EstadoReserva;
 import com.koroFoods.reservationService.enums.TipoReserva;
 import com.koroFoods.reservationService.feign.EventoFeign;
@@ -336,5 +338,23 @@ public class ReservaService {
         }
         log.error("No se obtuvo la lista {}", (Object) null);
         return ResultadoResponse.error("No se obtuvo el grafico 2: ", null);
+    }
+
+    public ResultadoResponse<List<GraficoCuatroList>> graficoCuatroList(Integer mes){
+
+        List<GraficoCuatroData> data = reservaRepository.graficoCuatroList(mes);
+        List<GraficoCuatroList> list = new ArrayList<>();
+
+        for(var evento : data){
+            ResultadoResponse<EventoFeign> eventoFeign = eventoFeignClient.obtenerEvento(evento.getIdEvento());
+            var eventoData = eventoFeign.getData();
+
+            list.add(new GraficoCuatroList(
+                evento.getIdEvento(),
+                    evento.getCantidad(),
+                    eventoData.getNombre()
+            )) ;
+        }
+        return ResultadoResponse.success("Se obtuvo grafico {}", list);
     }
 }
