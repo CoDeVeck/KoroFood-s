@@ -4,9 +4,7 @@ import com.koroFoods.reservationService.dto.ReservaDtoFeing;
 import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ReservaResponse;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
-import com.koroFoods.reservationService.dto.response.Grafico2Data;
-import com.koroFoods.reservationService.dto.response.GraficoCuatroData;
-import com.koroFoods.reservationService.dto.response.GraficoCuatroList;
+import com.koroFoods.reservationService.dto.response.*;
 import com.koroFoods.reservationService.enums.EstadoReserva;
 import com.koroFoods.reservationService.enums.TipoReserva;
 import com.koroFoods.reservationService.feign.EventoFeign;
@@ -357,4 +355,7 @@ public class ReservaService {
         }
         return ResultadoResponse.success("Se obtuvo grafico {}", list);
     }
+
+
+
 }

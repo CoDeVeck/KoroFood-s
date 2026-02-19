@@ -92,4 +92,6 @@ public interface IReservaRepository extends JpaRepository<Reserva, Integer> {
             order by cantidad desc
             """,nativeQuery = true)
     List<GraficoCuatroData> graficoCuatroList(@Param("mes")Integer mes);
+
+
 }
