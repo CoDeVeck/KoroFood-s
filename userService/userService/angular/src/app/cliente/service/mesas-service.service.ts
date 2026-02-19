@@ -13,7 +13,7 @@ import { MesaDto } from '../../shared/dto/MesaDto';
 })
 export class MesasServiceService {
 
-  private baseUrl = `${enviroment.apiUrls.mesas}/mesa/feign`;
+  private baseUrl = `${enviroment.apigateway}/mesa/feign`;
   private baseUrlService = `${enviroment.apiUrls.mesas}/mesa`;
     
   constructor(private http: HttpClient) {}
