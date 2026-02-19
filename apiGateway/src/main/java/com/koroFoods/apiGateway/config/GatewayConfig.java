@@ -30,7 +30,7 @@ public class GatewayConfig {
                         .uri("lb://eventService")
                 )
                 .route("menu-service", r -> r
-                        .path("/menu/**", "/menu/feign/**")
+                        .path("/menu/**", "/menu/feign/**", "/platos/**")
                         .uri("lb://menuService")
                 )
                 .route("user-service-soap", r -> r

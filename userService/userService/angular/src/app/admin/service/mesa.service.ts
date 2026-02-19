@@ -10,7 +10,7 @@ import { MesaResponse, MesaRequest } from '../models/mesa.model';
   providedIn: 'root'
 })
 export class MesaService {
-  private apiUrl = `${enviroment.apiUrls.mesa}/mesa`;
+  private apiUrl = `${enviroment.apiUrls.mesas}/mesa`;
 
   constructor(private http: HttpClient) {}
 

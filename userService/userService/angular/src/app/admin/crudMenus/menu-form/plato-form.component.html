@@ -88,16 +88,34 @@
 
             <!-- URL Imagen -->
             <div class="mb-3">
-              <label for="imagen" class="form-label">URL de Imagen</label>
-              <input 
-                type="text" 
-                class="form-control" 
-                id="imagen" 
-                formControlName="imagen"
-                placeholder="https://ejemplo.com/imagen.jpg">
-              <small class="form-text text-muted">
-                Por ahora solo URL. Cloudinary se implementará después.
-              </small>
+              <label class="form-label">Imagen del Plato</label>
+              
+              <!-- Preview de imagen -->
+              <div *ngIf="imagenPreview" class="imagen-preview-container mb-3">
+                <img [src]="imagenPreview" alt="Preview" class="imagen-preview">
+                <button 
+                  type="button" 
+                  class="btn btn-sm btn-danger mt-2"
+                  (click)="removerImagen()">
+                  <i class="bi bi-trash"></i> Remover imagen
+                </button>
+              </div>
+
+              <!-- Botón para seleccionar imagen -->
+              <div *ngIf="!imagenPreview">
+                <label for="imagenInput" class="btn btn-outline-primary">
+                  <i class="bi bi-upload"></i> Seleccionar imagen
+                </label>
+                <input 
+                  type="file" 
+                  id="imagenInput" 
+                  accept="image/*"
+                  (change)="onFileSelected($event)"
+                  style="display: none;">
+                <small class="form-text text-muted d-block mt-2">
+                  Formatos aceptados: JPG, PNG, GIF. Tamaño máximo: 5MB.
+                </small>
+              </div>
             </div>
 
             <!-- Botones -->
