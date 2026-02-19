@@ -20,14 +20,14 @@ public class WebServiceConfig  { // extends WsConfigurerAdapter
 		MessageDispatcherServlet servlet = new MessageDispatcherServlet();
 		servlet.setApplicationContext(context);
 		servlet.setTransformWsdlLocations(true);
-		return new ServletRegistrationBean<>(servlet, "/ws/*");
+		return new ServletRegistrationBean<>(servlet, "/soap/*");
 	}
 
 	@Bean(name = "usuarios")
     public DefaultWsdl11Definition defaultWsdl11Definition(XsdSchema usuariosSchema) {
         DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();
         wsdl11Definition.setPortTypeName("UsuariosPort");
-        wsdl11Definition.setLocationUri("/ws");
+        wsdl11Definition.setLocationUri("/soap");
         wsdl11Definition.setTargetNamespace("http://koroFoods.com/usuario");
         wsdl11Definition.setSchema(usuariosSchema);
         return wsdl11Definition;

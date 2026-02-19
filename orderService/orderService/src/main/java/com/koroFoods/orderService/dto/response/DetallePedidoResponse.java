@@ -27,4 +27,6 @@ public class DetallePedidoResponse {
     private String estado;
     private BigDecimal precioUnitario;
     private BigDecimal subTotal;
+
+    //private boolean pagar
 }

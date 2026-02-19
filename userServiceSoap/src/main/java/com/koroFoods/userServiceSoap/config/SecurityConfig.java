@@ -21,7 +21,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // Para SOAP
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/ws/**").permitAll() // Permitir acceso al servicio SOAP
+            	.requestMatchers("/soap/**").permitAll()// Permitir acceso al servicio SOAP
                 .anyRequest().authenticated()
             );
         return http.build();

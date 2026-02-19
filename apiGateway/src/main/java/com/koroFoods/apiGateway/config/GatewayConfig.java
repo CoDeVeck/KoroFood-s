@@ -33,6 +33,10 @@ public class GatewayConfig {
                         .path("/menu/**", "/menu/feign/**")
                         .uri("lb://menuService")
                 )
+                .route("user-service-soap", r -> r
+                	    .path("/soap/**")
+                	    .uri("lb://userServiceSoap")
+                	)
                 .route("qualification-service", r -> r
                         .path("/calificacion/**")
                         .uri("lb://qualificationService")

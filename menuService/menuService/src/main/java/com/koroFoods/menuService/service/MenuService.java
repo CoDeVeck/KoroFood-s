@@ -3,6 +3,8 @@ package com.koroFoods.menuService.service;
 import com.koroFoods.menuService.dto.EtiquetaDtoFeign;
 import com.koroFoods.menuService.dto.PlatoDtoFeign;
 import com.koroFoods.menuService.dto.ResultadoResponse;
+import com.koroFoods.menuService.dto.request.IncrementarStock;
+import com.koroFoods.menuService.dto.request.PlatoStockDto;
 import com.koroFoods.menuService.model.Plato;
 import com.koroFoods.menuService.repository.IMenuRepository;
 
@@ -15,6 +17,7 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.awt.Graphics2D;
@@ -33,6 +36,7 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MenuService {
@@ -524,4 +528,45 @@ public class MenuService {
 		}
 	}
 
+
+    public ResultadoResponse<PlatoStockDto> aumentarStock(IncrementarStock request){
+
+        PlatoStockDto response = new PlatoStockDto();
+
+        validarId(request.getIdPlato());
+
+        if (request.getCantidad() <= 0){
+
+            throw  new RuntimeException("Tienes que poner una cantidad a devolver");
+        }
+
+        Plato actualizar = obtenerPlato(request.getIdPlato());
+
+        Integer aumentar = actualizar.getStock() + request.getCantidad();
+        actualizar.setStock(aumentar);
+        menuRepository.save(actualizar);
+
+        response.setIdPlato(actualizar.getIdPlato());
+        response.setNombre(actualizar.getNombre());
+        response.setCantidad(actualizar.getStock());
+
+        return ResultadoResponse.success("Se actualizo el stock: ", response );
+
+    }
+
+
+    private Plato obtenerPlato(Integer idPlato){
+        validarId(idPlato);
+
+        return menuRepository.findById(idPlato)
+                .orElseThrow(() -> new RuntimeException("No se pudo obtener el plato con ID: " + idPlato));
+    }
+
+
+    private void validarId(Integer request){
+        if (request == null || request <= 0) {
+            log.error("Error al obtener con ID: {}", request);
+            throw new IllegalArgumentException("ID invalido");
+        }
+    }
 }

@@ -11,11 +11,14 @@ import iziToast from 'izitoast';
 import { AlertIziToast } from '../../../util/iziToastAlert.service';
 import { CommonModule } from '@angular/common';
 import { AlertService } from '../../../util/alert.service';
+import { MenuClienteService } from '../../../cliente/service/menuClienteService';
+import { PlatoDto } from '../../../shared/dto/PlatoDto';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-detalle-ordenes',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './detalle-ordenes.component.html',
   styleUrl: './detalle-ordenes.component.css',
 })
@@ -25,6 +28,7 @@ export class DetalleOrdenesComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+  private menuService = inject(MenuClienteService);
 
   idPedido: number | null = null;
   token: string | null = null;
@@ -33,10 +37,29 @@ export class DetalleOrdenesComponent implements OnInit, OnDestroy {
   detalles: DetallePedidoResponse[] = [];
   cliente: DetallePedidoUsuarioResponse | null = null;
 
+  plato: PlatoDto | null = null;
+  platos: PlatoDto[] = [];
+  platosFiltrados: PlatoDto[] = [];
+
   // Estados
+  loadingPlatos: boolean = false;
   loading: boolean = false;
   wsConnected: boolean = false;
   error: string | null = null;
+
+  // Cantidades
+  cantidadesPlatos: Map<number, number> = new Map();
+
+  // Filtros
+  filtroNombre: string = '';
+  filtroTipo: string = 'TODOS';
+  tiposPlato = [
+    { value: 'TODOS', label: 'Todos' },
+    { value: 'E', label: 'Entradas' },
+    { value: 'S', label: 'Segundos' },
+    { value: 'P', label: 'Postres' },
+    { value: 'B', label: 'Bebidas' },
+  ];
 
   private subscriptions: Subscription = new Subscription();
 
@@ -50,6 +73,7 @@ export class DetalleOrdenesComponent implements OnInit, OnDestroy {
         return;
       }
       this.verificarSesion();
+      this.cargarPlatos();
     });
   }
   verificarSesion(): void {
@@ -240,6 +264,105 @@ export class DetalleOrdenesComponent implements OnInit, OnDestroy {
       CAN: 'fas fa-times-circle',
     };
     return iconos[estado] || 'fas fa-question-circle';
+  }
+
+  cargarPlatos(): void {
+    this.loadingPlatos = true;
+    this.menuService.listarPlatos().subscribe({
+      next: (response) => {
+        if (response.valor) {
+          this.platos = response.data;
+          this.platosFiltrados = response.data;
+
+          this.platos.forEach((plato) => {
+            this.cantidadesPlatos.set(plato.idPlato, 1);
+          });
+        }
+        this.loadingPlatos = false;
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar platos:', err);
+        this.loadingPlatos = false;
+      },
+    });
+  }
+
+  aplicarFiltros(): void {
+    this.platosFiltrados = this.platos.filter((plato) => {
+      const cumpleNombre = plato.nombre
+        .toLowerCase()
+        .includes(this.filtroNombre.toLowerCase());
+      const cumpleTipo =
+        this.filtroTipo === 'TODOS' || plato.tipoPlato === this.filtroTipo;
+
+      return cumpleNombre && cumpleTipo;
+    });
+  }
+
+  limpiarFiltros(): void {
+    this.filtroNombre = '';
+    this.filtroTipo = 'TODOS';
+    this.platosFiltrados = this.platos;
+  }
+
+  incrementarCantidad(idPlato: number): void {
+    const cantidad = this.cantidadesPlatos.get(idPlato) || 1;
+    this.cantidadesPlatos.set(idPlato, cantidad + 1);
+  }
+
+  decrementarCantidad(idPlato: number): void {
+    const cantidad = this.cantidadesPlatos.get(idPlato) || 1;
+    if (cantidad > 1) {
+      this.cantidadesPlatos.set(idPlato, cantidad - 1);
+    }
+  }
+  getCantidad(idPlato: number): number {
+    return this.cantidadesPlatos.get(idPlato) || 1;
+  }
+
+  obtenerPlato(idPlato: number): PlatoDto | undefined {
+    return this.platos.find((plato) => plato.idPlato === idPlato);
+  }
+  obtenerPlatoDetalle(idDetalle: number): DetallePedidoResponse | undefined {
+    return this.detalles.find((detalles) => detalles.idDetalle === idDetalle);
+  }
+
+  agregarPlato(idPlato: number): void {
+    if (!this.idPedido) {
+      this.error = 'No hay pedido seleccionado';
+      setTimeout(() => (this.error = null), 3000);
+      return;
+    }
+
+    var platoObtenido = this.obtenerPlato(idPlato);
+
+    if (platoObtenido) {
+      AlertService.confirm(
+        `${platoObtenido?.nombre}`,
+        '¿Quieres agregar el plato?',
+      ).then((resultado: any) => {
+        if (resultado.isConfirmed || resultado === true) {
+          const cantidad = this.getCantidad(idPlato);
+          this.wsPedidoService.agregarPlato(this.idPedido!, idPlato, cantidad);
+          this.cantidadesPlatos.set(idPlato, 1);
+          AlertIziToast.success(
+            'Exito!',
+            `Se agrego el plato ${platoObtenido!.nombre.split(' ')[0]}`,
+          );
+        } else {
+          AlertIziToast.info(
+            'No se agrego el plato, ',
+            `${platoObtenido?.nombre.split(' ')[0]}`,
+          );
+        }
+      });
+    } else {
+      AlertService.error('Error!', 'No se encontro el plato');
+    }
+  }
+  getTipoPlatoLabel(tipo: string): string {
+    const tipoObj = this.tiposPlato.find((t) => t.value === tipo);
+    return tipoObj ? tipoObj.label : tipo;
   }
 
   // Obtener platos por estado
