@@ -10,6 +10,8 @@ import { EventoClienteService } from '../service/eventoClienteService';
 import { ReservaServiceService } from '../service/reserva-service.service';
 import { ReservaRequest } from '../../shared/request/ReservaRequest';
 import { AuthService } from '../../auth/service/auth.service';
+import { PagoService } from '../service/pago.service';
+import { CrearPagoRequest } from '../pago/pagoDto';
 
 @Component({
   selector: 'app-eventos-tematicos',
@@ -65,6 +67,7 @@ export class EventosTematicosComponent implements OnInit {
     private reservaService: ReservaServiceService,
     private authService: AuthService,
     private router: Router,
+    private pagoService: PagoService,
   ) {}
 
   ngOnInit(): void {
@@ -98,6 +101,7 @@ export class EventosTematicosComponent implements OnInit {
     this.eventoService.listarEventos().subscribe({
       next: (res) => {
         if (!res.valor || !res.data?.length) {
+          console.log(res);
           this.cargando = false;
           return;
         }
@@ -106,6 +110,7 @@ export class EventosTematicosComponent implements OnInit {
         ids.forEach((id) => {
           this.eventoService.obtenerEventoValidado(id).subscribe({
             next: (detRes) => {
+              console.log('Evento', detRes);
               if (detRes.valor && detRes.data) this.eventos.push(detRes.data);
             },
             complete: () => {
@@ -322,7 +327,6 @@ export class EventosTematicosComponent implements OnInit {
     return !!this.imagenPreview;
   }
 
-  // MÉTODO MEJORADO: Confirmar pago y crear reserva de evento
   confirmarPago(): void {
     if (!this.puedeConfirmarPago() || this.procesandoPago) return;
 
@@ -339,7 +343,6 @@ export class EventosTematicosComponent implements OnInit {
     this.procesandoPago = true;
     this.errorPago = null;
 
-    // Construir el request de reserva para eventos
     const reservaRequest: ReservaRequest = {
       idUsuario: this.idUsuario,
       idMesa: this.mesaSeleccionada.idMesa,
@@ -350,27 +353,60 @@ export class EventosTematicosComponent implements OnInit {
 
     console.log('📝 Enviando reserva de evento:', reservaRequest);
 
-    // Llamar al servicio de reservas
     this.reservaService.crearReserva(reservaRequest).subscribe({
       next: (response) => {
-        console.log('✅ Reserva creada exitosamente:', response);
-        this.procesandoPago = false;
+        console.log('✅ Reserva creada:', response);
 
         if (response.valor && response.data) {
-          // Mostrar alerta de éxito
-          this.mostrarAlertaExito();
+          const idReserva = response.data;
 
-          // Limpiar datos temporales
-          localStorage.removeItem('reserva_evento_temporal');
+          // Solo llamar a crearPago si es YAPE o PLIN
+          if (this.metodoPago === 'YAPE' || this.metodoPago === 'PLIN') {
+            const pagoRequest: CrearPagoRequest = {
+              idReserva: idReserva,
+              idUsuario: this.idUsuario!,
+              tipoPago: 'DR',
+              monto: parseFloat(this.calcularTotal()),
+              metodoPago: this.metodoPago,
+              observaciones: `Depósito - ${this.metodoPago}`,
+            };
 
-          // Redirigir después de 3 segundos
-          setTimeout(() => {
-            this.mostrarAlerta = false;
+            console.log('💳 Enviando pago:', pagoRequest);
+
+            this.pagoService.crearPago(pagoRequest).subscribe({
+              next: (pago) => {
+                console.log('✅ Pago creado:', pago);
+                this.procesandoPago = false;
+                this.mostrarAlertaExito();
+                localStorage.removeItem('reserva_evento_temporal');
+                setTimeout(() => {
+                  this.mostrarAlerta = false;
+                  setTimeout(
+                    () => this.router.navigate(['/cliente/inicio']),
+                    300,
+                  );
+                }, 3000);
+              },
+              error: (err) => {
+                console.error('❌ Error al crear pago:', err);
+                this.procesandoPago = false;
+                this.mostrarAlertaError(
+                  err.message || 'Error al procesar el pago',
+                );
+              },
+            });
+          } else {
+            // TARJETA: solo reserva, sin pago adicional
+            this.procesandoPago = false;
+            this.mostrarAlertaExito();
+            localStorage.removeItem('reserva_evento_temporal');
             setTimeout(() => {
-              this.router.navigate(['/cliente/inicio']);
-            }, 300);
-          }, 3000);
+              this.mostrarAlerta = false;
+              setTimeout(() => this.router.navigate(['/cliente/inicio']), 300);
+            }, 3000);
+          }
         } else {
+          this.procesandoPago = false;
           this.mostrarAlertaError(
             response.mensaje || 'Error al procesar la reserva',
           );
@@ -379,10 +415,9 @@ export class EventosTematicosComponent implements OnInit {
       error: (error) => {
         console.error('❌ Error al crear reserva:', error);
         this.procesandoPago = false;
-        const mensaje =
-          error.error?.mensaje ||
-          'Error al procesar la reserva. Por favor, intente nuevamente.';
-        this.mostrarAlertaError(mensaje);
+        this.mostrarAlertaError(
+          error.error?.mensaje || 'Error al procesar la reserva',
+        );
       },
     });
   }
@@ -438,10 +473,6 @@ export class EventosTematicosComponent implements OnInit {
   getSeats(capacidad: number): number[] {
     return Array.from({ length: capacidad }, (_, i) => i + 1);
   }
-
-  // ═══════════════════════════════════════════════════════════════════
-  // HELPERS DE FECHA — sin DatePipe, todo manual
-  // ═══════════════════════════════════════════════════════════════════
 
   parseFecha(iso: string | null | undefined): Date | null {
     if (!iso) return null;

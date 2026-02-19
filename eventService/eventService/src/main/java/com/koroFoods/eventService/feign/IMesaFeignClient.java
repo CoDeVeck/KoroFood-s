@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.koroFoods.eventService.dtos.ResultadoResponse;
 
 
-@FeignClient(name = "mesas", url = "http://localhost:8082/mesa/feign")
+@FeignClient(name = "tableService")
 public interface IMesaFeignClient {
 
-	@GetMapping("/{id}")
+	@GetMapping("/mesa/feign/{id}")
 	ResultadoResponse<MesaFeign> obtenerMesaPorId(@PathVariable Integer id);
 	
-    @PostMapping("/por-ids")
+    @PostMapping("/mesa/feign/por-ids")
     ResultadoResponse<List<MesaFeign>> obtenerMesasPorIds(@RequestBody List<Integer> ids);
 }

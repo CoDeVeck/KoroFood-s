@@ -11,7 +11,7 @@ import { VerificarCodigoRequest } from '../../shared/dto/VerificarCodigoRequest'
   providedIn: 'root',
 })
 export class CodigoVerificacionService {
-  private baseUrl = `${enviroment.apiUrls.reserva}/verificacion`;
+  private baseUrl = `${enviroment.apigateway}/verificacion`;
 
   constructor(private http: HttpClient) {}
 
