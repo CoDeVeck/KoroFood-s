@@ -1,0 +1,16 @@
+package com.koroFoods.userService.feign.repo;
+
+import com.koroFoods.userService.dto.ResultadoResponse;
+import com.koroFoods.userService.feign.dto.GraficoUnoDto;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+
+@FeignClient(name = "orderService")
+public interface OrderFeignClient {
+
+    @GetMapping("/pedido/feign/graficoUno")
+    ResultadoResponse<List<GraficoUnoDto>> getGraficoDos(@RequestParam("mes")Integer mes);
+}

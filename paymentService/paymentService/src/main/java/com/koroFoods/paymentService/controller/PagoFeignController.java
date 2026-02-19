@@ -19,7 +19,7 @@ public class PagoFeignController {
     private final PagoService pagoService;
 
     @GetMapping("/graficoTres")
-    public ResponseEntity<ResultadoResponse<GraficoTresData>> getGraficoUno(@RequestParam Integer mes){
+    public ResponseEntity<ResultadoResponse<GraficoTresData>> getGraficoTres(@RequestParam Integer mes){
         ResultadoResponse<GraficoTresData> resultado = pagoService.graficoTresList(mes);
 
         if (resultado.isValor()) {
