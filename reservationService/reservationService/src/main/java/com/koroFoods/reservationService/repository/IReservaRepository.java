@@ -1,5 +1,6 @@
 package com.koroFoods.reservationService.repository;
 
+import com.koroFoods.reservationService.dto.response.Grafico2Data;
 import com.koroFoods.reservationService.model.Reserva;
 
 import feign.Param;
@@ -69,4 +70,13 @@ public interface IReservaRepository extends JpaRepository<Reserva, Integer> {
 	        @Param("fechaDesde") LocalDateTime fechaDesde,
 	        @Param("fechaHasta") LocalDateTime fechaHasta
 	);
+
+    @Query(value = """
+            SELECT
+            SUM(CASE WHEN id_evento IS NOT NULL THEN 1 ELSE 0 END) as conEvento,
+            SUM(CASE WHEN id_evento IS NULL THEN 1 ELSE 0 END) as sinEvento
+            FROM tb_reserva
+            WHERE DATE_PART('month', fecha_registro) = :mes
+            """,nativeQuery = true)
+    Grafico2Data graficoDosList(@Param("mes")Integer mes);
 }

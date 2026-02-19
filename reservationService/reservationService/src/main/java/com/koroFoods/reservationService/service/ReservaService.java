@@ -4,6 +4,7 @@ import com.koroFoods.reservationService.dto.ReservaDtoFeing;
 import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ReservaResponse;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
+import com.koroFoods.reservationService.dto.response.Grafico2Data;
 import com.koroFoods.reservationService.enums.EstadoReserva;
 import com.koroFoods.reservationService.enums.TipoReserva;
 import com.koroFoods.reservationService.feign.EventoFeign;
@@ -26,8 +27,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReservaService {
@@ -323,4 +326,15 @@ public class ReservaService {
 		}
 	}
 
+
+    public ResultadoResponse<Grafico2Data>graficoDos(Integer mes){
+        Grafico2Data graficoDos = reservaRepository.graficoDosList(mes);
+
+        if (graficoDos != null){
+            log.info("Se obtuvo la lista {}", graficoDos);
+            return ResultadoResponse.success("Se obtuvo el grafico 2: ", graficoDos);
+        }
+        log.error("No se obtuvo la lista {}", (Object) null);
+        return ResultadoResponse.error("No se obtuvo el grafico 2: ", null);
+    }
 }
