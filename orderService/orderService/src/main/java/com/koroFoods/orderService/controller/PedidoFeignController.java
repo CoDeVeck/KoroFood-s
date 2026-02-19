@@ -1,5 +1,6 @@
 package com.koroFoods.orderService.controller;
 
+import com.koroFoods.orderService.dto.response.GraficoCincoList;
 import com.koroFoods.orderService.dto.response.GraficoUnoListResponse;
 import com.koroFoods.orderService.service.DetallePedidoService;
 import org.springframework.http.HttpStatus;
@@ -40,6 +41,16 @@ public class PedidoFeignController {
             return ResponseEntity.ok(resultado);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+        }
+    }
+
+    @GetMapping("/graficoCinco")
+    public ResponseEntity<ResultadoResponse<List<GraficoCincoList>>> getGraficoCinto(@RequestParam Integer mes){
+        ResultadoResponse<List<GraficoCincoList>> response = pedidoService.graficoCincoList(mes);
+        if (response.isValor()) {
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 }
