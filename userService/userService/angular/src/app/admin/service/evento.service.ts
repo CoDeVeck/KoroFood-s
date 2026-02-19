@@ -11,8 +11,8 @@ import { EventoResponse, EventoRequest, TematicaResponse } from '../models/event
   providedIn: 'root'
 })
 export class EventoService {
-  private apiUrl = `${enviroment.apiUrls.eventos}/eventos`;
-  private tematicaUrl = `${enviroment.apiUrls.eventos}/tematicas`;
+  private apiUrl = `${enviroment.apigateway}/eventos`;
+  private tematicaUrl = `${enviroment.apigateway}/tematicas`;
 
   constructor(private http: HttpClient) {}
 
