@@ -3,13 +3,11 @@ package com.koroFoods.qualificationService.service;
 import com.koroFoods.qualificationService.dto.ResenaListResponse;
 import com.koroFoods.qualificationService.dto.ResenaRequest;
 import com.koroFoods.qualificationService.dto.ResultadoResponse;
+import com.koroFoods.qualificationService.dto.response.GraficoSeisData;
+import com.koroFoods.qualificationService.dto.response.GraficoSeisList;
 import com.koroFoods.qualificationService.enums.EstadoResena;
 import com.koroFoods.qualificationService.enums.TipoEntidad;
-import com.koroFoods.qualificationService.feign.EventoFeignClient;
-import com.koroFoods.qualificationService.feign.PlatoFeignClient;
-import com.koroFoods.qualificationService.feign.UsuarioFeign;
-import com.koroFoods.qualificationService.feign.UsuarioFeignClient;
-import com.koroFoods.qualificationService.feign.UsuarioPublicoDTO;
+import com.koroFoods.qualificationService.feign.*;
 import com.koroFoods.qualificationService.model.Calificacion;
 import com.koroFoods.qualificationService.repository.ICalificacionRepository;
 
@@ -17,6 +15,7 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -176,5 +175,29 @@ public class CalificacionService {
         return response;
     }
 
+    public ResultadoResponse<List<GraficoSeisList>> graficoSeisList(Integer mes){
 
+        List<GraficoSeisData> data = resenaRepository.graficoSeisList(mes);
+        List<GraficoSeisList> list = new ArrayList<>();
+
+
+        for(var plato : data){
+            ResultadoResponse<PlatoFeign> platoFeign = platoFeignClient.getDishById(plato.getIdEntidad());
+            var platoData = platoFeign.getData();
+
+            list.add(new GraficoSeisList(
+                    plato.getIdEntidad(),
+                    plato.getPromedio(),
+                    plato.getTotal(),
+                    platoData.getNombre()
+            ));
+
+        }
+
+        if (!list.isEmpty()){
+            return ResultadoResponse.success("Se obtuvo la lista: ", list);
+        }
+
+        return ResultadoResponse.error("No hay datos para la lista", list);
+    }
 }
