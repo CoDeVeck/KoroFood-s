@@ -3,13 +3,11 @@ package com.koroFoods.qualificationService.service;
 import com.koroFoods.qualificationService.dto.ResenaListResponse;
 import com.koroFoods.qualificationService.dto.ResenaRequest;
 import com.koroFoods.qualificationService.dto.ResultadoResponse;
+import com.koroFoods.qualificationService.dto.response.GraficoSeisData;
+import com.koroFoods.qualificationService.dto.response.GraficoSeisList;
 import com.koroFoods.qualificationService.enums.EstadoResena;
 import com.koroFoods.qualificationService.enums.TipoEntidad;
-import com.koroFoods.qualificationService.feign.EventoFeignClient;
-import com.koroFoods.qualificationService.feign.PlatoFeignClient;
-import com.koroFoods.qualificationService.feign.UsuarioFeign;
-import com.koroFoods.qualificationService.feign.UsuarioFeignClient;
-import com.koroFoods.qualificationService.feign.UsuarioPublicoDTO;
+import com.koroFoods.qualificationService.feign.*;
 import com.koroFoods.qualificationService.model.Calificacion;
 import com.koroFoods.qualificationService.repository.ICalificacionRepository;
 
@@ -18,6 +16,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,12 +29,12 @@ public class CalificacionService {
     private final PlatoFeignClient platoFeignClient;
     private final EventoFeignClient eventoFeignClient;
     private final UsuarioClientService usuarioClientService;
-    
+
     public ResultadoResponse<List<ResenaListResponse>> listarResenas() {
         List<Calificacion> list = resenaRepository.findAll();
 
         List<ResenaListResponse> listResponse = list.stream()
-                .map(resena -> convertirAResenaListResponse(resena, true)) 
+                .map(resena -> convertirAResenaListResponse(resena, true))
                 .collect(Collectors.toList());
 
         return ResultadoResponse.success("Reseñas listadas correctamente", listResponse);
@@ -45,16 +44,15 @@ public class CalificacionService {
         List<Calificacion> resenas = resenaRepository.findByIdUsuario(idUsuario);
 
         List<ResenaListResponse> listResponse = resenas.stream()
-                .map(resena -> convertirAResenaListResponse(resena, false)) 
+                .map(resena -> convertirAResenaListResponse(resena, false))
                 .collect(Collectors.toList());
 
         return ResultadoResponse.success("Reseñas del usuario listadas correctamente", listResponse);
     }
 
-    
     public ResultadoResponse<Calificacion> crearResena(ResenaRequest req) {
         try {
-            usuarioClientService.obtenerUsuarioConCache(req.getIdUsuario()); 
+            usuarioClientService.obtenerUsuarioConCache(req.getIdUsuario());
         } catch (FeignException.NotFound e) {
             return ResultadoResponse.error("El usuario con ID " + req.getIdUsuario() + " no existe");
         } catch (Exception e) {
@@ -113,16 +111,15 @@ public class CalificacionService {
 
         try {
             if (publico) {
-                UsuarioPublicoDTO usuario = usuarioClientService.obtenerUsuarioPublicoConCache(resena.getIdUsuario()); 
+                UsuarioPublicoDTO usuario = usuarioClientService.obtenerUsuarioPublicoConCache(resena.getIdUsuario());
                 response.setNombreUsuarioCompleto(usuario.getNombreCompleto());
                 response.setImagenUsuario(usuario.getImagen());
             } else {
                 UsuarioFeign usuario = usuarioClientService.obtenerUsuarioConCache(resena.getIdUsuario());
                 response.setNombreUsuarioCompleto(
-                    usuario.getNombres() + " " +
-                    usuario.getApePaterno() + " " +
-                    usuario.getApeMaterno()
-                );
+                        usuario.getNombres() + " " +
+                                usuario.getApePaterno() + " " +
+                                usuario.getApeMaterno());
                 response.setImagenUsuario(usuario.getImagen());
             }
         } catch (Exception e) {
@@ -158,4 +155,27 @@ public class CalificacionService {
         return response;
     }
 
+    public ResultadoResponse<List<GraficoSeisList>> graficoSeisList(Integer mes) {
+
+        List<GraficoSeisData> data = resenaRepository.graficoSeisList(mes);
+        List<GraficoSeisList> list = new ArrayList<>();
+
+        for (var plato : data) {
+            ResultadoResponse<PlatoFeign> platoFeign = platoFeignClient.getDishById(plato.getIdEntidad());
+            var platoData = platoFeign.getData();
+
+            list.add(new GraficoSeisList(
+                    plato.getIdEntidad(),
+                    plato.getPromedio(),
+                    plato.getTotal(),
+                    platoData.getNombre()));
+
+        }
+
+        if (!list.isEmpty()) {
+            return ResultadoResponse.success("Se obtuvo la lista: ", list);
+        }
+
+        return ResultadoResponse.error("No hay datos para la lista", list);
+    }
 }

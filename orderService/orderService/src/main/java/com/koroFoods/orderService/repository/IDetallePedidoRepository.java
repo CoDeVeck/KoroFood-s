@@ -1,10 +1,10 @@
 package com.koroFoods.orderService.repository;
 
-import com.koroFoods.orderService.dto.response.DetalleCantidadPedidos;
-import com.koroFoods.orderService.dto.response.DetalleEstadoCount;
+import com.koroFoods.orderService.dto.response.*;
 import com.koroFoods.orderService.model.DetallePedido;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -37,4 +37,16 @@ public interface IDetallePedidoRepository extends JpaRepository<DetallePedido, I
     DetalleEstadoCount findByIdPedido(Integer idPedido);
 
 
+    @Query(value = """
+            select
+            dt.id_plato as idPlato,
+            SUM(dt.cantidad) as cantidadPlatos
+            from tb_detalle_pedido dt
+            INNER JOIN tb_pedido p ON  dt.id_pedido = p.id_pedido
+            where DATE_PART('month',p.fecha_hora) = :mes
+            GROUP BY dt.id_plato
+            Order by cantidadPlatos desc
+            limit 10
+            """,nativeQuery = true)
+    List<GraficoUnoData> graficoUnoList(@Param("mes")Integer mes);
 }

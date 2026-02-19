@@ -1,5 +1,7 @@
 package com.koroFoods.reservationService.controller;
 
+import com.koroFoods.reservationService.dto.response.Grafico2Data;
+import com.koroFoods.reservationService.dto.response.GraficoCuatroList;
 import com.koroFoods.reservationService.feign.UsuarioFeign;
 
 import java.time.LocalDateTime;
@@ -66,4 +68,25 @@ public class ReservaFeignController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
+
+    @GetMapping("/graficoDos")
+    public ResponseEntity<ResultadoResponse<Grafico2Data>> getGraficoDos(@RequestParam Integer mes){
+        ResultadoResponse<Grafico2Data> response = reservaService.graficoDos(mes);
+        if (response.isValor()) {
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    @GetMapping("/graficoCuatro")
+    public ResponseEntity<ResultadoResponse<List<GraficoCuatroList>>> getGraficoCuatro(@RequestParam Integer mes){
+        ResultadoResponse<List<GraficoCuatroList>> response = reservaService.graficoCuatroList(mes);
+        if (response.isValor()) {
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
 }
