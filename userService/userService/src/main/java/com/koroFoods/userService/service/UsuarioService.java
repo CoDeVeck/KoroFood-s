@@ -260,4 +260,7 @@ public class UsuarioService  {
         return UUID.randomUUID().toString() + ":" + email + ":" + provider;
     }
 
+
+
+
 }
