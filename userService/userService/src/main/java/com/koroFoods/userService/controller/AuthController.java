@@ -32,6 +32,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.koroFoods.userService.dto.ResultadoResponse;
+import com.koroFoods.userService.dto.UsuarioDtoFeign;
+import com.koroFoods.userService.dto.UsuarioPerfilDTO;
 
 @RestController
 @RequestMapping("/auth")
@@ -123,6 +125,12 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/{id}")
+	public ResponseEntity<ResultadoResponse<UsuarioPerfilDTO>> getUserById(@PathVariable Integer id) {
+		ResultadoResponse<UsuarioPerfilDTO> user = usuarioService.getUsuarioById(id);
+		return ResponseEntity.ok(user);
+	}
+    
     //Login/Register con Google
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> payload){

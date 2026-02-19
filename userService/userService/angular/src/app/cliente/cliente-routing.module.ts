@@ -7,12 +7,12 @@ import { FormResenaComponent } from './form-resena/form-resena.component';
 import { MenuComponent } from './menu/menu.component';
 import { ContactoComponent } from './contacto/contacto.component';
 import { ReservaComponent } from './reserva/reserva.component';
-import { PerfilComponent } from './perfil/perfil.component';
 import { ChatContainerComponent } from './chat/chat-container.component';
 import { EventosTematicosComponent } from './eventos-tematicos/eventos-tematicos.component';
 import { MisReservasComponent } from './mis-reservas/mis-reservas.component';
 import { ListaPedidosComponent } from './pedido/lista-pedidos/lista-pedidos.component';
 import { DetallePedidoComponent } from './pedido/detalle-pedido/detalle-pedido.component';
+import { PerfilComponent } from './perfil/perfil.component';
 
 const routes: Routes = [
   //Ruta para el chat sin layout
