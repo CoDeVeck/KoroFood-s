@@ -8,7 +8,7 @@ import { enviroment } from '@envs/enviroment';
   providedIn: 'root',
 })
 export class ChatbotService {
-  private baseUrl = `${enviroment.apiUrls.usuarios}/chatbot`;
+  private baseUrl = `${enviroment.apigateway}/chatbot`;
 
   constructor(private http: HttpClient) {}
 

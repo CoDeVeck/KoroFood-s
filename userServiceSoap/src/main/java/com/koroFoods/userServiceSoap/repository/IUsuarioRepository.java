@@ -12,13 +12,14 @@ Optional<Usuario> findByCorreo(String correo);
     
     Optional<Usuario> findByNroDoc(String nroDoc);
     
-    List<Usuario> findByRol_IdRol(Integer idRol);
+    List<Usuario> findByRol_IdRolOrderByFechaRegistroDesc(Integer idRol);
 
-    List<Usuario> findByActivo(Boolean activo);
+    List<Usuario> findByActivoOrderByFechaRegistroDesc(Boolean activo);
 
-    List<Usuario> findByRol_IdRolAndActivo(Integer idRol, Boolean activo);
+    List<Usuario> findByRol_IdRolAndActivoOrderByFechaRegistroDesc(Integer idRol, Boolean activo);
 
-    List<Usuario> findByRol_IdRolIn(List<Integer> roles);
+    List<Usuario> findByRol_IdRolInOrderByFechaRegistroDesc(List<Integer> roles);
 
-    List<Usuario> findByRol_IdRolInAndActivo(List<Integer> roles, Boolean activo);
+    List<Usuario> findByRol_IdRolInAndActivoOrderByFechaRegistroDesc(List<Integer> roles, Boolean activo);
+
 }

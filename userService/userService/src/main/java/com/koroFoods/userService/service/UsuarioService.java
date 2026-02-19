@@ -14,6 +14,8 @@ import com.koroFoods.userService.model.Usuario;
 import com.koroFoods.userService.repository.IUsuarioRepository;
 import com.koroFoods.userService.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -70,7 +72,7 @@ public class UsuarioService  {
     }
 
     
-    // Método para el feign de la reseña
+    @Cacheable(value = "usuarios", key = "#id")
     public ResultadoResponse<UsuarioDtoFeign> getUsuarioByIdFeign(Integer id){
     	Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -86,7 +88,8 @@ public class UsuarioService  {
 
         return ResultadoResponse.success("Usuario encontrado", dto);
     }
-
+    
+    @Cacheable(value = "usuariosPublicos", key = "#id")
     public ResultadoResponse<UsuarioPublicoDTO> getUsuarioByIdPublic(Integer id){
     	Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));

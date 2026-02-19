@@ -12,6 +12,7 @@ import com.koroFoods.qualificationService.model.Calificacion;
 import com.koroFoods.qualificationService.repository.ICalificacionRepository;
 
 import feign.FeignException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -27,13 +28,13 @@ public class CalificacionService {
     private final ICalificacionRepository resenaRepository;
     private final PlatoFeignClient platoFeignClient;
     private final EventoFeignClient eventoFeignClient;
-    private final UsuarioFeignClient usuarioFeignClient;
-    
+    private final UsuarioClientService usuarioClientService;
+
     public ResultadoResponse<List<ResenaListResponse>> listarResenas() {
         List<Calificacion> list = resenaRepository.findAll();
 
         List<ResenaListResponse> listResponse = list.stream()
-                .map(resena -> convertirAResenaListResponse(resena, true)) 
+                .map(resena -> convertirAResenaListResponse(resena, true))
                 .collect(Collectors.toList());
 
         return ResultadoResponse.success("Reseñas listadas correctamente", listResponse);
@@ -43,36 +44,34 @@ public class CalificacionService {
         List<Calificacion> resenas = resenaRepository.findByIdUsuario(idUsuario);
 
         List<ResenaListResponse> listResponse = resenas.stream()
-                .map(resena -> convertirAResenaListResponse(resena, false)) 
+                .map(resena -> convertirAResenaListResponse(resena, false))
                 .collect(Collectors.toList());
 
         return ResultadoResponse.success("Reseñas del usuario listadas correctamente", listResponse);
     }
 
-    
     public ResultadoResponse<Calificacion> crearResena(ResenaRequest req) {
         try {
-            var usuario = usuarioFeignClient.getUsuarioById(req.getIdUsuario());
+            usuarioClientService.obtenerUsuarioConCache(req.getIdUsuario());
         } catch (FeignException.NotFound e) {
             return ResultadoResponse.error("El usuario con ID " + req.getIdUsuario() + " no existe");
-        } catch (FeignException e) {
-            return ResultadoResponse.error("Error al consultar el usuario: " + e.getMessage());
+        } catch (Exception e) {
+            return ResultadoResponse.error("Usuario no disponible: " + e.getMessage());
         }
 
         switch (req.getTipoEntidad()) {
             case PLATO -> {
                 try {
-                    var plato = platoFeignClient.getDishById(req.getIdEntidad());
+                    platoFeignClient.getDishById(req.getIdEntidad());
                 } catch (FeignException.NotFound e) {
                     return ResultadoResponse.error("El plato con ID " + req.getIdEntidad() + " no existe");
                 } catch (FeignException e) {
                     return ResultadoResponse.error("Error al consultar el plato: " + e.getMessage());
                 }
             }
-
             case EVENTO -> {
                 try {
-                    var evento = eventoFeignClient.getEventById(req.getIdEntidad());
+                    eventoFeignClient.getEventById(req.getIdEntidad());
                 } catch (FeignException.NotFound e) {
                     return ResultadoResponse.error("El evento con ID " + req.getIdEntidad() + " no existe");
                 } catch (FeignException e) {
@@ -80,16 +79,15 @@ public class CalificacionService {
                 }
             }
         }
+
         boolean yaExiste = resenaRepository.existsByIdUsuarioAndTipoEntidadAndIdEntidad(
-                req.getIdUsuario(),
-                req.getTipoEntidad(),
-                req.getIdEntidad()
-        );
-        
+                req.getIdUsuario(), req.getTipoEntidad(), req.getIdEntidad());
+
         if (yaExiste) {
             return ResultadoResponse.error("Ya enviaste una calificación sobre este " +
                     (req.getTipoEntidad() == TipoEntidad.PLATO ? "plato" : "evento"));
         }
+
         Calificacion r = new Calificacion();
         r.setIdUsuario(req.getIdUsuario());
         r.setTipoEntidad(req.getTipoEntidad());
@@ -100,7 +98,6 @@ public class CalificacionService {
         r.setEstado(EstadoResena.ACT);
 
         resenaRepository.save(r);
-
         return ResultadoResponse.success("Reseña registrada correctamente", r);
     }
 
@@ -113,54 +110,37 @@ public class CalificacionService {
         response.setComentario(resena.getComentario());
 
         try {
-            if(publico) {
-                // Endpoint público SIN token
-                ResultadoResponse<UsuarioPublicoDTO> usuario = usuarioFeignClient.getUserByIdNoauth(resena.getIdUsuario());
-                
-                if(usuario != null && usuario.isValor() && usuario.getData() != null) {
-                    response.setNombreUsuarioCompleto(usuario.getData().getNombreCompleto());
-                    response.setImagenUsuario(usuario.getData().getImagen());
-                } else {
-                    response.setNombreUsuarioCompleto("Usuario no disponible");
-                    response.setImagenUsuario(null);
-                }
+            if (publico) {
+                UsuarioPublicoDTO usuario = usuarioClientService.obtenerUsuarioPublicoConCache(resena.getIdUsuario());
+                response.setNombreUsuarioCompleto(usuario.getNombreCompleto());
+                response.setImagenUsuario(usuario.getImagen());
             } else {
-                // Endpoint CON token
-                ResultadoResponse<UsuarioFeign> usuario = usuarioFeignClient.getUsuarioById(resena.getIdUsuario());
-                
-                if(usuario != null && usuario.isValor() && usuario.getData() != null) {
-                    response.setNombreUsuarioCompleto(
-                        usuario.getData().getNombres() + " " +
-                        usuario.getData().getApePaterno() + " " +
-                        usuario.getData().getApeMaterno()
-                    );
-                    response.setImagenUsuario(usuario.getData().getImagen());
-                } else {
-                    response.setNombreUsuarioCompleto("Usuario no disponible");
-                    response.setImagenUsuario(null);
-                }
+                UsuarioFeign usuario = usuarioClientService.obtenerUsuarioConCache(resena.getIdUsuario());
+                response.setNombreUsuarioCompleto(
+                        usuario.getNombres() + " " +
+                                usuario.getApePaterno() + " " +
+                                usuario.getApeMaterno());
+                response.setImagenUsuario(usuario.getImagen());
             }
-        } catch (FeignException e) {
-            // ⚠️ AGREGA LOGS PARA VER EL ERROR REAL
-            System.err.println("Error al obtener usuario: " + e.getMessage());
-            e.printStackTrace();
-            
-            response.setImagenUsuario(null);
+        } catch (Exception e) {
+            System.err.println("Usuario no disponible ni en cache: " + e.getMessage());
             response.setNombreUsuarioCompleto(publico ? "Usuario anónimo" : "Usuario no disponible");
+            response.setImagenUsuario(null);
         }
 
+        // entidades sin cambios
         try {
             switch (resena.getTipoEntidad()) {
                 case PLATO -> {
                     var plato = platoFeignClient.getDishById(resena.getIdEntidad());
-                    if(plato != null && plato.getData() != null) {
+                    if (plato != null && plato.getData() != null) {
                         response.setImagenEntidad(plato.getData().getImagen());
                         response.setNombreEntidad(plato.getData().getNombre());
                     }
                 }
                 case EVENTO -> {
                     var evento = eventoFeignClient.getEventById(resena.getIdEntidad());
-                    if(evento != null && evento.getData() != null) {
+                    if (evento != null && evento.getData() != null) {
                         response.setImagenEntidad(evento.getData().getImagen());
                         response.setNombreEntidad(evento.getData().getNombre());
                     }
@@ -175,13 +155,12 @@ public class CalificacionService {
         return response;
     }
 
-    public ResultadoResponse<List<GraficoSeisList>> graficoSeisList(Integer mes){
+    public ResultadoResponse<List<GraficoSeisList>> graficoSeisList(Integer mes) {
 
         List<GraficoSeisData> data = resenaRepository.graficoSeisList(mes);
         List<GraficoSeisList> list = new ArrayList<>();
 
-
-        for(var plato : data){
+        for (var plato : data) {
             ResultadoResponse<PlatoFeign> platoFeign = platoFeignClient.getDishById(plato.getIdEntidad());
             var platoData = platoFeign.getData();
 
@@ -189,12 +168,11 @@ public class CalificacionService {
                     plato.getIdEntidad(),
                     plato.getPromedio(),
                     plato.getTotal(),
-                    platoData.getNombre()
-            ));
+                    platoData.getNombre()));
 
         }
 
-        if (!list.isEmpty()){
+        if (!list.isEmpty()) {
             return ResultadoResponse.success("Se obtuvo la lista: ", list);
         }
 

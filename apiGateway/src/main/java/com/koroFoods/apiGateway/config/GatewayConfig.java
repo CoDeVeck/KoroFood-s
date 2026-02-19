@@ -22,7 +22,7 @@ public class GatewayConfig {
                 )
                 //para el uso de webSockets
                 .route("usuario-service-ws", r -> r
-                        .path("/ws/**", "/chat/**")
+                        .path("/ws/**", "/chat/**", "/chatbot/**")
                         .uri("lb:ws://userService")
                 )
                 .route("evento-service", r -> r
@@ -33,6 +33,10 @@ public class GatewayConfig {
                         .path("/menu/**", "/menu/feign/**")
                         .uri("lb://menuService")
                 )
+                .route("user-service-soap", r -> r
+                	    .path("/soap/**")
+                	    .uri("lb://userServiceSoap")
+                	)
                 .route("qualification-service", r -> r
                         .path("/calificacion/**")
                         .uri("lb://qualificationService")
@@ -48,6 +52,10 @@ public class GatewayConfig {
                 .route("payment-service", r -> r
                         .path("/pago/**", "/pago/feign/**")
                         .uri("lb://paymentService")
+                )
+                .route("table-service", r -> r
+                        .path("/mesa/**", "/mesa/feign/**")
+                        .uri("lb://tableService")
                 )
                 .build();
     }

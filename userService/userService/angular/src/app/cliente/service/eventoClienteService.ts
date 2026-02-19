@@ -11,7 +11,7 @@ import { EventoFeignReserva } from '../../shared/dto/EventoFeignReserva';
   providedIn: 'root',
 })
 export class EventoClienteService {
-  private baseUrl = `${enviroment.apiUrls.eventos}/evento/feign`;
+  private baseUrl = `${enviroment.apigateway}/evento/feign`;
 
   constructor(private http: HttpClient) {}
 

@@ -502,21 +502,21 @@
               <button
                 class="payment-btn"
                 [class.active]="metodoPago === 'TARJETA'"
-                (click)="metodoPago = 'TARJETA'"
+                (click)="seleccionarMetodoPago('TARJETA')"
               >
                 <span class="payment-icon">💳</span><span>Tarjeta</span>
               </button>
               <button
                 class="payment-btn"
                 [class.active]="metodoPago === 'YAPE'"
-                (click)="metodoPago = 'YAPE'"
+                (click)="seleccionarMetodoPago('YAPE')"
               >
                 <span class="payment-icon yape">Y</span><span>Yape</span>
               </button>
               <button
                 class="payment-btn"
                 [class.active]="metodoPago === 'PLIN'"
-                (click)="metodoPago = 'PLIN'"
+                (click)="seleccionarMetodoPago('PLIN')"
               >
                 <span class="payment-icon plin">P</span><span>Plin</span>
               </button>
@@ -847,8 +847,6 @@
         </div>
       </ng-container>
       <ng-container *ngIf="alertaTipo === 'error'">
-        <div class="koro-icono">
-        </div>
         <div class="koro-contenido">
           <h3>Error en la Reserva</h3>
           <p class="koro-mensaje">{{ alertaDatos.mensaje }}</p>
