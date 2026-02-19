@@ -1,0 +1,10 @@
+.contenedor-grafico-uno{
+    height: 100%;
+    width: 100%;
+}
+
+#grafico-uno{
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}

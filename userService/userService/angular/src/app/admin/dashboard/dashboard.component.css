@@ -1,0 +1,32 @@
+.contedor-dashboard{
+  padding: 1rem;
+  overflow-y: auto;
+  gap: 1.2rem;
+  background: #f5f6fa;
+  border-radius: 20px;
+}
+
+.grid-stack{
+  min-height: 100%;
+}
+
+.contedor-dashboard::-webkit-scrollbar {
+  display: none;
+}
+
+
+.grid-stack-item-content {
+  background: white;
+  border-radius: 18px;
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.08),
+    0 2px 4px rgba(0,0,0,0.06);
+  padding: 1rem;
+  overflow: hidden;
+  transition: transform .2s;
+}
+
+.grid-stack-item-content:hover {
+  transform: translateY(-6px);
+}
+
