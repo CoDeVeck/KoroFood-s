@@ -73,4 +73,23 @@ public interface IReservaRepository extends JpaRepository<Reserva, Integer> {
 			    AND r.fechaHora <= :limiteTolerancia
 			""")
 	List<Reserva> findReservasVencidas(@Param("limiteTolerancia") LocalDateTime limiteTolerancia);
+
+	// COUNTS - Dashboard Recepcionista
+
+	@Query("""
+			    SELECT COUNT(r) FROM Reserva r
+			    WHERE r.estado = 'PAGADA'
+			    AND r.fechaHora >= :inicio
+			    AND r.fechaHora < :fin
+			""")
+	long countReservasEntreFechas(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
+
+	@Query("""
+			    SELECT COUNT(r) FROM Reserva r
+			    WHERE r.estado = 'ASISTIDA'
+			    AND r.fechaHora >= :inicio
+			    AND r.fechaHora < :fin
+			""")
+	long countReservasAsistidas(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
+
 }

@@ -1,5 +1,6 @@
 package com.koroFoods.reservationService.service;
 
+import com.koroFoods.reservationService.dto.RecepcionistaCountsDTO;
 import com.koroFoods.reservationService.dto.ReservaDtoFeing;
 import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ReservaResponse;
@@ -19,6 +20,7 @@ import com.koroFoods.reservationService.repository.IReservaRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -213,16 +215,29 @@ public class ReservaService {
 	    return ResultadoResponse.success("Reserva cancelada correctamente", reserva.getIdReserva());
 	}
 
+	public RecepcionistaCountsDTO obtenerCounts() {
+		LocalDateTime inicioHoy = LocalDate.now().atStartOfDay();         
+		LocalDateTime finHoy    = inicioHoy.plusDays(1);                   
+		LocalDateTime inicioTomorrow = inicioHoy.plusDays(1);
+		LocalDateTime finTomorrow    = inicioHoy.plusDays(2);
+
+		long reservasHoy      = reservaRepository.countReservasEntreFechas(inicioHoy, finHoy);
+		long reservasAsistidas = reservaRepository.countReservasAsistidas(inicioHoy, finHoy);
+		long reservasMañana   = reservaRepository.countReservasEntreFechas(inicioTomorrow, finTomorrow);
+	    long reservasPendientes = reservasHoy - reservasAsistidas;
+
+
+	    return new RecepcionistaCountsDTO(reservasHoy, reservasAsistidas, reservasPendientes, reservasMañana);
+	}
+	
+	
 	/*
 	 * Reserva Simple----- Horario local (12:00 – 23:00) generarSlots
 	 * filtrarSlotsDisponibles frontend muestra horas libres usuario elige una
 	 * mesaOcupadaPorReserva (check final)
 	 *
-	 *
-	 * Reserva Especial---- Horario evento (19:00 – 22:00) generarSlots
-	 * filtrarSlotsDisponibles usuario elige mesaOcupadaPorReserva
-	 *
 	 */
+
     public ResultadoResponse<List<Reserva>> obtenerReservaPorIdCliente(Integer idCliente){
         validarId(idCliente);
 
