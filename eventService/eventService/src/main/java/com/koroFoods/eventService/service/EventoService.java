@@ -22,18 +22,19 @@ import com.koroFoods.eventService.repository.ITematicaRepository;
 
 import lombok.RequiredArgsConstructor;
 
-
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventoService {
 
     private final IEventoRepository eventoRepository;
@@ -44,6 +45,8 @@ public class EventoService {
     
     private final IMesaFeignClient mesaClient;
     private final IReservaFeignClient reservaFeignClient;
+    
+    private final CloudinaryService cloudinaryService;
     
     
     @Transactional
@@ -56,13 +59,32 @@ public class EventoService {
         evento.setFechaInicio(request.getFechaInicio());
         evento.setFechaFin(request.getFechaFin());
         evento.setCosto(request.getCosto());
-        evento.setImagen(request.getImagen());
         evento.setActivo(true);
 
         if (request.getIdTematica() != null) {
             Tematica tematica = tematicaRepository.findByIdTematicaAndActivoTrue(request.getIdTematica())
                     .orElseThrow(() -> new ResourceNotFoundException("Temática no encontrada con ID: " + request.getIdTematica()));
             evento.setTematica(tematica);
+        }
+
+        // ✅ SUBIR IMAGEN A CLOUDINARY SI SE PROPORCIONÓ
+        if (request.getImagenBase64() != null && !request.getImagenBase64().isBlank()) {
+            try {
+                String publicId = "evento_" + System.currentTimeMillis();
+                String urlImagen = cloudinaryService.subirImagen(
+                    request.getImagenBase64(),
+                    "korofood/eventos",
+                    publicId
+                );
+                evento.setImagen(urlImagen);
+                log.info("✅ Imagen subida para nuevo evento: {}", urlImagen);
+            } catch (IOException e) {
+                log.error("❌ Error al subir imagen", e);
+                throw new BusinessException("Error al subir la imagen: " + e.getMessage());
+            }
+        } else if (request.getImagen() != null) {
+            // Si viene una URL directa (para compatibilidad)
+            evento.setImagen(request.getImagen());
         }
 
         Evento guardado = eventoRepository.save(evento);
@@ -116,7 +138,6 @@ public class EventoService {
         evento.setFechaInicio(request.getFechaInicio());
         evento.setFechaFin(request.getFechaFin());
         evento.setCosto(request.getCosto());
-        evento.setImagen(request.getImagen());
 
         if (request.getIdTematica() != null) {
             Tematica tematica = tematicaRepository.findByIdTematicaAndActivoTrue(request.getIdTematica())
@@ -124,6 +145,35 @@ public class EventoService {
             evento.setTematica(tematica);
         } else {
             evento.setTematica(null);
+        }
+
+        // ✅ ACTUALIZAR IMAGEN SI CAMBIÓ
+        if (request.getImagenBase64() != null && !request.getImagenBase64().isBlank()) {
+            try {
+                // Eliminar imagen anterior si existe
+                if (evento.getImagen() != null && evento.getImagen().contains("cloudinary.com")) {
+                    String oldPublicId = cloudinaryService.extraerPublicId(evento.getImagen());
+                    if (oldPublicId != null) {
+                        cloudinaryService.eliminarImagen(oldPublicId);
+                    }
+                }
+
+                // Subir nueva imagen
+                String publicId = "evento_" + id;
+                String urlImagen = cloudinaryService.subirImagen(
+                    request.getImagenBase64(),
+                    "korofood/eventos",
+                    publicId
+                );
+                evento.setImagen(urlImagen);
+                log.info("✅ Imagen actualizada para evento {}: {}", id, urlImagen);
+            } catch (IOException e) {
+                log.error("❌ Error al actualizar imagen", e);
+                throw new BusinessException("Error al actualizar la imagen: " + e.getMessage());
+            }
+        } else if (request.getImagen() != null && !request.getImagen().equals(evento.getImagen())) {
+            // Si viene una URL diferente
+            evento.setImagen(request.getImagen());
         }
 
         Evento actualizado = eventoRepository.save(evento);
@@ -134,6 +184,18 @@ public class EventoService {
     public void eliminar(Integer id) {
         Evento evento = eventoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
+
+        // ✅ OPCIONAL: Eliminar imagen de Cloudinary
+        if (evento.getImagen() != null && evento.getImagen().contains("cloudinary.com")) {
+            try {
+                String publicId = cloudinaryService.extraerPublicId(evento.getImagen());
+                if (publicId != null) {
+                    cloudinaryService.eliminarImagen(publicId);
+                }
+            } catch (IOException e) {
+                log.warn("No se pudo eliminar imagen de Cloudinary", e);
+            }
+        }
         
         evento.setActivo(false);
         eventoRepository.save(evento);

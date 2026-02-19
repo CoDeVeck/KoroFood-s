@@ -26,7 +26,7 @@ public class GatewayConfig {
                         .uri("lb:ws://userService")
                 )
                 .route("evento-service", r -> r
-                        .path("/eventos/**", "/evento/feign/**")
+                        .path("/eventos/**", "/evento/feign/**", "/tematicas/**")
                         .uri("lb://eventService")
                 )
                 .route("menu-service", r -> r
