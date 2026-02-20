@@ -17,9 +17,11 @@ import com.koroFoods.reservationService.feign.UsuarioFeignClient;
 import com.koroFoods.reservationService.model.Reserva;
 import com.koroFoods.reservationService.repository.IReservaRepository;
 
+import com.koroFoods.reservationService.util.DashboardNotificador;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -41,6 +43,8 @@ public class ReservaService {
 
 	private final EventoFeignClient eventoFeignClient;
 	private final MesaFeignClient mesaFeignClient;
+
+    private final DashboardNotificador dashboardNotificador;
 
 	public ResultadoResponse<Integer> registrarReserva(ReservaRequest request) {
 
@@ -101,6 +105,14 @@ public class ReservaService {
 	    reserva.setVerificado(false);
 
 	    reservaRepository.save(reserva);
+
+        //mandar al dashboard el tipo de reserva si es por evento o sin evento
+        dashboardNotificador.notificarGraficoDos(LocalDate.now().getMonthValue());
+
+        if (reserva.getIdEvento() != null){
+            //Notificar/actualizar grafico solo si hay un evento que se esta registrando
+            dashboardNotificador.notificarGraficoCuatro(LocalDateTime.now().getMonthValue());
+        }
 
 	    return ResultadoResponse.success("Reserva registrada correctamente.", reserva.getIdReserva());
 	}

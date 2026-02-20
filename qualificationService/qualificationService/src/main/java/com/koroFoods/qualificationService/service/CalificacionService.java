@@ -11,10 +11,12 @@ import com.koroFoods.qualificationService.feign.*;
 import com.koroFoods.qualificationService.model.Calificacion;
 import com.koroFoods.qualificationService.repository.ICalificacionRepository;
 
+import com.koroFoods.qualificationService.util.DashboardNotificador;
 import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,8 @@ public class CalificacionService {
     private final PlatoFeignClient platoFeignClient;
     private final EventoFeignClient eventoFeignClient;
     private final UsuarioClientService usuarioClientService;
+
+    private final DashboardNotificador dashboardNotificador;
 
     public ResultadoResponse<List<ResenaListResponse>> listarResenas() {
         List<Calificacion> list = resenaRepository.findAll();
@@ -98,6 +102,10 @@ public class CalificacionService {
         r.setEstado(EstadoResena.ACT);
 
         resenaRepository.save(r);
+
+        if (r.getTipoEntidad().equals(TipoEntidad.PLATO)){
+            dashboardNotificador.notificarGraficoSeis(LocalDate.now().getMonthValue());
+        }
         return ResultadoResponse.success("Reseña registrada correctamente", r);
     }
 

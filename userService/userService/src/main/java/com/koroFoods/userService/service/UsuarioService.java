@@ -111,7 +111,7 @@ public class UsuarioService  {
     @Cacheable(value = "usuariosPublicos", key = "#id")
     public ResultadoResponse<UsuarioPublicoDTO> getUsuarioByIdPublic(Integer id){
     	Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() ->  new RuntimeException("Usuario no encontrado"));
 
     	UsuarioPublicoDTO dto = new UsuarioPublicoDTO();
         dto.setIdUsuario(usuario.getIdUsuario());
