@@ -12,7 +12,31 @@
 
         <ul class="nav flex-column sidebar-nav">
           <li class="nav-item">
-            <a class="nav-link active" (click)="navigateToChat()">
+            <a
+              class="nav-link"
+              [class.active]="currentRoute === 'home'"
+              (click)="navigateToHome()"
+            >
+              <i class="fa-solid fa-home"></i>
+              <span>Inicio</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [class.active]="currentRoute === 'list'"
+              (click)="navigateToList()"
+            >
+              <i class="fa-solid fa-list"></i>
+              <span>Reservas Asistidas</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [class.active]="currentRoute === 'chat'"
+              (click)="navigateToChat()"
+            >
               <i class="fa-solid fa-message"></i>
               <span>Mensajes</span>
             </a>

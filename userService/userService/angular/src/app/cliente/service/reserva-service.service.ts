@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 import { Reserva } from '../../shared/model/reserva.model';
 import { ReservaResponseDTO } from '../../shared/dto/ReservaResponseDTO';
+import { RecepcionistaCountsDTO } from '../../shared/dto/RecepcionistaCountsDTO';
 
 
 
@@ -77,6 +78,13 @@ export class ReservaServiceService {
     return this.http.patch<ResultadoResponse<number>>(
       `${this.baseUrl}/cancelar/${idReserva}`,
       {}, // PATCH necesita body, aunque esté vacío
+    );
+  }
+
+  // GET /reserva/dashboard/recepcionista/counts
+  obtenerCountsRecepcionista(): Observable<RecepcionistaCountsDTO> {
+    return this.http.get<RecepcionistaCountsDTO>(
+      `${this.baseUrl}/dashboard/recepcionista/counts`,
     );
   }
 }

@@ -14,5 +14,5 @@ public class RecepcionistaCountsDTO {
     private long reservasHoy;
     private long reservasAsistidas;
     private long reservasPendientes;   // reservasHoy - reservasAsistidas
-    private long reservasMañana;
+    private long reservasTomorrow;
 }

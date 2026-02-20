@@ -223,11 +223,11 @@ public class ReservaService {
 
 		long reservasHoy      = reservaRepository.countReservasEntreFechas(inicioHoy, finHoy);
 		long reservasAsistidas = reservaRepository.countReservasAsistidas(inicioHoy, finHoy);
-		long reservasMañana   = reservaRepository.countReservasEntreFechas(inicioTomorrow, finTomorrow);
+		long reservasTomorrow   = reservaRepository.countReservasEntreFechas(inicioTomorrow, finTomorrow);
 	    long reservasPendientes = reservasHoy - reservasAsistidas;
 
 
-	    return new RecepcionistaCountsDTO(reservasHoy, reservasAsistidas, reservasPendientes, reservasMañana);
+	    return new RecepcionistaCountsDTO(reservasHoy, reservasAsistidas, reservasPendientes, reservasTomorrow);
 	}
 	
 	
