@@ -36,4 +36,7 @@ public interface IUsuarioRepository  extends JpaRepository<Usuario, Integer> {
              where u.ID_USUARIO = :idUsuario
             """,nativeQuery = true)
     PerfilClienteResponse obtenerPerfil(@Param("idUsuario") Integer idUsuario);
+
+
+
 }

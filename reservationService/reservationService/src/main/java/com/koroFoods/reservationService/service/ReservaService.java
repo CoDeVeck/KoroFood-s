@@ -6,6 +6,7 @@ import com.koroFoods.reservationService.dto.ReservaDtoFeing;
 import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ReservaResponse;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
+import com.koroFoods.reservationService.dto.response.*;
 import com.koroFoods.reservationService.enums.EstadoReserva;
 import com.koroFoods.reservationService.enums.TipoReserva;
 import com.koroFoods.reservationService.feign.EventoFeign;
@@ -18,6 +19,7 @@ import com.koroFoods.reservationService.feign.UsuarioFeignClient;
 import com.koroFoods.reservationService.model.Reserva;
 import com.koroFoods.reservationService.repository.IReservaRepository;
 
+import com.koroFoods.reservationService.util.DashboardNotificador;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 
@@ -28,8 +30,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReservaService {
@@ -40,6 +44,8 @@ public class ReservaService {
 
 	private final EventoFeignClient eventoFeignClient;
 	private final MesaFeignClient mesaFeignClient;
+
+    private final DashboardNotificador dashboardNotificador;
 
 	public ResultadoResponse<Integer> registrarReserva(ReservaRequest request) {
 
@@ -100,6 +106,14 @@ public class ReservaService {
 	    reserva.setVerificado(false);
 
 	    reservaRepository.save(reserva);
+
+        //mandar al dashboard el tipo de reserva si es por evento o sin evento
+        dashboardNotificador.notificarGraficoDos(LocalDate.now().getMonthValue());
+
+        if (reserva.getIdEvento() != null){
+            //Notificar/actualizar grafico solo si hay un evento que se esta registrando
+            dashboardNotificador.notificarGraficoCuatro(LocalDateTime.now().getMonthValue());
+        }
 
 	    return ResultadoResponse.success("Reserva registrada correctamente.", reserva.getIdReserva());
 	}
@@ -379,9 +393,17 @@ public class ReservaService {
 
 		validarId(idReserva);
 
+        log.info("ID RECIBIENDO: {} ", idReserva);
+
 		Reserva reservaObtenida = obtenerReserva(idReserva);
+        log.info("reserva obtenida: {} ", reservaObtenida);
+
 		ResultadoResponse<UsuarioFeign> cliente = usuarioFeignClient.getUsuarioById(reservaObtenida.getIdUsuario());
+        log.info("cliente obtenido : {} ", cliente);
+
 		var clienteData = cliente.getData();
+        log.info("cliente data obtenido : {} ", clienteData);
+
 
 		return ResultadoResponse.success("Se obtuvo al cliente ", clienteData);
 	}
@@ -397,5 +419,37 @@ public class ReservaService {
 			throw new IllegalArgumentException("ID invalido");
 		}
 	}
+
+
+    public ResultadoResponse<Grafico2Data>graficoDos(Integer mes){
+        Grafico2Data graficoDos = reservaRepository.graficoDosList(mes);
+
+        if (graficoDos != null){
+            log.info("Se obtuvo la lista {}", graficoDos);
+            return ResultadoResponse.success("Se obtuvo el grafico 2: ", graficoDos);
+        }
+        log.error("No se obtuvo la lista {}", (Object) null);
+        return ResultadoResponse.error("No se obtuvo el grafico 2: ", null);
+    }
+
+    public ResultadoResponse<List<GraficoCuatroList>> graficoCuatroList(Integer mes){
+
+        List<GraficoCuatroData> data = reservaRepository.graficoCuatroList(mes);
+        List<GraficoCuatroList> list = new ArrayList<>();
+
+        for(var evento : data){
+            ResultadoResponse<EventoFeign> eventoFeign = eventoFeignClient.obtenerEvento(evento.getIdEvento());
+            var eventoData = eventoFeign.getData();
+
+            list.add(new GraficoCuatroList(
+                evento.getIdEvento(),
+                    evento.getCantidad(),
+                    eventoData.getNombre()
+            )) ;
+        }
+        return ResultadoResponse.success("Se obtuvo grafico {}", list);
+    }
+
+
 
 }

@@ -2,6 +2,9 @@
   <!-- Botón volver -->
   <button class="btn-volver" (click)="volver()">← Volver a Mis Pedidos</button>
 
+  <div class="pedido-pagado-banner" *ngIf="estadoPedido === 'PA'">
+    ✅ Este pedido ya fue pagado
+  </div>
   <!-- Header con estado de conexión -->
   <div class="header">
     <h1>🍽️ Detalle del Pedido #{{ idPedido }}</h1>
@@ -155,7 +158,12 @@
               </button>
             </div>
 
-            <button class="btn-agregar" (click)="agregarPlato(plato.idPlato)">
+            <button
+              class="btn-agregar"
+              (click)="agregarPlato(plato.idPlato)"
+              [disabled]="estadoPedido === 'PA'"
+              [ngClass]="{ 'btn-agregar-disabled': estadoPedido === 'PA' }"
+            >
               ➕ Agregar
             </button>
           </div>
@@ -221,6 +229,8 @@
                   *ngIf="detalle.estado === 'PED'"
                   class="btn-cancelar"
                   (click)="cancelarPlato(detalle.idDetalle)"
+                  [disabled]="estadoPedido === 'PA'"
+                  [ngClass]="{ 'btn-agregar-disabled': estadoPedido === 'PA' }"
                 >
                   ❌ Cancelar
                 </button>
@@ -248,5 +258,121 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modal Método de Pago Cliente -->
+<div class="modal-overlay" *ngIf="mostrarModalMetodo">
+  <div class="modal-metodo">
+    <h3>Elige tu método de pago</h3>
+
+    <!-- Selector de métodos -->
+    <div class="metodos-grid">
+      <button
+        class="metodo-btn"
+        [class.activo]="metodoSeleccionado === 'TARJETA'"
+        (click)="elegirMetodo('TARJETA')"
+      >
+        <span class="metodo-icono">💳</span>
+        Tarjeta
+      </button>
+      <button
+        class="metodo-btn"
+        [class.activo]="metodoSeleccionado === 'YAPE'"
+        (click)="elegirMetodo('YAPE')"
+      >
+        <span class="metodo-icono yape">Y</span>
+        Yape
+      </button>
+      <button
+        class="metodo-btn"
+        [class.activo]="metodoSeleccionado === 'PLIN'"
+        (click)="elegirMetodo('PLIN')"
+      >
+        <span class="metodo-icono plin">P</span>
+        Plin
+      </button>
+      <button
+        class="metodo-btn"
+        [class.activo]="metodoSeleccionado === 'EFECTIVO'"
+        (click)="elegirMetodo('EFECTIVO')"
+      >
+        <span class="metodo-icono">💵</span>
+        Efectivo
+      </button>
+    </div>
+
+    <!-- ========== YAPE ========== -->
+    <div class="payment-form" *ngIf="metodoSeleccionado === 'YAPE'">
+      <div *ngIf="!imagenPreview">
+        <h4 class="payment-form-title">Escanea el código QR con Yape</h4>
+        <div class="qr-container">
+          <img [src]="qrYapeUrl" alt="QR Yape" class="qr-code" />
+          <p class="qr-instructions">
+            Abre tu app de Yape y escanea el código para pagar
+            <strong>S/ {{ datosPago?.totalPagar | number: "1.2-2" }}</strong>
+          </p>
+          <div class="yape-badge">
+            <span class="yape-icon">Y</span>
+            <span>Pago mediante Yape</span>
+          </div>
+        </div>
+        <div class="alert alert-info mt-3">
+          <h6>Instrucciones:</h6>
+          <ol class="mb-0">
+            <li>Abre tu app de Yape</li>
+            <li>Escanea este código QR</li>
+            <li>
+              Ingresa el monto:
+              <strong>S/ {{ datosPago?.totalPagar | number: "1.2-2" }}</strong>
+            </li>
+            <li>Completa el pago</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PLIN ========== -->
+    <div class="payment-form" *ngIf="metodoSeleccionado === 'PLIN'">
+      <div *ngIf="!imagenPreview">
+        <h4 class="payment-form-title">Escanea el código QR con Plin</h4>
+        <div class="qr-container">
+          <img [src]="qrPlinUrl" alt="QR Plin" class="qr-code" />
+          <p class="qr-instructions">
+            Abre tu app de Plin y escanea el código para pagar
+            <strong>S/ {{ datosPago?.totalPagar | number: "1.2-2" }}</strong>
+          </p>
+          <div class="plin-badge">
+            <span class="plin-icon">P</span>
+            <span>Pago mediante Plin</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== TARJETA ========== -->
+    <div class="payment-form" *ngIf="metodoSeleccionado === 'TARJETA'">
+      <h4 class="payment-form-title">Datos de la tarjeta</h4>
+      <p class="total-pagar">
+        Total: <strong>S/ {{ datosPago?.totalPagar | number: "1.2-2" }}</strong>
+      </p>
+      <p class="info-tarjeta">El mesero procesará el pago con tu tarjeta.</p>
+    </div>
+
+    <!-- ========== EFECTIVO ========== -->
+    <div class="payment-form" *ngIf="metodoSeleccionado === 'EFECTIVO'">
+      <h4 class="payment-form-title">Pago en efectivo</h4>
+      <p class="total-pagar">
+        Prepara:
+        <strong>S/ {{ datosPago?.totalPagar | number: "1.2-2" }}</strong>
+      </p>
+      <p class="info-tarjeta">Entrega el efectivo al mesero.</p>
+    </div>
+
+    <!-- Esperando confirmación -->
+    <p class="esperando" *ngIf="metodoSeleccionado">
+      ✅ Elegiste <strong>{{ metodoSeleccionado }}</strong> — esperando
+      confirmación del mesero...
+    </p>
   </div>
 </div>

@@ -14,6 +14,10 @@ import { AlertService } from '../../../util/alert.service';
 import { MenuClienteService } from '../../../cliente/service/menuClienteService';
 import { PlatoDto } from '../../../shared/dto/PlatoDto';
 import { FormsModule } from '@angular/forms';
+import { PagoService } from '../../../cliente/service/pago.service';
+import { CrearPagoRequest } from '../../../cliente/pago/pagoDto';
+import { DetallePedidoPagar } from '../../../shared/response/detallePedidoPagar.model';
+import { PedidoMeseroService } from '../../service/pedidoMeseroService';
 
 @Component({
   selector: 'app-detalle-ordenes',
@@ -21,14 +25,17 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule],
   templateUrl: './detalle-ordenes.component.html',
   styleUrl: './detalle-ordenes.component.css',
+  providers: [WebsocketPedidosService],
 })
 export class DetalleOrdenesComponent implements OnInit, OnDestroy {
   private detallePedidoService = inject(DetallePedidoServiceService);
+  private pedidoService = inject(PedidoMeseroService);
   private wsPedidoService = inject(WebsocketPedidosService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private menuService = inject(MenuClienteService);
+  private pagoService = inject(PagoService);
 
   idPedido: number | null = null;
   token: string | null = null;
@@ -36,6 +43,7 @@ export class DetalleOrdenesComponent implements OnInit, OnDestroy {
 
   detalles: DetallePedidoResponse[] = [];
   cliente: DetallePedidoUsuarioResponse | null = null;
+  pagoResponse: DetallePedidoPagar | null = null;
 
   plato: PlatoDto | null = null;
   platos: PlatoDto[] = [];
@@ -46,6 +54,11 @@ export class DetalleOrdenesComponent implements OnInit, OnDestroy {
   loading: boolean = false;
   wsConnected: boolean = false;
   error: string | null = null;
+
+  mostrarModalPago = false;
+  datosPago: any = null;
+  metodoPagoCliente: string | null = null;
+  pagoConfirmado = false;
 
   // Cantidades
   cantidadesPlatos: Map<number, number> = new Map();
@@ -76,6 +89,7 @@ export class DetalleOrdenesComponent implements OnInit, OnDestroy {
       this.cargarPlatos();
     });
   }
+
   verificarSesion(): void {
     this.token = this.authService.getToken();
 
@@ -212,13 +226,59 @@ export class DetalleOrdenesComponent implements OnInit, OnDestroy {
     }
   }
 
-  private actualizarVistaMesero(message: PedidoWebSocketMessage): void {
+  private actualizarVistaMesero(message: any): void {
     if (message.detalles) {
       this.detalles = message.detalles;
     }
 
     if (message.infoCliente) {
       this.cliente = message.infoCliente;
+    }
+
+    if (message.inicioPago) {
+      this.datosPago = message.pago;
+      this.mostrarModalPago = true;
+    }
+    if (message.metodoPago) {
+      this.metodoPagoCliente = message.metodoPago;
+    }
+    if (message.pagoConfirmado) {
+      this.mostrarModalPago = false;
+      this.pagoConfirmado = true;
+
+      var metodoPago = message.metodoPago;
+      const primerDetalle = this.detalles[0];
+
+      const pagoRequest: CrearPagoRequest = {
+        idPedido: this.idPedido!,
+        idUsuario: this.idUsuario!,
+        tipoPago: 'PP',
+        monto: this.datosPago.totalPagar,
+        metodoPago: this.metodoPagoCliente!,
+        observaciones: `Depósito - ${metodoPago}`,
+      };
+
+      console.log('Creando pago:', pagoRequest);
+
+      this.pagoService.crearPago(pagoRequest).subscribe({
+        next: (pago) => {
+          AlertService.success('Pago completado exitosamente!');
+          this.detallePedidoService.cambiarEstado(this.idPedido!).subscribe({
+            next: (response) => {
+              console.log('Cambiadno de estado');
+              this.pagoConfirmado = true;
+            },
+            error: (error) => {
+              console.error('Sucedio un problema con el pago');
+            },
+          });
+        },
+        error: (err) => {
+          console.error('rror al crear pago:', err);
+          this.error = 'Error al procesar el pago';
+          setTimeout(() => (this.error = null), 5000);
+        },
+      });
     }
   }
 
@@ -227,10 +287,20 @@ export class DetalleOrdenesComponent implements OnInit, OnDestroy {
   }
 
   procederAlPago(): void {
-    console.log('Proceder al pago del pedido:', this.idPedido);
-    AlertIziToast.info('Proximamente', 'Funcionalidad de pago en desarrollo');
+    if (this.detalles) {
+      this.detalles.find((x) => x.estado === 'PEN');
+      AlertService.info(
+        'Tienes q entregar todos los platos o cancelar para proceder al pago',
+      );
+    }
+
+    this.wsPedidoService.iniciarPago(this.idPedido!);
   }
 
+  confirmarPago(): void {
+    if (!this.metodoPagoCliente) return;
+    this.wsPedidoService.confirmarPago(this.idPedido!, this.metodoPagoCliente);
+  }
   getEstadoClase(estado: string): string {
     switch (estado) {
       case 'PED':

@@ -5,10 +5,14 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { enviroment } from '../../../enviroments/enviroment';
-import { EventoResponse, EventoRequest, TematicaResponse } from '../models/evento.model';
+import {
+  EventoResponse,
+  EventoRequest,
+  TematicaResponse,
+} from '../models/evento.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EventoService {
   private apiUrl = `${enviroment.apigateway}/eventos`;
@@ -18,49 +22,57 @@ export class EventoService {
 
   // Eventos
   listarTodos(): Observable<EventoResponse[]> {
-    return this.http.get<EventoResponse[]>(this.apiUrl)
+    return this.http
+      .get<EventoResponse[]>(this.apiUrl)
       .pipe(catchError(this.handleError));
   }
 
   listarActivos(): Observable<EventoResponse[]> {
-    return this.http.get<EventoResponse[]>(`${this.apiUrl}/activos`)
+    return this.http
+      .get<EventoResponse[]>(`${this.apiUrl}/activos`)
       .pipe(catchError(this.handleError));
   }
 
   listarEventosFuturos(): Observable<EventoResponse[]> {
-    return this.http.get<EventoResponse[]>(`${this.apiUrl}/futuros`)
+    return this.http
+      .get<EventoResponse[]>(`${this.apiUrl}/futuros`)
       .pipe(catchError(this.handleError));
   }
 
   buscarPorId(id: number): Observable<EventoResponse> {
-    return this.http.get<EventoResponse>(`${this.apiUrl}/${id}`)
+    return this.http
+      .get<EventoResponse>(`${this.apiUrl}/${id}`)
       .pipe(catchError(this.handleError));
   }
 
   crear(evento: EventoRequest): Observable<EventoResponse> {
-    return this.http.post<EventoResponse>(this.apiUrl, evento)
+    return this.http
+      .post<EventoResponse>(this.apiUrl, evento)
       .pipe(catchError(this.handleError));
   }
 
   actualizar(id: number, evento: EventoRequest): Observable<EventoResponse> {
-    return this.http.put<EventoResponse>(`${this.apiUrl}/${id}`, evento)
+    return this.http
+      .put<EventoResponse>(`${this.apiUrl}/${id}`, evento)
       .pipe(catchError(this.handleError));
   }
 
   eliminar(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`)
+    return this.http
+      .delete<void>(`${this.apiUrl}/${id}`)
       .pipe(catchError(this.handleError));
   }
 
   // Temáticas
   listarTematicas(): Observable<TematicaResponse[]> {
-    return this.http.get<TematicaResponse[]>(`${this.tematicaUrl}/activas`)
+    return this.http
+      .get<TematicaResponse[]>(`${this.tematicaUrl}/activas`)
       .pipe(catchError(this.handleError));
   }
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocurrió un error desconocido';
-    
+
     if (error.error instanceof ErrorEvent) {
       // Error del lado del cliente
       errorMessage = `Error: ${error.error.message}`;
@@ -74,7 +86,7 @@ export class EventoService {
         errorMessage = `Error ${error.status}: ${error.message}`;
       }
     }
-    
+
     console.error(errorMessage);
     return throwError(() => new Error(errorMessage));
   }

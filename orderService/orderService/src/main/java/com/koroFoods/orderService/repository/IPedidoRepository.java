@@ -1,6 +1,7 @@
 package com.koroFoods.orderService.repository;
 
 import com.koroFoods.orderService.dto.response.DetalleCantidadPedidos;
+import com.koroFoods.orderService.dto.response.GraficoCincoData;
 import com.koroFoods.orderService.enums.EstadoPedido;
 import com.koroFoods.orderService.model.Pedido;
 import feign.Param;
@@ -34,4 +35,18 @@ public interface IPedidoRepository extends JpaRepository<Pedido, Integer> {
 
 
     List<Pedido>findByIdReservaIn(List<Integer> idReserva);
+
+
+
+    @Query(value = """
+            select
+            id_usuario as idUsuario,
+            COUNT(id_pedido) as completado
+            FROM tb_pedido
+            where DATE_PART('month',fecha_hora) = :mes
+            AND estado = 'PA'
+            group by id_usuario
+            order by completado DESC
+            """,nativeQuery = true)
+    List<GraficoCincoData> graficoCincoList(@Param("mes")Integer mes);
 }

@@ -5,9 +5,7 @@ import com.koroFoods.orderService.dto.PedidoResumenDto;
 import com.koroFoods.orderService.dto.PedidoRequestDTO;
 import com.koroFoods.orderService.dto.ResultadoResponse;
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
-import com.koroFoods.orderService.dto.response.DetalleEstadoCount;
-import com.koroFoods.orderService.dto.response.DetallePedidoResponse;
-import com.koroFoods.orderService.dto.response.DetallePedidoUsuarioResponse;
+import com.koroFoods.orderService.dto.response.*;
 import com.koroFoods.orderService.enums.EstadoDetallePedido;
 import com.koroFoods.orderService.enums.EstadoPedido;
 import com.koroFoods.orderService.feign.*;
@@ -18,14 +16,17 @@ import com.koroFoods.orderService.repository.IPedidoRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PedidoService {
 
@@ -113,6 +114,8 @@ public class PedidoService {
 
             detallePedidoRepository.save(detalle);
             platoFeignClient.substractStockOrder(d.getIdPlato(), d.getCantidad());
+            log.info("Stock del plato ID {} reducido en {} unidades para el pedido ID {}",
+                    d.getIdPlato(), d.getCantidad(), pedido.getIdPedido());
 
             subtotalPedido = subtotalPedido.add(subtotal);
         }
@@ -124,7 +127,7 @@ public class PedidoService {
         return ResultadoResponse.success("El pedido fue generado satisfactoriamente.", pedido);
     }
 
-    public ResultadoResponse<List<Pedido>> obtenerPedidoDelCliente(Integer idCliente){
+    public ResultadoResponse<List<Pedido>> obtenerPedidoDelCliente(Integer idCliente) {
         validarId(idCliente);
 
         //Obtener las reservas del cliente
@@ -143,18 +146,36 @@ public class PedidoService {
 
         List<Pedido> pedidos = pedidoRepository.findByIdReservaIn(idsReservas);
 
-        if (pedidos.isEmpty()){
-            return ResultadoResponse.error("No se encontro pedidos",null);
+        if (pedidos.isEmpty()) {
+            return ResultadoResponse.error("No se encontro pedidos", null);
         }
 
-        return ResultadoResponse.success("Pedidos encontrados: " +  pedidos.size() ,pedidos);
+        return ResultadoResponse.success("Pedidos encontrados: " + pedidos.size(), pedidos);
 
 
     }
 
-    private void validarId(Integer request){
-        if (request == null ||request <= 0) {
+    private void validarId(Integer request) {
+        if (request == null || request <= 0) {
             throw new IllegalArgumentException("ID invalido");
         }
+    }
+
+    public ResultadoResponse<List<GraficoCincoList>> graficoCincoList(Integer mes) {
+
+        List<GraficoCincoData> data = pedidoRepository.graficoCincoList(mes);
+        List<GraficoCincoList> list = new ArrayList<>();
+
+        for (var usuario : data) {
+            ResultadoResponse<UsuarioFeign> user = usuarioFeignClient.getUsuarioById(usuario.getIdUsuario());
+            var userData = user.getData();
+            var nombres = String.format(userData.getNombres() + " " +  userData.getApePaterno());
+            list.add(new GraficoCincoList(
+                    usuario.getIdUsuario(),
+                    usuario.getCompletado(),
+                    nombres
+            ));
+        }
+        return ResultadoResponse.success("Se obtuvo grafico {}", list);
     }
 }

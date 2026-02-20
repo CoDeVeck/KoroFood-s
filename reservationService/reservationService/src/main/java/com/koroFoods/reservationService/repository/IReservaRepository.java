@@ -1,5 +1,7 @@
 package com.koroFoods.reservationService.repository;
 
+import com.koroFoods.reservationService.dto.response.Grafico2Data;
+import com.koroFoods.reservationService.dto.response.GraficoCuatroData;
 import com.koroFoods.reservationService.model.Reserva;
 
 import feign.Param;
@@ -100,5 +102,26 @@ public interface IReservaRepository extends JpaRepository<Reserva, Integer> {
 			    ORDER BY r.fechaHora DESC
 			""")
 	List<Reserva> findReservasAsistidasPorFecha(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
+
+	@Query(value = """
+			SELECT
+			SUM(CASE WHEN id_evento IS NOT NULL THEN 1 ELSE 0 END) as conEvento,
+			SUM(CASE WHEN id_evento IS NULL THEN 1 ELSE 0 END) as sinEvento
+			FROM tb_reserva
+			WHERE DATE_PART('month', fecha_registro) = :mes
+			""", nativeQuery = true)
+	Grafico2Data graficoDosList(@Param("mes") Integer mes);
+
+	@Query(value = """
+			select
+			id_evento as idEvento,
+			count(id_evento) as cantidad
+			from tb_reserva
+			where DATE_PART('month',fecha_registro) = :mes
+			and id_evento IS NOT NULL
+			group by id_evento
+			order by cantidad desc
+			""", nativeQuery = true)
+	List<GraficoCuatroData> graficoCuatroList(@Param("mes") Integer mes);
 
 }

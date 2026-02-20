@@ -3,6 +3,7 @@ package com.koroFoods.userService.service;
 import com.koroFoods.userService.dto.ResultadoResponse;
 import com.koroFoods.userService.dto.SocialUserDataDto;
 import com.koroFoods.userService.dto.UsuarioDtoFeign;
+import com.koroFoods.userService.dto.UsuarioPerfilDTO;
 import com.koroFoods.userService.dto.UsuarioPublicoDTO;
 import com.koroFoods.userService.dto.request.RegistroSocialRequest;
 import com.koroFoods.userService.dto.request.UpdatePasswordRequest;
@@ -71,6 +72,25 @@ public class UsuarioService  {
         return ResultadoResponse.success("El usuario fue creado correctamente", nuevoUsuario);
     }
 
+    public ResultadoResponse<UsuarioPerfilDTO> getUsuarioById(Integer id){
+    	Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    	UsuarioPerfilDTO dto = new UsuarioPerfilDTO();
+        dto.setIdUsuario(usuario.getIdUsuario());
+        dto.setNombres(usuario.getNombres());
+        dto.setApePaterno(usuario.getApePaterno());
+        dto.setApeMaterno(usuario.getApeMaterno());
+        dto.setCorreo(usuario.getCorreo());
+        dto.setTelefono(usuario.getTelefono());
+        dto.setImagen(usuario.getImagen());
+        dto.setDireccion(usuario.getDireccion());
+        dto.setTipoDoc(usuario.getTipoDoc().toString());
+        dto.setNroDoc(usuario.getNroDoc());
+        dto.setDistrito(usuario.getDistrito().getNombre());
+        dto.setFechaRegistro(usuario.getFechaRegistro().toString());
+        return ResultadoResponse.success("Usuario encontrado", dto);
+    }
     
     @Cacheable(value = "usuarios", key = "#id")
     public ResultadoResponse<UsuarioDtoFeign> getUsuarioByIdFeign(Integer id){
@@ -85,14 +105,13 @@ public class UsuarioService  {
         dto.setCorreo(usuario.getCorreo());
         dto.setTelefono(usuario.getTelefono());
         dto.setImagen(usuario.getImagen());
-
         return ResultadoResponse.success("Usuario encontrado", dto);
     }
     
     @Cacheable(value = "usuariosPublicos", key = "#id")
     public ResultadoResponse<UsuarioPublicoDTO> getUsuarioByIdPublic(Integer id){
     	Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() ->  new RuntimeException("Usuario no encontrado"));
 
     	UsuarioPublicoDTO dto = new UsuarioPublicoDTO();
         dto.setIdUsuario(usuario.getIdUsuario());
@@ -262,5 +281,8 @@ public class UsuarioService  {
     public String generarTokenTemporal(String email, String nombre, String avatar, String provider){
         return UUID.randomUUID().toString() + ":" + email + ":" + provider;
     }
+
+
+
 
 }

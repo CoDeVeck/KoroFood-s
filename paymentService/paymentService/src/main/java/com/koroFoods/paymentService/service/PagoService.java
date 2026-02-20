@@ -1,6 +1,9 @@
 package com.koroFoods.paymentService.service;
 
 
+import com.koroFoods.paymentService.dtos.response.GraficoTresData;
+import com.koroFoods.paymentService.dtos.response.ResultadoResponse;
+import com.koroFoods.paymentService.util.DashboardNotificator;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,7 @@ import com.koroFoods.paymentService.messaging.PagoEventPublisher;
 import com.koroFoods.paymentService.model.Pago;
 import com.koroFoods.paymentService.repository.IPagoRepository;
 import java.security.MessageDigest;
+import java.time.LocalDate;
 import java.util.Base64;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,6 +44,8 @@ public class PagoService {
 
 	private final IPagoRepository pagoRepository;
     private final PagoEventPublisher eventPublisher;
+
+    private final DashboardNotificator dashboardNotificator;
     
     @Autowired
     private CloudinaryService cloudinaryService;
@@ -73,6 +79,9 @@ public class PagoService {
         pago.setReferenciaPago(generarReferencia());
 
         Pago guardado = pagoRepository.save(pago);
+
+
+        dashboardNotificator.notificarGraficoTres(LocalDate.now().getMonthValue());
 
         // Retornar datos para generar QR en frontend
         return generarQRData(guardado);
@@ -112,6 +121,8 @@ public class PagoService {
 
         // Publicar evento en RabbitMQ
         publicarEventoPagoConfirmado(confirmado);
+
+
 
         return mapearAResponse(confirmado);
     }
@@ -456,5 +467,15 @@ public class PagoService {
                 .build();
     }
     
-    
+
+    public ResultadoResponse<GraficoTresData> graficoTresList(Integer mes){
+        GraficoTresData data = pagoRepository.graficoTresList(mes);
+
+        if (data != null){
+         log.info("Se obtuvo la lista: {}", data);
+         return  ResultadoResponse.success("Lista obtenida: ", data);
+        }
+        log.error("No se obtuvbo la lista {}", (Object) null);
+        return  ResultadoResponse.error("Lista obtenida: ",  null);
+    }
 }
