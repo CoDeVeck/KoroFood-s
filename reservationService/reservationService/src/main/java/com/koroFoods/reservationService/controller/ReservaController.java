@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.koroFoods.reservationService.dto.RecepcionistaCountsDTO;
+import com.koroFoods.reservationService.dto.ReservaAsistidaDTO;
 import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ReservaResponse;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
@@ -69,5 +70,10 @@ public class ReservaController {
 	@GetMapping("/dashboard/recepcionista/counts")
 	public ResponseEntity<RecepcionistaCountsDTO> obtenerCounts() {
 	    return ResponseEntity.ok(reservaService.obtenerCounts());
+	}
+	
+	@GetMapping("/dashboard/recepcionista/asistidas/hoy")
+	public ResponseEntity<ResultadoResponse<List<ReservaAsistidaDTO>>> listarReservasAsistidasPorDia() {
+	    return ResponseEntity.ok(reservaService.listarReservasAsistidasPorDia());
 	}
 }

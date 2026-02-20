@@ -92,4 +92,13 @@ public interface IReservaRepository extends JpaRepository<Reserva, Integer> {
 			""")
 	long countReservasAsistidas(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
 
+	@Query("""
+			    SELECT r FROM Reserva r
+			    WHERE r.estado = 'ASISTIDA'
+			    AND r.fechaHora >= :inicio
+			    AND r.fechaHora < :fin
+			    ORDER BY r.fechaHora DESC
+			""")
+	List<Reserva> findReservasAsistidasPorFecha(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
+
 }
