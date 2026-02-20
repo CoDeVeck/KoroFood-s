@@ -157,7 +157,9 @@ public class DetallePedidoService {
             actualizar.setEstado(EstadoPedido.PA);
             pedidoRepository.save(actualizar);
 
+            dashboardNotificador.notificarGraficoCinco(LocalDate.now().getMonthValue());
             return ResultadoResponse.success("Se pago correctamente el pedido", actualizar);
+
         }
         return ResultadoResponse.error("Hubo un error al pagar el pedido: " + idPedido, null);
     }

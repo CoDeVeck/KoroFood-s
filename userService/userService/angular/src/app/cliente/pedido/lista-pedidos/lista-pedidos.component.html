@@ -29,9 +29,9 @@
         <h2>Pedido #{{ pedido.idPedido }}</h2>
         <span
           class="estado-badge"
-          [ngClass]="getEstadoBadgeClass(pedido.estadoPedido)"
+          [ngClass]="getEstadoBadgeClass(pedido.estado)"
         >
-          {{ getEstadoTexto(pedido.estadoPedido) }}
+          {{ getEstadoTexto(pedido.estado) }}
         </span>
       </div>
 
