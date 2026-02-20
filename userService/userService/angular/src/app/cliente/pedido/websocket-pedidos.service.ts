@@ -208,6 +208,30 @@ export class WebsocketPedidosService {
     console.log('📤 Cancelando plato:', idDetalle);
   }
 
+  iniciarPago(idPedido: number): void {
+    if (!this.client || !this.client.connected) return;
+    this.client.publish({
+      destination: `/app/pedido/${idPedido}/pagar`,
+      body: JSON.stringify({}),
+    });
+  }
+
+  elegirMetodo(idPedido: number, metodoPago: string): void {
+    if (!this.client || !this.client.connected) return;
+    this.client.publish({
+      destination: `/app/pedido/${idPedido}/elegirMetodo`,
+      body: metodoPago,
+    });
+  }
+
+  confirmarPago(idPedido: number, metodoPago: string): void {
+    if (!this.client || !this.client.connected) return;
+    this.client.publish({
+      destination: `/app/pedido/${idPedido}/confirmarPago`,
+      body: metodoPago,
+    });
+  }
+
   onPedidoCliente(): Observable<PedidoWebSocketMessage | null> {
     return this.pedidoClienteSubject$.asObservable();
   }

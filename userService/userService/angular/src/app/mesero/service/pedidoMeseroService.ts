@@ -6,6 +6,7 @@ import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 import { PedidoResumenDto } from '../../shared/dto/PedidoResumenDto';
 import { PedidoRequestoDto } from '../../shared/dto/PedidoRequestDto';
 import { Pedido } from '../../shared/model/pedido.model';
+import { DetallePedidoPagar } from '../../shared/response/detallePedidoPagar.model';
 
 @Injectable({
   providedIn: 'root',
@@ -27,5 +28,13 @@ export class PedidoMeseroService {
 
   crearPedido(dto: PedidoRequestoDto): Observable<ResultadoResponse<Pedido>> {
     return this.http.post<ResultadoResponse<Pedido>>(`${this.baseUrl}`, dto);
+  }
+
+  pagarResponse(
+    idPedido: number,
+  ): Observable<ResultadoResponse<DetallePedidoPagar>> {
+    return this.http.get<ResultadoResponse<DetallePedidoPagar>>(
+      `${this.baseUrl}/procederPago?idPedido=${idPedido}`,
+    );
   }
 }

@@ -1,6 +1,5 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DetallePedidoServiceService } from '../../service/detalle-pedido-service.service';
-import { WebsocketService } from '../../service/websocket.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../auth/service/auth.service';
 import { MenuClienteService } from '../../service/menuClienteService';
@@ -8,15 +7,12 @@ import { DetallePedidoResponse } from '../../../shared/response/detallePedidoRes
 import { PlatoDto } from '../../../shared/dto/PlatoDto';
 import { DetallePedidoMeseroResponse } from '../../../shared/response/detallePedidoMeseroResponse';
 import { Subscription } from 'rxjs';
-import { Pedido } from '../../../shared/model/pedido.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WebsocketPedidosService } from '../websocket-pedidos.service';
 import { AlertService } from '../../../util/alert.service';
-import { Plato } from '../../../shared/model/plato.model';
-import iziToast from 'izitoast';
 import { AlertIziToast } from '../../../util/iziToastAlert.service';
-import { DetallePedido } from '../../../shared/model/detallePedido.model';
+import { EstadoPedido } from '../../../shared/enums/estadoPedido.enum';
 
 export interface PedidoWebSocketMessage {
   detalles: any[];
@@ -29,6 +25,7 @@ export interface PedidoWebSocketMessage {
   imports: [CommonModule, FormsModule],
   templateUrl: './detalle-pedido.component.html',
   styleUrl: './detalle-pedido.component.css',
+  providers: [WebsocketPedidosService],
 })
 export class DetallePedidoComponent implements OnInit, OnDestroy {
   private detallePedidoService = inject(DetallePedidoServiceService);
@@ -45,6 +42,21 @@ export class DetallePedidoComponent implements OnInit, OnDestroy {
   idUsuario: number | null = null;
   token: string | null = null;
 
+  mostrarModalMetodo = false;
+  metodoSeleccionado: string | null = null;
+  pagoConfirmado = false;
+
+  imagenPreview: string | null = null;
+  imagenBase64: string | null = null;
+  errorPago: string = '';
+
+  // QRs estáticos
+  qrYapeUrl: string = 'assets/yape-qr.jpeg';
+  qrPlinUrl: string = 'assets/plin-qr.jpeg';
+
+  // Plin - Número ficticio
+  numeroPlin: string = '986425458';
+  datosPago: any = null;
   // Datos
   detalles: DetallePedidoResponse[] = [];
   platos: PlatoDto[] = [];
@@ -71,16 +83,17 @@ export class DetallePedidoComponent implements OnInit, OnDestroy {
   loadingPlatos: boolean = false;
   wsConnected: boolean = false;
   error: string | null = null;
+  estadoPedido: EstadoPedido | null = null;
 
   private subscriptions: Subscription = new Subscription();
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       this.idPedido = +params['id'];
-      console.log('📦 ID Pedido desde ruta:', this.idPedido);
+      console.log('ID Pedido desde ruta:', this.idPedido);
 
       if (!this.idPedido || isNaN(this.idPedido)) {
-        console.error('❌ ID de pedido inválido');
+        console.error('ID de pedido inválido');
         this.router.navigate(['/cliente/pedido']);
         return;
       }
@@ -93,7 +106,7 @@ export class DetallePedidoComponent implements OnInit, OnDestroy {
     this.token = this.authService.getToken();
 
     if (!this.token) {
-      console.error('❌ No hay token');
+      console.error('No hay token');
       this.router.navigate(['/auth/login'], {
         queryParams: { returnUrl: `/cliente/pedido/${this.idPedido}` },
       });
@@ -103,13 +116,12 @@ export class DetallePedidoComponent implements OnInit, OnDestroy {
     this.authService.getUsuario().subscribe({
       next: (response) => {
         this.idUsuario = response.idUsuario;
-        console.log('✅ ID Usuario:', this.idUsuario);
+        console.log('ID Usuario:', this.idUsuario);
 
-        // Inicializar WebSocket
         this.initializeWebSocket(this.idUsuario!, this.token!);
       },
       error: (error) => {
-        console.error('❌ Error al obtener usuario:', error);
+        console.error('Error al obtener usuario:', error);
         this.router.navigate(['/auth/login'], {
           queryParams: { returnUrl: `/cliente/pedido/${this.idPedido}` },
         });
@@ -117,41 +129,37 @@ export class DetallePedidoComponent implements OnInit, OnDestroy {
     });
   }
   private initializeWebSocket(userId: number, token: string): void {
-    console.log('🔌 Conectando WebSocket para pedido:', this.idPedido);
+    console.log('Conectando WebSocket para pedido:', this.idPedido);
     this.wsService.connect(userId, token);
 
-    // Escuchar conexión
     this.subscriptions.add(
       this.wsService.isConnected().subscribe((connected) => {
         this.wsConnected = connected;
         if (connected && this.idPedido) {
-          console.log('✅ WebSocket conectado');
+          console.log('WebSocket conectado');
 
-          // Suscribirse al pedido específico
           this.wsService.subscribeToPedidoCliente(this.idPedido);
 
-          // Cargar datos
           this.cargarDetallesPedido();
           this.cargarMesero();
+          this.cargarEstadoPedido();
         }
       }),
     );
 
-    // Escuchar actualizaciones
     this.subscriptions.add(
       this.wsService.onPedidoCliente().subscribe((message) => {
         if (message) {
-          console.log('📦 Actualización recibida:', message);
+          console.log('Actualización recibida:', message);
           this.actualizarVistaCliente(message);
         }
       }),
     );
 
-    // Escuchar errores
     this.subscriptions.add(
       this.wsService.onPedidoError().subscribe((error) => {
         if (error) {
-          console.error('❌ Error:', error);
+          console.error('Error:', error);
           this.error = error.mensaje || 'Error desconocido';
           setTimeout(() => (this.error = null), 5000);
         }
@@ -162,6 +170,16 @@ export class DetallePedidoComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
     this.wsService.unsubscribeFromPedido();
+  }
+
+  elegirMetodo(metodo: string): void {
+    this.metodoSeleccionado = metodo;
+    this.wsService.elegirMetodo(this.idPedido!, metodo);
+  }
+
+  cerrarYVolver(): void {
+    this.pagoConfirmado = false;
+    this.router.navigate(['/cliente/pedido']);
   }
 
   cargarPlatos(): void {
@@ -179,7 +197,7 @@ export class DetallePedidoComponent implements OnInit, OnDestroy {
         this.loadingPlatos = false;
       },
       error: (err) => {
-        console.error('❌ Error al cargar platos:', err);
+        console.error(' Error al cargar platos:', err);
         this.loadingPlatos = false;
       },
     });
@@ -193,14 +211,27 @@ export class DetallePedidoComponent implements OnInit, OnDestroy {
       next: (response) => {
         if (response.valor) {
           this.detalles = response.data;
-          console.log('📦 Detalles cargados:', this.detalles.length);
+          console.log('Detalles cargados:', this.detalles.length);
         }
         this.loading = false;
       },
       error: (err) => {
-        console.error('❌ Error al cargar detalles:', err);
+        console.error('Error al cargar detalles:', err);
         this.loading = false;
       },
+    });
+  }
+
+  cargarEstadoPedido(): void {
+    if (!this.idPedido) return;
+    this.detallePedidoService.obtenerPedido(this.idPedido).subscribe({
+      next: (response) => {
+        if (response.valor) {
+          console.log('Estado:', response.data.estado);
+          this.estadoPedido = response.data.estado;
+        }
+      },
+      error: (err) => console.error('Error al cargar pedido:', err),
     });
   }
   cargarMesero(): void {
@@ -210,11 +241,11 @@ export class DetallePedidoComponent implements OnInit, OnDestroy {
       next: (response) => {
         if (response.valor) {
           this.mesero = response.data;
-          console.log('👨‍🍳 Mesero cargado');
+          console.log(' Mesero cargado');
         }
       },
       error: (err) => {
-        console.error('❌ Error al cargar mesero:', err);
+        console.error('Error al cargar mesero:', err);
       },
     });
   }
@@ -321,13 +352,26 @@ export class DetallePedidoComponent implements OnInit, OnDestroy {
     }
   }
 
-  private actualizarVistaCliente(message: PedidoWebSocketMessage): void {
+  private actualizarVistaCliente(message: any): void {
     if (message.detalles) {
       this.detalles = message.detalles;
     }
 
     if (message.infoMesero) {
       this.mesero = message.infoMesero;
+    }
+    if (message.inicioPago) {
+      this.datosPago = message.pago;
+      this.mostrarModalMetodo = true;
+    }
+
+    if (message.pagoConfirmado) {
+      this.mostrarModalMetodo = false;
+      this.pagoConfirmado = true;
+      AlertService.success(
+        'Pagaste correctamente el pedido, gracias por tu visita!',
+      );
+      this.estadoPedido;
     }
   }
 
