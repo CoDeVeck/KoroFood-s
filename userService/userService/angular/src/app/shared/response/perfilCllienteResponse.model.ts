@@ -1,10 +1,14 @@
 export interface PerfilClienteResponse {
   idUsuario: number;
   nombres: string;
-  apellidos: string;
+  apePaterno: string;
+  apeMaterno: string;
   correo: string;
-  nroDoc: string;
   imagen: string;
+  telefono: string;
   direccion: string;
-  telofono: string;
+  tipoDoc: string;
+  nroDoc: string;
+  fechaRegistro: string;
+  distrito: string;
 }

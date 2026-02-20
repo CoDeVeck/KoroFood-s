@@ -525,6 +525,7 @@
 .cantidad-control {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
 }
 
@@ -548,7 +549,8 @@
 }
 
 .cantidad-input {
-  flex: 1;
+  max-width: 150px;  
+  width: 100%;
   text-align: center;
   padding: 8px;
   border: 2px solid #E0E0E0;

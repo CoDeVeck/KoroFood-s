@@ -1,63 +1,70 @@
 import { Component, OnInit } from '@angular/core';
-import { Usuario } from '../../shared/model/usuario.model';
-import { AuthService } from '../../auth/service/auth.service';
+import { CommonModule } from '@angular/common';
+
 import { PerfilClienteResponse } from '../../shared/response/perfilCllienteResponse.model';
+import { ResultadoResponse } from '../../shared/dto/ResultadoResponse'; // ajusta ruta
 import { PerfilService } from '../service/perfil.service';
-import { UserService } from '../service/user.service';
-import { Router } from '@angular/router';
+import { AuthService } from '../../auth/service/auth.service'; // ajusta ruta
+import { RouterLinkWithHref } from '@angular/router';
 
 @Component({
   selector: 'app-perfil',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, RouterLinkWithHref],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.css',
 })
 export class PerfilComponent implements OnInit {
-  usuario: Usuario | null = null;
-  perfilDTO: PerfilClienteResponse[] | null = null;
+  perfil: ResultadoResponse<PerfilClienteResponse> | null = null;
+  isLoading = false;
+  error: string | null = null;
+
+  private idUsuario: number = 0;
 
   constructor(
     private perfilService: PerfilService,
-    private userService: UserService,
-    private router: Router,
-    private socialAuth: AuthService,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
-    if (!this.socialAuth.isLoggedIn()) {
-      console.log('Logeo requerido, Redirigiendo a Login!');
-      (this.router.navigate(['/login']),
-        {
-          queryParams: { message: 'login_required' },
-        });
-      return;
-    }
-
-    const usuario = this.userService.getUser();
-
-    if (!usuario) {
-      this.router.navigate(['/login'], {
-        queryParams: { message: 'login_required' },
-      });
-      return;
-    }
-
-    const idUsuario = usuario.idUsuario;
-
-    this.perfilService.getPerfilCliente(idUsuario!).subscribe({
-      next: (data: PerfilClienteResponse[]) => {
-        this.perfilDTO = data;
+    // Primero obtenemos el usuario desde /auth/me para sacar el idUsuario
+    this.authService.getUsuario().subscribe({
+      next: (usuario: any) => {
+        this.idUsuario = usuario.idUsuario;
+        this.cargarPerfil();
       },
-
-      error: (err) => {
-        console.error('Error al obtener el perfil', err);
-        if (err.status === 401) {
-          this.socialAuth.logout();
-          this.router.navigate(['/login'], {
-            queryParams: { message: 'session_expired' },
-          });
-        }
+      error: (err: any) => {
+        console.error('Error al obtener usuario:', err);
+        this.error = 'No se pudo identificar al usuario. Inicia sesión nuevamente.';
       },
     });
+  }
+
+  cargarPerfil(): void {
+    this.isLoading = true;
+    this.error = null;
+
+    this.perfilService.getPerfilCliente(this.idUsuario).subscribe({
+      next: (data: ResultadoResponse<PerfilClienteResponse>) => {
+        this.perfil = data;
+        this.isLoading = false;
+      },
+      error: (err: any) => {
+        console.error('Error al cargar perfil:', err);
+        this.error = 'No se pudo cargar el perfil. Intenta de nuevo.';
+        this.isLoading = false;
+      },
+    });
+  }
+
+  // Accesos directos a los datos del perfil para el HTML
+  get datos(): PerfilClienteResponse | null {
+    return this.perfil?.data ?? null;
+  }
+
+  getInitials(): string {
+    const nombres    = this.datos?.nombres    ?? '';
+    const apePaterno = this.datos?.apePaterno ?? '';
+    return `${nombres.charAt(0)}${apePaterno.charAt(0)}`.toUpperCase() || 'U';
   }
 }

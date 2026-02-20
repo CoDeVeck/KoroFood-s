@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.koroFoods.orderService.dto.ResultadoResponse;
 
-@FeignClient(name = "mesa-service", url = "http://localhost:8082/mesa/feign")
+@FeignClient(name = "tableService")
 public interface MesaFeignClient {
-	@GetMapping("/{id}")
+	@GetMapping("/mesa/feign/{id}")
     ResultadoResponse<MesaFeign> getTableById(@PathVariable int id);
 }

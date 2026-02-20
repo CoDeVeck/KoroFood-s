@@ -16,6 +16,7 @@ import com.koroFoods.orderService.repository.IPedidoRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PedidoService {
 
@@ -112,6 +114,8 @@ public class PedidoService {
 
             detallePedidoRepository.save(detalle);
             platoFeignClient.substractStockOrder(d.getIdPlato(), d.getCantidad());
+            log.info("Stock del plato ID {} reducido en {} unidades para el pedido ID {}",
+                    d.getIdPlato(), d.getCantidad(), pedido.getIdPedido());
 
             subtotalPedido = subtotalPedido.add(subtotal);
         }

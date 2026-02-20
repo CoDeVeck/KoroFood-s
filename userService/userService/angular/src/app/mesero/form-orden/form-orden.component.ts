@@ -322,6 +322,8 @@ export class FormOrdenComponent implements OnInit {
           this.irAOrdenes();
         } else {
           AlertService.error(response.mensaje || 'Error al crear la orden.');
+          console.log(response.mensaje);
+
         }
         this.creandoOrden = false;
       },
@@ -330,6 +332,7 @@ export class FormOrdenComponent implements OnInit {
         const mensajeError =
           err?.error?.mensaje || err?.message || 'Error al crear la orden';
         AlertService.error(mensajeError);
+        console.log(err);
       },
     });
   }

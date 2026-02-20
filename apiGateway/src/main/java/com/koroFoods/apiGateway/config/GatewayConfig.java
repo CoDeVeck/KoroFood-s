@@ -25,8 +25,12 @@ public class GatewayConfig {
                         .path("/ws/**", "/chat/**", "/chatbot/**")
                         .uri("lb:ws://userService")
                 )
+                .route("table-service", r -> r
+                        .path("/mesa/**", "/mesa/feign/**")
+                        .uri("lb://tableService")
+                )
                 .route("evento-service", r -> r
-                        .path("/eventos/**", "/evento/feign/**")
+                        .path("/eventos/**", "/evento/feign/**", "/evento-mesas/**","/tematicas/**")
                         .uri("lb://eventService")
                 )
                 .route("menu-service", r -> r
