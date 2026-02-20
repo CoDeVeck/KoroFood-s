@@ -10,9 +10,9 @@ import { PlatoResponse, PlatoRequest, EtiquetaResponse, EtiquetaRequest, PlatoEt
   providedIn: 'root'
 })
 export class PlatoService {
-  private apiUrl = `${enviroment.apiUrls.menu}/platos`;
-  private etiquetaUrl = `${enviroment.apiUrls.menu}/etiquetas`;
-  private platoEtiquetaUrl = `${enviroment.apiUrls.menu}/plato-etiquetas`;
+  private apiUrl = `${enviroment.apigateway}/platos`;
+  private etiquetaUrl = `${enviroment.apigateway}/etiquetas`;
+  private platoEtiquetaUrl = `${enviroment.apigateway}/plato-etiquetas`;
 
   constructor(private http: HttpClient) {}
 

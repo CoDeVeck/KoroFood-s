@@ -6,8 +6,8 @@ import { Observable } from 'rxjs';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 import { Reserva } from '../../shared/model/reserva.model';
 import { ReservaResponseDTO } from '../../shared/dto/ReservaResponseDTO';
-
-
+import { RecepcionistaCountsDTO } from '../../shared/dto/RecepcionistaCountsDTO';
+import { ReservaAsistidaDTO } from '../../shared/dto/ReservaAsistidaDTO';
 
 @Injectable({
   providedIn: 'root',
@@ -77,6 +77,22 @@ export class ReservaServiceService {
     return this.http.patch<ResultadoResponse<number>>(
       `${this.baseUrl}/cancelar/${idReserva}`,
       {}, // PATCH necesita body, aunque esté vacío
+    );
+  }
+
+  // GET /reserva/dashboard/recepcionista/counts
+  obtenerCountsRecepcionista(): Observable<RecepcionistaCountsDTO> {
+    return this.http.get<RecepcionistaCountsDTO>(
+      `${this.baseUrl}/dashboard/recepcionista/counts`,
+    );
+  }
+
+  // GET /reserva/dashboard/recepcionista/asistidas/hoy
+  listarReservasAsistidasHoy(): Observable<
+    ResultadoResponse<ReservaAsistidaDTO[]>
+  > {
+    return this.http.get<ResultadoResponse<ReservaAsistidaDTO[]>>(
+      `${this.baseUrl}/dashboard/recepcionista/asistidas/hoy`,
     );
   }
 }

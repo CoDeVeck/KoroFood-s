@@ -14,8 +14,21 @@ export class RecepcionistaLayoutComponent {
   private router = inject(Router);
   private authService = inject(AuthService);
 
+  currentRoute: string = 'home'; // Valor inicial
+
   navigateToChat(): void {
+    this.currentRoute = 'chat';
     this.router.navigate(['/recepcionista/chat']);
+  }
+
+  navigateToHome(): void {
+    this.currentRoute = 'home';
+    this.router.navigate(['/recepcionista/dashboard']);
+  }
+
+  navigateToList(): void {
+    this.currentRoute = 'list';
+    this.router.navigate(['/recepcionista/listado']);
   }
 
   logout(): void {

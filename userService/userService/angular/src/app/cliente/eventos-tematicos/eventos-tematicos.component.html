@@ -137,6 +137,11 @@
               ><i class="bi bi-clock"></i>
               {{ formatHora(evento.fechaInicio) }}</span
             >
+            <span>—</span>
+            <span
+              >
+              {{ formatHora(evento.fechaFin) }}</span
+            >
           </div>
           <div class="et-card-actions">
             <button
@@ -825,7 +830,7 @@
       </div>
     </div>
 
-          <!-- ALERTA -->
+    <!-- ALERTA -->
     <div
       class="koro-alerta"
       [class.koro-exito]="alertaTipo === 'exito'"
@@ -838,9 +843,18 @@
           <h3>¡Reserva Confirmada!</h3>
           <div class="koro-detalles">
             <p><strong>Evento:</strong> {{ eventoDetalle?.nombre }}</p>
-            <p><strong>Fecha:</strong> {{ formatFechaCorta(eventoDetalle?.fechaInicio) }}</p>
-            <p><strong>Hora:</strong> {{ formatHora(eventoDetalle?.fechaInicio) }} hrs</p>
-            <p><strong>Mesa:</strong> #{{ mesaSeleccionada?.numeroMesa }} · Zona {{ mesaSeleccionada?.zona }}</p>
+            <p>
+              <strong>Fecha:</strong>
+              {{ formatFechaCorta(eventoDetalle?.fechaInicio) }}
+            </p>
+            <p>
+              <strong>Hora:</strong>
+              {{ formatHora(eventoDetalle?.fechaInicio) }} hrs
+            </p>
+            <p>
+              <strong>Mesa:</strong> #{{ mesaSeleccionada?.numeroMesa }} · Zona
+              {{ mesaSeleccionada?.zona }}
+            </p>
             <p><strong>Personas:</strong> {{ cantidadPersonas }}</p>
           </div>
           <p class="koro-mensaje">¡Te esperamos!</p>
@@ -854,5 +868,4 @@
       </ng-container>
     </div>
   </div>
-
 </section>

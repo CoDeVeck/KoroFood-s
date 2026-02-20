@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.koroFoods.reservationService.dto.RecepcionistaCountsDTO;
+import com.koroFoods.reservationService.dto.ReservaAsistidaDTO;
 import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ReservaResponse;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
@@ -62,5 +65,15 @@ public class ReservaController {
 	@PatchMapping("/cancelar/{idReserva}")
 	public ResultadoResponse<Integer> cancelarReserva(@PathVariable Integer idReserva) {
 	    return reservaService.cancelarReservaPagada(idReserva);
+	}
+	
+	@GetMapping("/dashboard/recepcionista/counts")
+	public ResponseEntity<RecepcionistaCountsDTO> obtenerCounts() {
+	    return ResponseEntity.ok(reservaService.obtenerCounts());
+	}
+	
+	@GetMapping("/dashboard/recepcionista/asistidas/hoy")
+	public ResponseEntity<ResultadoResponse<List<ReservaAsistidaDTO>>> listarReservasAsistidasPorDia() {
+	    return ResponseEntity.ok(reservaService.listarReservasAsistidasPorDia());
 	}
 }

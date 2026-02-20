@@ -12,6 +12,8 @@ import com.koroFoods.reservationService.dto.EnviarCodigoRequest;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
 import com.koroFoods.reservationService.dto.VerificarCodigoRequest;
 import com.koroFoods.reservationService.enums.EstadoReserva;
+import com.koroFoods.reservationService.feign.MesaFeign;
+import com.koroFoods.reservationService.feign.MesaFeignClient;
 import com.koroFoods.reservationService.feign.UsuarioFeign;
 import com.koroFoods.reservationService.feign.UsuarioFeignClient;
 import com.koroFoods.reservationService.model.Reserva;
@@ -27,6 +29,7 @@ public class VerificacionService {
     
     private final IReservaRepository reservaRepository;
     private final UsuarioFeignClient usuarioFeignClient;
+    private final MesaFeignClient mesaFeignClient;
     private final EmailService emailService;
     private final SmsService smsService;
     private final VerificacionConfig verificacionConfig;
@@ -104,38 +107,42 @@ public class VerificacionService {
     @Transactional
     public ResultadoResponse<String> verificarCodigo(VerificarCodigoRequest request) {
 
-    	Reserva reserva = reservaRepository.findById(request.getReservaId())
-            .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
-        
+        Reserva reserva = reservaRepository.findById(request.getReservaId())
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+
         if (reserva.getEstado() == EstadoReserva.ASISTIDA) {
             return ResultadoResponse.error("La reserva ya fue verificada anteriormente");
         }
-        
         if (reserva.getEstado() == EstadoReserva.CANCELADA) {
             return ResultadoResponse.error("No se puede verificar una reserva cancelada");
         }
-        
         if (reserva.getCodigoVerificacion() == null) {
             return ResultadoResponse.error("No se ha generado un código de verificación");
         }
-        
         if (LocalDateTime.now().isAfter(reserva.getFechaExpCod())) {
             return ResultadoResponse.error("El código de verificación ha expirado");
         }
-        
         if (!reserva.getCodigoVerificacion().equals(request.getCodigo())) {
             return ResultadoResponse.error("Código de verificación incorrecto");
         }
-        
+
         reserva.setEstado(EstadoReserva.ASISTIDA);
         reserva.setVerificado(true);
         reservaRepository.save(reserva);
-        
-        log.info("Reserva {} verificada exitosamente y marcada como ASISTIDA", 
-            reserva.getIdReserva());
-        
+
+        if (reserva.getIdMesa() != null) {
+            try {
+                mesaFeignClient.cambiarEstadoMesaOcupada(reserva.getIdMesa());
+                log.info("Mesa {} marcada como OCUPADA", reserva.getIdMesa());
+            } catch (Exception e) {
+                log.warn("No se pudo actualizar estado de mesa {}: {}", reserva.getIdMesa(), e.getMessage());
+            }
+        }
+
+        log.info("Reserva {} verificada exitosamente y marcada como ASISTIDA", reserva.getIdReserva());
+
         return ResultadoResponse.success(
-            "Código verificado correctamente. Reserva confirmada como ASISTIDA", 
+            "Código verificado correctamente. Reserva confirmada como ASISTIDA",
             "ASISTIDA"
         );
     }

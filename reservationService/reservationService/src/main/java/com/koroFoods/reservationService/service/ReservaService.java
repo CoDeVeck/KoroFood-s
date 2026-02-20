@@ -1,5 +1,7 @@
 package com.koroFoods.reservationService.service;
 
+import com.koroFoods.reservationService.dto.RecepcionistaCountsDTO;
+import com.koroFoods.reservationService.dto.ReservaAsistidaDTO;
 import com.koroFoods.reservationService.dto.ReservaDtoFeing;
 import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ReservaResponse;
@@ -23,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -228,16 +229,89 @@ public class ReservaService {
 	    return ResultadoResponse.success("Reserva cancelada correctamente", reserva.getIdReserva());
 	}
 
+	public RecepcionistaCountsDTO obtenerCounts() {
+	    LocalDateTime inicioHoy      = LocalDate.now().atStartOfDay();
+	    LocalDateTime finHoy         = inicioHoy.plusDays(1);
+	    LocalDateTime inicioTomorrow = finHoy;
+	    LocalDateTime finTomorrow    = inicioHoy.plusDays(2);
+
+	    long reservasHoy      = reservaRepository.countReservasTotalesDelDia(inicioHoy, finHoy);
+	    long reservasAsistidas = reservaRepository.countReservasAsistidas(inicioHoy, finHoy);    
+	    long reservasTomorrow  = reservaRepository.countReservasTotalesDelDia(inicioTomorrow, finTomorrow);
+	    long reservasPendientes = Math.max(0, reservasHoy - reservasAsistidas);                
+
+	    return new RecepcionistaCountsDTO(reservasHoy, reservasAsistidas, reservasPendientes, reservasTomorrow);
+	}
+	
+	public ResultadoResponse<List<ReservaAsistidaDTO>> listarReservasAsistidasPorDia() {
+	    LocalDateTime inicio = LocalDate.now().atStartOfDay();
+	    LocalDateTime fin    = inicio.plusDays(1);
+
+	    List<Reserva> reservas = reservaRepository.findReservasAsistidasPorFecha(inicio, fin);
+
+	    List<ReservaAsistidaDTO> resultado = reservas.stream()
+	            .map(this::mapearAReservaAsistidaDTO)
+	            .collect(Collectors.toList());
+
+	    return ResultadoResponse.success("Reservas asistidas del día", resultado);
+	}
+
+	private ReservaAsistidaDTO mapearAReservaAsistidaDTO(Reserva r) {
+	    ReservaAsistidaDTO dto = new ReservaAsistidaDTO();
+
+	    dto.setIdReserva(r.getIdReserva());
+	    dto.setTipoReserva(r.getTipoReserva().name());
+	    dto.setFechaReserva(r.getFechaHora());
+	    dto.setObservaciones(r.getObservaciones());
+
+	    // Usuario
+	    try {
+	        ResultadoResponse<UsuarioFeign> usuarioResp = usuarioFeignClient.getUsuarioById(r.getIdUsuario());
+	        if (usuarioResp != null && usuarioResp.getData() != null) {
+	            dto.setNombreCliente(usuarioResp.getData().getNombreCompleto());
+	        }
+	    } catch (Exception e) {
+	        dto.setNombreCliente("Sin información");
+	    }
+
+	    // Mesa
+	    if (r.getIdMesa() != null) {
+	        try {
+	            ResultadoResponse<MesaFeign> mesaResp = mesaFeignClient.obtenerMesaPorId(r.getIdMesa());
+	            if (mesaResp != null && mesaResp.getData() != null) {
+	                dto.setMesa(mesaResp.getData().getNumeroMesa());
+	                dto.setZona(mesaResp.getData().getTipo());
+	            }
+	        } catch (Exception e) {
+	            dto.setMesa(r.getIdMesa());
+	            dto.setZona("-");
+	        }
+	    }
+
+	    // Evento (opcional, puede ser reserva sin evento)
+	    if (r.getIdEvento() != null) {
+	        try {
+	            ResultadoResponse<EventoFeign> eventoResp = eventoFeignClient.obtenerEvento(r.getIdEvento());
+	            if (eventoResp != null && eventoResp.getData() != null) {
+	                dto.setEvento(eventoResp.getData().getNombre());
+	                dto.setTematica(eventoResp.getData().getTematica());
+	            }
+	        } catch (Exception e) {
+	            dto.setEvento("-");
+	            dto.setTematica("-");
+	        }
+	    }
+
+	    return dto;
+	}
+	
 	/*
 	 * Reserva Simple----- Horario local (12:00 – 23:00) generarSlots
 	 * filtrarSlotsDisponibles frontend muestra horas libres usuario elige una
 	 * mesaOcupadaPorReserva (check final)
 	 *
-	 *
-	 * Reserva Especial---- Horario evento (19:00 – 22:00) generarSlots
-	 * filtrarSlotsDisponibles usuario elige mesaOcupadaPorReserva
-	 *
 	 */
+
     public ResultadoResponse<List<Reserva>> obtenerReservaPorIdCliente(Integer idCliente){
         validarId(idCliente);
 
