@@ -17,6 +17,7 @@ public class ReservaAsistidaDTO {
 
 	private Integer idReserva;
 	private String nombreCliente;
+	private String tipoReserva;
 	private LocalDateTime fechaReserva;
 	private String observaciones;
 	private Integer mesa;

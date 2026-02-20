@@ -247,6 +247,7 @@ public class ReservaService {
 	    ReservaAsistidaDTO dto = new ReservaAsistidaDTO();
 
 	    dto.setIdReserva(r.getIdReserva());
+	    dto.setTipoReserva(r.getTipoReserva().name());
 	    dto.setFechaReserva(r.getFechaHora());
 	    dto.setObservaciones(r.getObservaciones());
 
