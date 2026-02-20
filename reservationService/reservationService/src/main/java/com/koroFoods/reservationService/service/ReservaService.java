@@ -319,9 +319,17 @@ public class ReservaService {
 
 		validarId(idReserva);
 
+        log.info("ID RECIBIENDO: {} ", idReserva);
+
 		Reserva reservaObtenida = obtenerReserva(idReserva);
+        log.info("reserva obtenida: {} ", reservaObtenida);
+
 		ResultadoResponse<UsuarioFeign> cliente = usuarioFeignClient.getUsuarioById(reservaObtenida.getIdUsuario());
+        log.info("cliente obtenido : {} ", cliente);
+
 		var clienteData = cliente.getData();
+        log.info("cliente data obtenido : {} ", clienteData);
+
 
 		return ResultadoResponse.success("Se obtuvo al cliente ", clienteData);
 	}
