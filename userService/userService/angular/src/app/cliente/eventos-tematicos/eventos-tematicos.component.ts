@@ -385,10 +385,10 @@ export class EventosTematicosComponent implements OnInit {
         )
         .subscribe({
           next: (res) => {
-            this.mesaOcupadaMap[mesa.idEventoMesa] = res.data === true;
+            this.mesaOcupadaMap[mesa.idEventoMesa] = res.data === false;
           },
           error: () => {
-            this.mesaOcupadaMap[mesa.idEventoMesa] = false;
+            this.mesaOcupadaMap[mesa.idEventoMesa] = true;
           },
         });
     });

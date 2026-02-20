@@ -2,6 +2,7 @@ package com.koroFoods.tableService.service;
 
 import com.koroFoods.tableService.dto.MesaDtoFeign;
 import com.koroFoods.tableService.dto.ResultadoResponse;
+import com.koroFoods.tableService.enums.EstadoMesa;
 import com.koroFoods.tableService.enums.Zona;
 import com.koroFoods.tableService.model.Mesa;
 import com.koroFoods.tableService.repository.IMesaRepository;
@@ -75,6 +76,15 @@ public class MesaService {
                 .collect(Collectors.toList());
         
         return ResultadoResponse.success("Mesas encontradas", mesas);
+    }
+    
+    public ResultadoResponse<MesaDtoFeign> cambiarEstadoOcupada(Integer idMesa) {
+    	Mesa m = mesaRepository.findById(idMesa).orElse(null);
+    	m.setEstado(EstadoMesa.OCUPADA);
+    	mesaRepository.save(m);
+    	
+    	MesaDtoFeign mesita = convertirAMesaFeign(m);
+    	return ResultadoResponse.success("Se cambio el estado de la mesa a ocupada", mesita);
     }
     
     private MesaDtoFeign convertirAMesaFeign(Mesa mesa) {

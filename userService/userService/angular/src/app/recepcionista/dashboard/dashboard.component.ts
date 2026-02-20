@@ -25,6 +25,9 @@ export class DashboardComponent implements OnInit {
     reservasTomorrow: 0,
   };
 
+  reservasHoyFijo: number = 0;
+  primeraCarga: boolean = true;
+
   eventosDelDia: EventoFeignReserva[] = [];
 
   // Estados
@@ -59,8 +62,15 @@ export class DashboardComponent implements OnInit {
       eventos: this.eventoService.listarEventosDelDia(),
     }).subscribe({
       next: ({ counts, eventos }) => {
-        this.counts = counts;
-        // ResultadoResponse<T> → extraemos data con fallback seguro
+        if (this.primeraCarga) {
+          this.reservasHoyFijo = counts.reservasHoy;
+          this.counts.reservasTomorrow = counts.reservasTomorrow;
+          this.primeraCarga = false;
+        }
+
+        this.counts.reservasHoy = this.reservasHoyFijo;
+        this.counts.reservasAsistidas = counts.reservasAsistidas;
+        this.counts.reservasPendientes = this.reservasHoyFijo - counts.reservasAsistidas,
         this.eventosDelDia = (eventos as any)?.data ?? [];
         this.loading = false;
       },

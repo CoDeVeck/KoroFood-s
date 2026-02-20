@@ -17,6 +17,8 @@ import com.koroFoods.tableService.enums.Zona;
 import com.koroFoods.tableService.service.MesaService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 @RestController
 @RequestMapping("/mesa/feign")
@@ -45,6 +47,12 @@ public class MesaFeignController {
 	public ResponseEntity<ResultadoResponse<List<MesaDtoFeign>>> obtenerMesasPorIds(@RequestBody List<Integer> ids) {
 		ResultadoResponse<List<MesaDtoFeign>> mesas = mesaService.obtenerMesasPorIds(ids);
 		return ResponseEntity.ok(mesas);
+	}
+	
+	@PutMapping("/estado-ocupada/{id}")
+	public ResponseEntity<ResultadoResponse<MesaDtoFeign>> cambiarEstadoOcupada(@PathVariable Integer id) {
+		ResultadoResponse<MesaDtoFeign> m = mesaService.cambiarEstadoOcupada(id);
+		return ResponseEntity.ok(m);
 	}
 
 }

@@ -216,16 +216,15 @@ public class ReservaService {
 	}
 
 	public RecepcionistaCountsDTO obtenerCounts() {
-		LocalDateTime inicioHoy = LocalDate.now().atStartOfDay();         
-		LocalDateTime finHoy    = inicioHoy.plusDays(1);                   
-		LocalDateTime inicioTomorrow = inicioHoy.plusDays(1);
-		LocalDateTime finTomorrow    = inicioHoy.plusDays(2);
+	    LocalDateTime inicioHoy      = LocalDate.now().atStartOfDay();
+	    LocalDateTime finHoy         = inicioHoy.plusDays(1);
+	    LocalDateTime inicioTomorrow = finHoy;
+	    LocalDateTime finTomorrow    = inicioHoy.plusDays(2);
 
-		long reservasHoy      = reservaRepository.countReservasEntreFechas(inicioHoy, finHoy);
-		long reservasAsistidas = reservaRepository.countReservasAsistidas(inicioHoy, finHoy);
-		long reservasTomorrow   = reservaRepository.countReservasEntreFechas(inicioTomorrow, finTomorrow);
-	    long reservasPendientes = reservasHoy - reservasAsistidas;
-
+	    long reservasHoy      = reservaRepository.countReservasTotalesDelDia(inicioHoy, finHoy);
+	    long reservasAsistidas = reservaRepository.countReservasAsistidas(inicioHoy, finHoy);    
+	    long reservasTomorrow  = reservaRepository.countReservasTotalesDelDia(inicioTomorrow, finTomorrow);
+	    long reservasPendientes = Math.max(0, reservasHoy - reservasAsistidas);                
 
 	    return new RecepcionistaCountsDTO(reservasHoy, reservasAsistidas, reservasPendientes, reservasTomorrow);
 	}

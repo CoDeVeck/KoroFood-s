@@ -78,11 +78,11 @@ public interface IReservaRepository extends JpaRepository<Reserva, Integer> {
 
 	@Query("""
 			    SELECT COUNT(r) FROM Reserva r
-			    WHERE r.estado = 'PAGADA'
+			    WHERE r.estado IN ('PAGADA', 'ASISTIDA')
 			    AND r.fechaHora >= :inicio
 			    AND r.fechaHora < :fin
 			""")
-	long countReservasEntreFechas(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
+	long countReservasTotalesDelDia(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
 
 	@Query("""
 			    SELECT COUNT(r) FROM Reserva r

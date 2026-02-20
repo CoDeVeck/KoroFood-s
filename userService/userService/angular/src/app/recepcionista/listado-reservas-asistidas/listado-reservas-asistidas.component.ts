@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReservaServiceService } from '../../cliente/service/reserva-service.service';
@@ -20,34 +20,29 @@ interface AlertaVerificacion {
   imports: [CommonModule, FormsModule],
   templateUrl: './listado-reservas-asistidas.component.html',
   styleUrls: ['./listado-reservas-asistidas.component.css'],
+  encapsulation: ViewEncapsulation.None // ← Esto desactiva la encapsulación
 })
 export class ListadoReservasAsistidasComponent implements OnInit {
   private reservaService = inject(ReservaServiceService);
   private codigoService = inject(CodigoVerificacionService);
 
-  // ── Data ──────────────────────────────────────────
   reservas: ReservaAsistidaDTO[] = [];
   reservasFiltradas: ReservaAsistidaDTO[] = [];
 
-  // ── Estados ───────────────────────────────────────
   loading = true;
   error: string | null = null;
 
-  // ── Filtros ───────────────────────────────────────
   filtroTipo: FiltroTipo = 'AMBAS';
   textoBusqueda: string = '';
 
-  // ── Fecha ─────────────────────────────────────────
   fechaFormateada = '';
 
-  // ── Modal verificar ───────────────────────────────
   modalAbierto = false;
   codigoIngresado = '';
   idReservaInput: number | null = null;
   verificando = false;
   alertaVerificacion: AlertaVerificacion | null = null;
 
-  // ─────────────────────────────────────────────────
   ngOnInit(): void {
     this.formatearFechaHeader();
     this.cargarReservas();
@@ -63,7 +58,6 @@ export class ListadoReservasAsistidasComponent implements OnInit {
     this.fechaFormateada = raw.charAt(0).toUpperCase() + raw.slice(1);
   }
 
-  // ── Carga ─────────────────────────────────────────
   cargarReservas(): void {
     this.loading = true;
     this.error = null;
@@ -81,7 +75,6 @@ export class ListadoReservasAsistidasComponent implements OnInit {
     });
   }
 
-  // ── Filtros ───────────────────────────────────────
   cambiarFiltroTipo(tipo: FiltroTipo): void {
     this.filtroTipo = tipo;
     this.aplicarFiltros();
@@ -122,7 +115,6 @@ export class ListadoReservasAsistidasComponent implements OnInit {
     this.aplicarFiltros();
   }
 
-  // ── Modal ─────────────────────────────────────────
   abrirModalVerificar(): void {
     this.modalAbierto = true;
     this.codigoIngresado = '';
@@ -157,7 +149,6 @@ export class ListadoReservasAsistidasComponent implements OnInit {
             icono: 'fa-solid fa-circle-check',
             mensaje: resp.mensaje!,
           };
-          // Recargar listado para reflejar la nueva asistida
           setTimeout(() => {
             this.cerrarModal();
             this.cargarReservas();
@@ -193,7 +184,6 @@ export class ListadoReservasAsistidasComponent implements OnInit {
     if (m.includes('cancelada')) {
       return { clase: 'alerta-danger', icono: 'fa-solid fa-ban', mensaje };
     }
-    // incorrecto / no encontrada / genérico
     return {
       clase: 'alerta-danger',
       icono: 'fa-solid fa-triangle-exclamation',
@@ -201,7 +191,6 @@ export class ListadoReservasAsistidasComponent implements OnInit {
     };
   }
 
-  // ── Helpers ───────────────────────────────────────
   getIniciales(nombre: string): string {
     if (!nombre) return '?';
     return nombre
