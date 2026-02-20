@@ -47,4 +47,17 @@ export class DetallePedidoServiceService {
       `${this.baseUrl}/cliente/${idPedido}`,
     );
   }
+
+  cambiarEstado(idPedidio: number): Observable<ResultadoResponse<Pedido>> {
+    return this.http.put<ResultadoResponse<Pedido>>(
+      `${this.baseUrl}/estadoPagado?idPedido=${idPedidio}`,
+      null,
+    );
+  }
+
+  obtenerPedido(idPedido: number): Observable<ResultadoResponse<Pedido>> {
+    return this.http.get<ResultadoResponse<Pedido>>(
+      `${this.baseUrl}/obtener/${idPedido}`,
+    );
+  }
 }

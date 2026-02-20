@@ -274,3 +274,47 @@
     </div>
   </div>
 </div>
+
+<!-- Modal Pago Mesero -->
+<div class="modal-overlay" *ngIf="mostrarModalPago">
+  <div class="modal-pago">
+    <h3>Resumen del Pedido</h3>
+
+    <div class="pago-datos" *ngIf="datosPago">
+      <div class="pago-row">
+        <span>Cliente:</span>
+        <strong>{{ datosPago.nombreCliente }}</strong>
+      </div>
+      <div class="pago-row">
+        <span>Total platos:</span>
+        <strong>{{ datosPago.totalPlatos }}</strong>
+      </div>
+      <div class="pago-row total">
+        <span>Total a pagar:</span>
+        <strong>S/ {{ datosPago.totalPagar | number: "1.2-2" }}</strong>
+      </div>
+    </div>
+
+    <!-- Método que eligió el cliente -->
+    <div class="metodo-elegido" *ngIf="metodoPagoCliente">
+      <p>Método elegido por el cliente:</p>
+      <span class="badge-metodo">{{ metodoPagoCliente }}</span>
+    </div>
+    <div class="esperando-metodo" *ngIf="!metodoPagoCliente">
+      <div class="spinner-small"></div>
+      <p>Esperando que el cliente elija el método de pago...</p>
+    </div>
+
+    <button
+      class="btn-confirmar-pago"
+      [disabled]="!metodoPagoCliente"
+      (click)="confirmarPago()"
+    >
+      Confirmar Pago
+    </button>
+
+    <button class="btn-cancelar-modal" (click)="mostrarModalPago = false">
+      Cancelar
+    </button>
+  </div>
+</div>

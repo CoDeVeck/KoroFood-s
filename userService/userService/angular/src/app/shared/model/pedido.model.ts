@@ -11,5 +11,5 @@ export interface Pedido {
   fechaHora: string;
   subTotal: number;
   total: number;
-  estadoPedido: EstadoPedido;
+  estado: EstadoPedido;
 }

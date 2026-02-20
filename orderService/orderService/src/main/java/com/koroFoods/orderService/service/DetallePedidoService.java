@@ -5,6 +5,7 @@ import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
 import com.koroFoods.orderService.dto.request.IncrementarStock;
 import com.koroFoods.orderService.dto.response.*;
 import com.koroFoods.orderService.enums.EstadoDetallePedido;
+import com.koroFoods.orderService.enums.EstadoPedido;
 import com.koroFoods.orderService.feign.*;
 import com.koroFoods.orderService.model.DetallePedido;
 import com.koroFoods.orderService.model.Pedido;
@@ -68,6 +69,17 @@ public class DetallePedidoService {
                 .orElseThrow(() -> new RuntimeException("Error al obtener el pedido: " + id));
     }
 
+    public ResultadoResponse<Pedido> obtenerPedidoPorId(Integer idPedido){
+        validarId(idPedido);
+
+        Pedido obtenido = obtenerPedido(idPedido);
+        if (obtenido != null){
+            return ResultadoResponse.success("Se obtuvo el pedido: ", obtenido);
+        }
+
+        return  ResultadoResponse.error("No se obuto el pedido error.",null);
+    }
+
 
     private ResultadoResponse<UsuarioFeign> obtenerClientePorReserva(Integer idUsuario) {
         validarId(idUsuario);
@@ -91,6 +103,63 @@ public class DetallePedidoService {
         detallePedidoRepository.save(dp);
 
         return ResultadoResponse.success("Se actualizo al estado Entregado", dp);
+    }
+
+
+    @Transactional
+    public ResultadoResponse<DetallePedidoPagar> procederAlPago(Integer idPedido){
+        validarId(idPedido);
+
+        List<DetallePedidoResponse> listaDeDetalles =
+                obtenerDetallePorPedido(idPedido).getData();
+
+        //Validamos q ningun detalle este en estado PENDIENTE
+        for (var detalle : listaDeDetalles){
+            if (detalle.getEstado().equals("PED")){
+                throw new RuntimeException("Las ordenes no pueden estar en PENDIENTE");
+            }
+        }
+
+        int totalPlatos = listaDeDetalles.stream()
+                .mapToInt(DetallePedidoResponse::getCantidad)
+                .sum();
+
+        //Sumamos las cantidades
+        Pedido pedido = obtenerPedido(idPedido);
+        ResultadoResponse<UsuarioFeign> usuarioCliente = obtenerClientePorReserva(pedido.getIdReserva());
+        var clienteData =usuarioCliente.getData();
+
+
+        DetallePedidoPagar response = new DetallePedidoPagar();
+
+
+        response.setIdCliente(clienteData.getIdUsuario());
+        response.setNombreCliente(
+                String.format(clienteData.getNombres() + " " + clienteData.getApePaterno()));
+        response.setTotalPlatos(totalPlatos);
+        response.setMetodoPago(null);
+
+        BigDecimal descontar = BigDecimal.valueOf(15);
+        BigDecimal total = pedido.getTotal().subtract(descontar);
+
+        response.setTotalPagar(total);
+
+        return ResultadoResponse.success("Proceder al pago, ",response);
+    }
+
+
+    @Transactional
+    public ResultadoResponse<Pedido> cambiarAPagadoLaOrder(Integer idPedido){
+        validarId(idPedido);
+
+        Pedido actualizar = obtenerPedido(idPedido);
+        if (actualizar != null){
+            actualizar.setEstado(EstadoPedido.PA);
+            pedidoRepository.save(actualizar);
+
+            return ResultadoResponse.success("Se pago correctamente el pedido", actualizar);
+        }
+        return ResultadoResponse.error("Hubo un error al pagar el pedido: " + idPedido, null);
     }
 
     @Transactional
@@ -286,6 +355,8 @@ public class DetallePedidoService {
         rs.setSubTotal(dp.getSubtotal());
         return rs;
     }
+
+
 
 
     public ResultadoResponse<DetallePedidoMeseroResponse>obtenerUsuarioPorPedido(Integer idPedido){
