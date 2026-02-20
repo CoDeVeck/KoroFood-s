@@ -28,5 +28,4 @@ public class DetallePedidoResponse {
     private BigDecimal precioUnitario;
     private BigDecimal subTotal;
 
-    //private boolean pagar
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
 import com.koroFoods.orderService.dto.response.DetallePedidoMeseroResponse;
+import com.koroFoods.orderService.dto.response.DetallePedidoPagar;
 import com.koroFoods.orderService.dto.response.DetallePedidoResponse;
 import com.koroFoods.orderService.dto.response.DetallePedidoUsuarioResponse;
 import com.koroFoods.orderService.model.DetallePedido;
@@ -128,4 +129,41 @@ public class PedidoController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pedidos);
 		}
 	}
+
+    @GetMapping("/procederPago")
+    public ResponseEntity<ResultadoResponse<DetallePedidoPagar>> pagar(
+            @RequestParam Integer idPedido
+    ){
+        ResultadoResponse<DetallePedidoPagar> response = detallePedidoService.procederAlPago(idPedido);
+
+        if (response.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    @PutMapping("/estadoPagado")
+    public ResponseEntity<ResultadoResponse<Pedido>> estadoPagado(
+            @RequestParam Integer idPedido
+    ){
+        ResultadoResponse<Pedido> response = detallePedidoService.cambiarAPagadoLaOrder(idPedido);
+        if (response.isValor()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    @GetMapping("/obtener/{idPedido}")
+    public ResponseEntity<ResultadoResponse<Pedido>> obtener(
+            @PathVariable Integer idPedido
+    ){
+        ResultadoResponse<Pedido> response = detallePedidoService.obtenerPedidoPorId(idPedido);
+        if (response != null) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
 }
