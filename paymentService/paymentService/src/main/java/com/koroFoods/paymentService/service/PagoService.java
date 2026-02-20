@@ -80,6 +80,9 @@ public class PagoService {
 
         Pago guardado = pagoRepository.save(pago);
 
+
+        dashboardNotificator.notificarGraficoTres(LocalDate.now().getMonthValue());
+
         // Retornar datos para generar QR en frontend
         return generarQRData(guardado);
     }
@@ -119,7 +122,7 @@ public class PagoService {
         // Publicar evento en RabbitMQ
         publicarEventoPagoConfirmado(confirmado);
 
-        dashboardNotificator.notificarGraficoTres(LocalDate.now().getMonthValue());
+
 
         return mapearAResponse(confirmado);
     }
