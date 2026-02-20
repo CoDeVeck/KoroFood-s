@@ -12,6 +12,6 @@ import java.util.List;
 public interface PaymentFeignClient {
 
     @GetMapping("/pago/feign/graficoTres")
-    ResultadoResponse<List<GraficoTresDto>>getGraficoTres(@RequestParam Integer mes);
+    ResultadoResponse<GraficoTresDto>getGraficoTres(@RequestParam Integer mes);
 
 }

@@ -10,12 +10,15 @@ import com.koroFoods.orderService.model.DetallePedido;
 import com.koroFoods.orderService.model.Pedido;
 import com.koroFoods.orderService.repository.IDetallePedidoRepository;
 import com.koroFoods.orderService.repository.IPedidoRepository;
+import com.koroFoods.orderService.util.DashboardNotificador;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +33,7 @@ public class DetallePedidoService {
     private final ReservaFeignClient reservaFeignClient;
     private final PlatoFeignClient platoFeignClient;
 
+    private final DashboardNotificador dashboardNotificador;
     //Obtenemos el cliente existente por el id_reserva que hay en pedido que a la vez relaciona una
     //reserva con un cliente
     public ResultadoResponse<DetallePedidoUsuarioResponse> obtenerUsuarioPorPedidoReserva(Integer idPedido) {
@@ -178,6 +182,10 @@ public class DetallePedidoService {
         //Actualizamos el stock del plato los subtotales etc
         actualizarStockPlato(request.getIdPlato(), request.getCantidad());
         actualizarTotalesPedido(actualizarPedido, registrar.getSubtotal());
+
+        //Mandamos la notificacion al DASHBOARD para que le llegue la data
+        //que solicita para actualizar automaticamente el grafico UNO*
+        dashboardNotificador.notificarGraficoUno(LocalDate.now().getMonthValue());
 
 
         return ResultadoResponse.success("Se agrego un nuevo plato a tu orden  " + platoData.getNombre(), registrar);
