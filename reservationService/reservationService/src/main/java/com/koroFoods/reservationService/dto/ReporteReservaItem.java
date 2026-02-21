@@ -11,16 +11,11 @@ import java.time.LocalDateTime;
 @Builder
 
 public class ReporteReservaItem {
-
 	private Integer idReserva;
     private String nombreCliente;
-    private String emailCliente;
-    private String telefonoCliente;
     private Integer numeroMesa;
     private String zona;
     private LocalDateTime fechaHora;
     private String estado;
     private String estadoDescripcion;
-    private String metodoPago;
-    private BigDecimal montoDeposito;
 }

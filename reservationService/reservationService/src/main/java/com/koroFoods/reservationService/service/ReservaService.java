@@ -442,50 +442,77 @@ public class ReservaService {
 
 	@Transactional(readOnly = true)
 	public List<ReporteReservaItem> obtenerDatosReporteReservas(ReporteReservasRequest request) {
+	    
+	    LocalDateTime fechaInicio = request.getFechaInicio().atStartOfDay();
+	    LocalDateTime fechaFin = request.getFechaFin().atTime(23, 59, 59);
 
-		LocalDateTime fechaInicio = request.getFechaInicio().atStartOfDay();
-		LocalDateTime fechaFin = request.getFechaFin().atTime(23, 59, 59);
+	    log.info("📊 Generando reporte desde {} hasta {}", fechaInicio, fechaFin);
+	    
+	    List<Reserva> reservas = reservaRepository.findReservasParaReporte(
+	        fechaInicio, 
+	        fechaFin, 
+	        request.getEstado()
+	    );
+	    
+	    log.info("📊 Encontradas {} reservas", reservas.size());
+	    
+	    // Imprimir estados de las reservas
+	    reservas.forEach(r -> log.info("Reserva {}: Estado = {}", r.getIdReserva(), r.getEstado()));
 
-		// Query personalizada (crear en el repositorio)
-		List<Reserva> reservas = reservaRepository.findReservasParaReporte(fechaInicio, fechaFin, request.getEstado(),
-				request.getZona());
+	    List<ReporteReservaItem> items = reservas.stream()
+	        .map(this::mapearAReporteItem)
+	        .collect(Collectors.toList());
 
-		return reservas.stream().map(this::mapearAReporteItem).collect(Collectors.toList());
+	    // Filtrar por zona si se especificó
+	    if (request.getZona() != null && !request.getZona().isBlank()) {
+	        log.info("📊 Filtrando por zona: {}", request.getZona());
+	        items = items.stream()
+	            .filter(item -> request.getZona().equals(item.getZona()))
+	            .collect(Collectors.toList());
+	        log.info("📊 Después de filtrar: {} reservas", items.size());
+	    }
+
+	    return items;
 	}
 
 	private ReporteReservaItem mapearAReporteItem(Reserva reserva) {
-		// Obtener datos del cliente via Feign
-		ResultadoResponse<UsuarioFeign> clienteResponse = usuarioFeignClient.getUsuarioById(reserva.getIdUsuario());
-		UsuarioFeign cliente = clienteResponse.getData();
-
-		// Obtener datos de la mesa via Feign
-		ResultadoResponse<MesaFeign> mesaResponse = mesaFeignClient.obtenerMesaPorId(reserva.getIdMesa());
-		MesaFeign mesa = mesaResponse.getData();
-		// Obtener datos del pago (si existe)
-		BigDecimal montoDeposito = null;
-		String metodoPago = null;
-		if (reserva.getIdReserva() != null) {
-			// Aquí podrías llamar al servicio de pago para obtener el depósito
-			// O tener esa info en la reserva directamente
-		}
-
-		return ReporteReservaItem.builder().idReserva(reserva.getIdReserva()).nombreCliente(cliente.getNombreCompleto()) // ✅
-																															// Usa
-																															// el
-																															// método
-																															// del
-																															// DTO
-				.emailCliente(cliente.getCorreo()) // ✅ correo, no email
-				.telefonoCliente(cliente.getTelefono()).numeroMesa(mesa.getNumeroMesa()).zona(mesa.getTipo()) // ✅ tipo
-																												// contiene
-																												// la
-																												// zona
-																												// (Z1,
-																												// Z2,
-																												// etc)
-				.fechaHora(reserva.getFechaHora()).estado(reserva.getEstado().name())
-				.estadoDescripcion(obtenerDescripcionEstado(reserva.getEstado())).metodoPago(metodoPago)
-				.montoDeposito(montoDeposito).build();
+	    String nombreCliente = "Cliente no disponible";
+	    Integer numeroMesa = 0;
+	    String zona = "-";
+	    
+	    // Intentar obtener datos del cliente
+	    try {
+	        ResultadoResponse<UsuarioFeign> clienteResponse = usuarioFeignClient.getUsuarioById(reserva.getIdUsuario());
+	        if (clienteResponse != null && clienteResponse.getData() != null) {
+	            nombreCliente = clienteResponse.getData().getNombreCompleto();
+	        }
+	    } catch (Exception e) {
+	        log.warn("⚠️ No se pudo obtener cliente para reserva {}: {}", 
+	            reserva.getIdReserva(), e.getMessage());
+	    }
+	    
+	    // Intentar obtener datos de la mesa
+	    try {
+	        ResultadoResponse<MesaFeign> mesaResponse = mesaFeignClient.obtenerMesaPorId(reserva.getIdMesa());
+	        if (mesaResponse != null && mesaResponse.getData() != null) {
+	            MesaFeign mesa = mesaResponse.getData();
+	            numeroMesa = mesa.getNumeroMesa();
+	            zona = mesa.getTipo();
+	        }
+	    } catch (Exception e) {
+	        log.warn("⚠️ No se pudo obtener mesa para reserva {}: {}", 
+	            reserva.getIdReserva(), e.getMessage());
+	    }
+	    
+	    return ReporteReservaItem.builder()
+	        .idReserva(reserva.getIdReserva())
+	        .nombreCliente(nombreCliente)
+	        .numeroMesa(numeroMesa)
+	        .zona(zona)
+	        .fechaHora(reserva.getFechaHora())
+	        .estado(reserva.getEstado().name())
+	        .estadoDescripcion(obtenerDescripcionEstado(reserva.getEstado()))
+	        .build();
 	}
 
 	private String obtenerDescripcionEstado(EstadoReserva estado) {
@@ -495,6 +522,7 @@ public class ReservaService {
 		case CANCELADA -> "Cancelada";
 		case ASISTIDA -> "Asistida";
 		case VENCIDA -> "Vencida";
+		default -> estado.name();
 		};
 	}
 

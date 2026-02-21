@@ -115,6 +115,22 @@ export class ReporteReservasComponent implements OnInit{
     });
   }
 
+  get estadoLabel(): string {
+  const estado = this.reporteForm.value.estado;
+  if (!estado) return 'Todos';
+
+  const encontrado = this.estados.find(e => e.value === estado);
+  return encontrado ? encontrado.label : 'Todos';
+}
+
+get zonaLabel(): string {
+  const zona = this.reporteForm.value.zona;
+  if (!zona) return 'Todas';
+
+  const encontrado = this.zonas.find(z => z.value === zona);
+  return encontrado ? encontrado.label : 'Todas';
+}
+
   get fechaInicio() { return this.reporteForm.get('fechaInicio'); }
   get fechaFin() { return this.reporteForm.get('fechaFin'); }
 }

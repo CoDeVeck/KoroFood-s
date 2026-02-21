@@ -1,5 +1,6 @@
 package com.koroFoods.orderService.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
@@ -12,13 +13,16 @@ import com.koroFoods.orderService.service.DetallePedidoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.format.annotation.DateTimeFormat;
 import com.koroFoods.orderService.dto.PedidoRequestDTO;
 import com.koroFoods.orderService.dto.PedidoResumenDto;
+import com.koroFoods.orderService.dto.PlatosMasVendidosDTO;
 import com.koroFoods.orderService.dto.ResultadoResponse;
+import com.koroFoods.orderService.dto.VentasPorFechaMesaDTO;
 import com.koroFoods.orderService.enums.EstadoPedido;
 import com.koroFoods.orderService.model.Pedido;
 import com.koroFoods.orderService.service.PedidoService;
+import com.koroFoods.orderService.service.ReporteService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +33,7 @@ public class PedidoController {
 
 	private final PedidoService pedidoService;
 	private final DetallePedidoService detallePedidoService;
+	  private final ReporteService reporteService;
 
 	@GetMapping
 	public ResponseEntity<ResultadoResponse<List<PedidoResumenDto>>> list(
@@ -165,5 +170,35 @@ public class PedidoController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
+    }
+    
+  
+
+    
+    @GetMapping("reporte/ventas-por-mesa")
+    public ResponseEntity<ResultadoResponse<List<VentasPorFechaMesaDTO>>> ventasPorFechaMesa(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
+            @RequestParam(required = false) Integer idMesa) {
+
+        ResultadoResponse<List<VentasPorFechaMesaDTO>> resultado =
+                reporteService.ventasPorFechaMesa(fechaInicio, fechaFin, idMesa);
+
+        return resultado.isValor()
+                ? ResponseEntity.ok(resultado)
+                : ResponseEntity.badRequest().body(resultado);
+    }
+
+     @GetMapping("reporte/platos-mas-vendidos")
+    public ResponseEntity<ResultadoResponse<List<PlatosMasVendidosDTO>>> platosMasVendidos(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+
+        ResultadoResponse<List<PlatosMasVendidosDTO>> resultado =
+                reporteService.platosMasVendidos(fechaInicio, fechaFin);
+
+        return resultado.isValor()
+                ? ResponseEntity.ok(resultado)
+                : ResponseEntity.badRequest().body(resultado);
     }
 }

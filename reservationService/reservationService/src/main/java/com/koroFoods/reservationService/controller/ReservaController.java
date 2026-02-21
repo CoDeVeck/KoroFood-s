@@ -1,5 +1,6 @@
 package com.koroFoods.reservationService.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -77,19 +78,32 @@ public class ReservaController {
 		return reservaService.cancelarReservaPagada(idReserva);
 	}
 
-	@PostMapping("/reportes/reservas")
-	public ResponseEntity<byte[]> generarReporteReservas(@RequestBody ReporteReservasRequest request) {
+	@GetMapping("/reportes/reservas/todas")
+	public ResponseEntity<byte[]> generarReporteTodasReservas() {
+	    
+	    // Últimos 6 meses por defecto
+	    LocalDate fechaFin = LocalDate.now();
+	    LocalDate fechaInicio = fechaFin.minusMonths(6);
+	    
+	    ReporteReservasRequest request = new ReporteReservasRequest();
+	    request.setFechaInicio(fechaInicio);
+	    request.setFechaFin(fechaFin);
+	    
+	    List<ReporteReservaItem> datos = reservaService.obtenerDatosReporteReservas(request);
+	    
+	    byte[] pdfBytes = pdfReservasService.generarReporteReservas(
+	        datos, 
+	        fechaInicio, 
+	        fechaFin
+	    );
 
-		List<ReporteReservaItem> datos = reservaService.obtenerDatosReporteReservas(request);
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_PDF);
+	    headers.setContentDispositionFormData("attachment", "reporte-reservas.pdf");
 
-		byte[] pdfBytes = pdfReservasService.generarReporteReservas(datos, request.getFechaInicio(),
-				request.getFechaFin());
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_PDF);
-		headers.setContentDispositionFormData("attachment", "reporte-reservas.pdf");
-
-		return ResponseEntity.ok().headers(headers).body(pdfBytes);
+	    return ResponseEntity.ok()
+	        .headers(headers)
+	        .body(pdfBytes);
 	}
 
 	@GetMapping("/dashboard/recepcionista/counts")

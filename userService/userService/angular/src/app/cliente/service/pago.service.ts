@@ -107,4 +107,10 @@ export class PagoService {
     console.error('❌ [PagoService] Error:', errorMessage, error);
     return throwError(() => new Error(errorMessage));
   }
+
+  generarReporteIngresos(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/reporte/ingresos`, {
+      responseType: 'blob'
+    });
+  }
 }

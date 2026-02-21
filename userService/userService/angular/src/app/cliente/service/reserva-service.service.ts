@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { enviroment } from '../../../enviroments/enviroment';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { ReservaRequest } from '../../shared/request/ReservaRequest';
 import { Observable } from 'rxjs';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
@@ -89,11 +89,13 @@ export class ReservaServiceService {
 
   // NUEVO: Generar reporte de reservas en PDF
   generarReporteReservas(request: ReporteReservasRequest): Observable<Blob> {
-    return this.http.post(`${this.baseUrl}/reportes/reservas`, request, {
+    const params = new HttpParams()
+      .set('fechaInicio', request.fechaInicio)
+      .set('fechaFin', request.fechaFin);
+
+    return this.http.get(`${this.baseUrl}/reportes/reservas/todas`, {
+      params,
       responseType: 'blob',
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-      }),
     });
   }
   // GET /reserva/dashboard/recepcionista/counts
