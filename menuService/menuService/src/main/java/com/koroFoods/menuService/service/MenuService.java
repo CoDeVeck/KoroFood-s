@@ -2,11 +2,14 @@ package com.koroFoods.menuService.service;
 
 import com.koroFoods.menuService.dto.EtiquetaDtoFeign;
 import com.koroFoods.menuService.dto.PlatoDtoFeign;
+import com.koroFoods.menuService.dto.ReportePlatoItem;
 import com.koroFoods.menuService.dto.ResultadoResponse;
 import com.koroFoods.menuService.dto.request.IncrementarStock;
 import com.koroFoods.menuService.dto.request.PlatoStockDto;
 import com.koroFoods.menuService.model.Plato;
 import com.koroFoods.menuService.repository.IMenuRepository;
+import com.koroFoods.menuService.repository.IPlatoEtiquetaRepository;
+import com.koroFoods.menuService.repository.IPlatoRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +21,8 @@ import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.Graphics2D;
@@ -43,6 +48,14 @@ public class MenuService {
 
 	private final IMenuRepository menuRepository;
 
+	@Autowired
+	private PdfPlatosService pdfPlatosService;
+	
+	@Autowired
+	private IPlatoRepository platoRepository;
+	
+	@Autowired
+	private IPlatoEtiquetaRepository platoEtiquetaRepository;
 	// Método para restar el stock de los pedidos consumidos
 	public ResultadoResponse<PlatoDtoFeign> substractStockOrder(Integer idPlato, Integer cantidadVendida) {
         Plato plato = menuRepository.findById(idPlato)
@@ -568,5 +581,38 @@ public class MenuService {
             log.error("Error al obtener con ID: {}", request);
             throw new IllegalArgumentException("ID invalido");
         }
+    }
+    
+    public byte[] generarReportePlatos() {
+        List<Plato> platos = platoRepository.findAll();
+
+        List<ReportePlatoItem> items = platos.stream().map(p -> {
+            ReportePlatoItem item = new ReportePlatoItem();
+            item.setIdPlato(p.getIdPlato());
+            item.setNombre(p.getNombre());
+            item.setPrecio(p.getPrecio());
+            item.setStock(p.getStock());
+            item.setTipoPlato(p.getTipoPlato().name());
+            item.setTipoPlatoDescripcion(switch (p.getTipoPlato().name()) {
+                case "E" -> "Entrada";
+                case "S" -> "Sopa";
+                case "P" -> "Plato Principal";
+                case "B" -> "Bebida";
+                default  -> p.getTipoPlato().name();
+            });
+            item.setActivo(p.getActivo());
+
+            // Obtener etiquetas activas
+            List<String> etiquetas = platoEtiquetaRepository
+                    .findByPlato_IdPlatoAndActivo(p.getIdPlato(), true)
+                    .stream()
+                    .map(pe -> pe.getEtiqueta().getNombre())
+                    .toList();
+            item.setEtiquetas(etiquetas);
+
+            return item;
+        }).toList();
+
+        return pdfPlatosService.generarReportePlatos(items);
     }
 }

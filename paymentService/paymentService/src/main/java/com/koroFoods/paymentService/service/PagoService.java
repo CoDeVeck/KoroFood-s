@@ -16,6 +16,7 @@ import com.koroFoods.paymentService.dtos.PagoAnuladoEvent;
 import com.koroFoods.paymentService.dtos.PagoConfirmadoEvent;
 import com.koroFoods.paymentService.dtos.PagoResponse;
 import com.koroFoods.paymentService.dtos.QRDataResponse;
+import com.koroFoods.paymentService.dtos.ReporteIngresoItem;
 import com.koroFoods.paymentService.dtos.SubirCapturaRequest;
 import com.koroFoods.paymentService.enums.EstadoPago;
 import com.koroFoods.paymentService.enums.MetodoPago;
@@ -46,6 +47,9 @@ public class PagoService {
     private final PagoEventPublisher eventPublisher;
 
     private final DashboardNotificator dashboardNotificator;
+    
+    @Autowired
+    private PdfIngresosService pdfIngresosService;
     
     @Autowired
     private CloudinaryService cloudinaryService;
@@ -477,5 +481,27 @@ public class PagoService {
         }
         log.error("No se obtuvbo la lista {}", (Object) null);
         return  ResultadoResponse.error("Lista obtenida: ",  null);
+    }
+    
+    public byte[] generarReporteIngresos() {
+        List<Pago> pagos = pagoRepository.findAll();
+
+        List<ReporteIngresoItem> items = pagos.stream().map(p -> {
+            ReporteIngresoItem item = new ReporteIngresoItem();
+            item.setIdPago(p.getIdPago());
+            item.setReferenciaPago(p.getReferenciaPago());
+            item.setTipoPago(obtenerDescripcionTipoPago(p.getTipoPago()));
+            item.setMetodoPago(obtenerDescripcionMetodoPago(p.getMetodoPago()));
+            item.setMonto(p.getMonto());
+            item.setEstado(p.getEstado().name());
+            item.setEstadoDescripcion(obtenerDescripcionEstado(p.getEstado()));
+            item.setFechaPago(p.getFechaPago());
+            item.setFechaCreacion(p.getFechaCreacion());
+            item.setCodigoOperacion(p.getCodigoOperacion());
+            item.setObservaciones(p.getObservaciones());
+            return item;
+        }).toList();
+
+        return pdfIngresosService.generarReporteIngresos(items);
     }
 }

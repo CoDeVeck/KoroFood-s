@@ -1,10 +1,15 @@
 package com.koroFoods.reservationService.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,11 +20,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.koroFoods.reservationService.dto.ReporteReservaItem;
+import com.koroFoods.reservationService.dto.ReporteReservasRequest;
+
 import com.koroFoods.reservationService.dto.RecepcionistaCountsDTO;
 import com.koroFoods.reservationService.dto.ReservaAsistidaDTO;
+
 import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ReservaResponse;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
+import com.koroFoods.reservationService.service.PdfReservaService;
 import com.koroFoods.reservationService.service.ReservaService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReservaController {
 	private final ReservaService reservaService;
+	private final PdfReservaService pdfReservasService;
 
 	// cuando el usuario ya escogio una hora
 	@GetMapping("/ocupada")
@@ -64,16 +75,44 @@ public class ReservaController {
 
 	@PatchMapping("/cancelar/{idReserva}")
 	public ResultadoResponse<Integer> cancelarReserva(@PathVariable Integer idReserva) {
-	    return reservaService.cancelarReservaPagada(idReserva);
+		return reservaService.cancelarReservaPagada(idReserva);
 	}
-	
+
+	@GetMapping("/reportes/reservas/todas")
+	public ResponseEntity<byte[]> generarReporteTodasReservas() {
+	    
+	    // Últimos 6 meses por defecto
+	    LocalDate fechaFin = LocalDate.now();
+	    LocalDate fechaInicio = fechaFin.minusMonths(6);
+	    
+	    ReporteReservasRequest request = new ReporteReservasRequest();
+	    request.setFechaInicio(fechaInicio);
+	    request.setFechaFin(fechaFin);
+	    
+	    List<ReporteReservaItem> datos = reservaService.obtenerDatosReporteReservas(request);
+	    
+	    byte[] pdfBytes = pdfReservasService.generarReporteReservas(
+	        datos, 
+	        fechaInicio, 
+	        fechaFin
+	    );
+
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_PDF);
+	    headers.setContentDispositionFormData("attachment", "reporte-reservas.pdf");
+
+	    return ResponseEntity.ok()
+	        .headers(headers)
+	        .body(pdfBytes);
+	}
+
 	@GetMapping("/dashboard/recepcionista/counts")
 	public ResponseEntity<RecepcionistaCountsDTO> obtenerCounts() {
-	    return ResponseEntity.ok(reservaService.obtenerCounts());
+		return ResponseEntity.ok(reservaService.obtenerCounts());
 	}
-	
+
 	@GetMapping("/dashboard/recepcionista/asistidas/hoy")
 	public ResponseEntity<ResultadoResponse<List<ReservaAsistidaDTO>>> listarReservasAsistidasPorDia() {
-	    return ResponseEntity.ok(reservaService.listarReservasAsistidasPorDia());
+		return ResponseEntity.ok(reservaService.listarReservasAsistidasPorDia());
 	}
 }

@@ -3,7 +3,9 @@ package com.koroFoods.paymentService.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -111,5 +113,14 @@ public class PagoController {
             PagoResponse pagoRechazado = pagoService.buscarPorId(request.getIdPago());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pagoRechazado);
         }
+    }
+    
+    @GetMapping("/reporte/ingresos")
+    public ResponseEntity<byte[]> reporteIngresos() {
+        byte[] pdf = pagoService.generarReporteIngresos();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte-ingresos.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 }

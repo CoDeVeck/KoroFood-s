@@ -3,14 +3,14 @@ export const enviroment = {
   apigateway: 'http://localhost:8098',
   apiUrls: {
     usuarios: 'http://localhost:8081',
-    menu: 'http://localhost:8087',
-    eventos: 'http://localhost:8088',
+    menu: 'http://localhost:8098',
+    eventos: 'http://localhost:8098',
     resenas: 'http://localhost:8098', // usando el apigateway
     pedido: 'http://localhost:8086',
     pago:'http://localhost:8098',
     reserva: 'http://localhost:8098', // reserva y codigo de verificacion
 
-    mesas: 'http://localhost:8082',
+    mesas: 'http://localhost:8098',
     usuarioSoap: 'http://localhost:8093'
 
   },
