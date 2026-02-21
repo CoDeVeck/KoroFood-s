@@ -34,4 +34,6 @@ public class EventResquest {
 	private BigDecimal costo;
 
 	private String imagen;
+	
+	private String imagenBase64;
 }

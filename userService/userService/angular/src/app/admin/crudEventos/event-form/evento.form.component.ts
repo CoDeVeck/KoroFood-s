@@ -21,6 +21,9 @@ export class EventoFormComponent implements OnInit {
   eventoId: number | null = null;
   loading: boolean = false;
   error: string = '';
+  imagenPreview: string | null = null;
+  imagenBase64: string | null = null;
+  archivoSeleccionado: File | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -32,9 +35,10 @@ export class EventoFormComponent implements OnInit {
       nombre: ['', [Validators.required, Validators.maxLength(100)]],
       descripcion: ['', [Validators.maxLength(500)]],
       idTematica: [null],
-      fecha: ['', [Validators.required]],
+      fechaInicio: ['', [Validators.required]],
+      fechaFin: ['', [Validators.required]],
       costo: [0, [Validators.required, Validators.min(0.01)]],
-      imagen: ['']
+      
     });
   }
 
@@ -67,8 +71,8 @@ export class EventoFormComponent implements OnInit {
     this.eventoService.buscarPorId(id).subscribe({
       next: (evento) => {
         // Convertir fecha de ISO a formato datetime-local
-        const fechaLocal = this.convertirADateTimeLocal(evento.fecha);
-        
+        const fechaLocal = this.convertirADateTimeLocal(evento.fechaInicio);
+        const fechaFinLocal = this.convertirADateTimeLocal(evento.fechaFin);
         this.eventoForm.patchValue({
           nombre: evento.nombre,
           descripcion: evento.descripcion,
@@ -77,6 +81,10 @@ export class EventoFormComponent implements OnInit {
           costo: evento.costo,
           imagen: evento.imagen
         });
+
+        if (evento.imagen) {
+          this.imagenPreview = evento.imagen;
+        }
         this.loading = false;
       },
       error: (err) => {
@@ -84,6 +92,40 @@ export class EventoFormComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      this.error = 'Solo se permiten imágenes';
+      return;
+    }
+
+    // Validar tamaño (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      this.error = 'La imagen no puede superar 5MB';
+      return;
+    }
+
+    this.archivoSeleccionado = file;
+    this.error = '';
+
+    // Leer archivo y crear preview
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.imagenPreview = e.target.result;
+      this.imagenBase64 = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removerImagen(): void {
+    this.imagenPreview = null;
+    this.imagenBase64 = null;
+    this.archivoSeleccionado = null;
   }
 
   onSubmit(): void {
@@ -96,9 +138,20 @@ export class EventoFormComponent implements OnInit {
     this.error = '';
 
     const eventoData: EventoRequest = {
-      ...this.eventoForm.value,
-      fecha: this.convertirAISO(this.eventoForm.value.fecha)
+      nombre: this.eventoForm.value.nombre,
+      descripcion: this.eventoForm.value.descripcion,
+      idTematica: this.eventoForm.value.idTematica,
+      fechaInicio: this.convertirAISO(this.eventoForm.value.fechaInicio),
+      fechaFin: this.convertirAISO(this.eventoForm.value.fechaFin),
+      costo: this.eventoForm.value.costo,
+      imagenBase64: this.imagenBase64 || undefined
     };
+
+    console.log('📤 Enviando evento:', {
+      nombre: eventoData.nombre,
+      tieneImagen: !!eventoData.imagenBase64
+    });
+
 
     const request = this.isEditMode
       ? this.eventoService.actualizar(this.eventoId!, eventoData)

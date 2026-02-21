@@ -124,4 +124,14 @@ public interface IReservaRepository extends JpaRepository<Reserva, Integer> {
 			""", nativeQuery = true)
 	List<GraficoCuatroData> graficoCuatroList(@Param("mes") Integer mes);
 
+    
+	@Query("SELECT r FROM Reserva r WHERE " +
+		       "r.fechaHora BETWEEN :fechaInicio AND :fechaFin " +
+		       "AND (:estado IS NULL OR r.estado = :estado) " +
+		       "ORDER BY r.fechaHora DESC")
+		List<Reserva> findReservasParaReporte(
+		    @Param("fechaInicio") LocalDateTime fechaInicio,
+		    @Param("fechaFin") LocalDateTime fechaFin,
+		    @Param("estado") String estado
+		);
 }

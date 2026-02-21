@@ -2,7 +2,9 @@ package com.koroFoods.menuService.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.koroFoods.menuService.dto.PlatoRequest;
 import com.koroFoods.menuService.dto.PlatoResponse;
+import com.koroFoods.menuService.service.MenuService;
 import com.koroFoods.menuService.service.PlatoAdminService;
 
 import jakarta.validation.Valid;
@@ -26,7 +29,8 @@ import lombok.RequiredArgsConstructor;
 public class PlatoAdminController {
 
 	private final PlatoAdminService platoAdminService;
-
+	private final MenuService menuService;
+	
     @PostMapping
     public ResponseEntity<PlatoResponse> crear(@Valid @RequestBody PlatoRequest request) {
         PlatoResponse response = platoAdminService.crear(request);
@@ -76,4 +80,13 @@ public class PlatoAdminController {
         platoAdminService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+    
+    @GetMapping("/reporte/platos")
+	public ResponseEntity<byte[]> reportePlatos() {
+	    byte[] pdf = menuService.generarReportePlatos();
+	    return ResponseEntity.ok()
+	            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte-platos.pdf")
+	            .contentType(MediaType.APPLICATION_PDF)
+	            .body(pdf);
+	}
 }

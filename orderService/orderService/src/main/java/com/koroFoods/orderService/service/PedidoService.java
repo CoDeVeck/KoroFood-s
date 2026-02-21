@@ -2,6 +2,7 @@ package com.koroFoods.orderService.service;
 
 import com.koroFoods.orderService.dto.DetallePedidoRequestDTO;
 import com.koroFoods.orderService.dto.PedidoResumenDto;
+import com.koroFoods.orderService.dto.PlatosMasVendidosProjection;
 import com.koroFoods.orderService.dto.PedidoRequestDTO;
 import com.koroFoods.orderService.dto.ResultadoResponse;
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -178,4 +180,6 @@ public class PedidoService {
         }
         return ResultadoResponse.success("Se obtuvo grafico {}", list);
     }
+    
+    
 }

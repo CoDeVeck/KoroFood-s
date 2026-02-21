@@ -26,4 +26,6 @@ public class PlatoRequest {
 	    private String tipoPlato; // "E", "S", "P", "B"
 
 	    private String imagen;
+	    
+	    private String imagenBase64;
 }

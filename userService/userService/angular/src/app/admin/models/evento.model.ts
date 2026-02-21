@@ -21,9 +21,11 @@ export interface EventoRequest {
   nombre: string;
   descripcion: string;
   idTematica: number | null;
-  fecha: string; // ISO string
+  fechaInicio: string; // ISO string
+  fechaFin: string; // ISO string
   costo: number;
-  imagen: string | null;
+  imagen?: string | null;
+  imagenBase64?: string;
 }
 
 export interface TematicaResponse {
@@ -37,7 +39,8 @@ export interface EventoResponse {
   nombre: string;
   descripcion: string;
   tematica: TematicaResponse | null;
-  fecha: string;
+  fechaInicio: string;
+  fechaFin: string;
   costo: number;
   imagen: string | null;
   activo: boolean;

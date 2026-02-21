@@ -76,4 +76,14 @@ export class EventoListComponent implements OnInit {
   formatearCosto(costo: number): string {
     return `S/. ${costo.toFixed(2)}`;
   }
+
+  
+  onImageError(event: any): void {
+  event.target.style.display = 'none';
+  event.target.parentElement.innerHTML = `
+    <div class="evento-sin-imagen">
+      <i class="bi bi-image"></i>
+    </div>
+  `;
+}
 }
