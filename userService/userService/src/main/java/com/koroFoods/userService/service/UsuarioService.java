@@ -54,11 +54,6 @@ public class UsuarioService  {
             return ResultadoResponse.error("El N°: " + usuario.getNroDoc() + " ya fue registrado, elige otro");
         }
 
-        if (usuarioRepository.findByApePaterno(usuario.getApePaterno()).isPresent() &&
-            usuarioRepository.findByApeMaterno(usuario.getApeMaterno()).isPresent()) {
-            return ResultadoResponse.error("Los apellidos ingresados ya fueron registrados, elige otro");
-        }
-
         Rol rolDefinido = new Rol();
         rolDefinido.setIdRol(4);
 
