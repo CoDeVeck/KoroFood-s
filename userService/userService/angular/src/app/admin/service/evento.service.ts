@@ -90,4 +90,10 @@ export class EventoService {
     console.error(errorMessage);
     return throwError(() => new Error(errorMessage));
   }
+
+  generarReporteEventos(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/reporte/eventos`, {
+      responseType: 'blob'
+    });
+  }
 }

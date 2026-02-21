@@ -4,6 +4,7 @@ import com.koroFoods.eventService.dtos.EventResponse;
 import com.koroFoods.eventService.dtos.EventResquest;
 import com.koroFoods.eventService.dtos.EventoDtoFeign;
 import com.koroFoods.eventService.dtos.EventoFeignReserva;
+import com.koroFoods.eventService.dtos.ReporteEventoItem;
 import com.koroFoods.eventService.dtos.ResultadoResponse;
 import com.koroFoods.eventService.dtos.TematicResponse;
 import com.koroFoods.eventService.exception.BusinessException;
@@ -31,6 +32,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +50,9 @@ public class EventoService {
 
 	private final IMesaFeignClient mesaClient;
 	private final IReservaFeignClient reservaFeignClient;
+	
+	@Autowired
+	private PdfEventosService pdfEventosService; 
 
 	@Transactional
 	public EventResponse crear(EventResquest request) {
@@ -246,6 +252,42 @@ public class EventoService {
 
 		return mesasResponse.getData().stream().filter(mesa -> !ocupadasSet.contains(mesa.getIdMesa()))
 				.mapToInt(MesaFeign::getCapacidad).sum();
+	}
+	
+	public byte[] generarReporteEventos() {
+	    List<Evento> eventos = eventoRepository.findAll();
+	    LocalDateTime ahora = LocalDateTime.now();
+
+	    List<ReporteEventoItem> items = eventos.stream().map(e -> {
+	        ReporteEventoItem item = new ReporteEventoItem();
+	        item.setIdEvento(e.getIdEvento());
+	        item.setNombre(e.getNombre());
+	        item.setDescripcion(e.getDescripcion());
+	        item.setTematica(e.getTematica() != null ? e.getTematica().getNombre() : "-");
+	        item.setFechaInicio(e.getFechaInicio());
+	        item.setFechaFin(e.getFechaFin());
+	        item.setCosto(e.getCosto());
+	        item.setActivo(e.getActivo());
+
+	        // Calcular estado
+	        String estado;
+	        if (e.getFechaInicio() != null && e.getFechaFin() != null) {
+	            if (ahora.isBefore(e.getFechaInicio())) {
+	                estado = "Próximo";
+	            } else if (ahora.isAfter(e.getFechaFin())) {
+	                estado = "Finalizado";
+	            } else {
+	                estado = "En curso";
+	            }
+	        } else {
+	            estado = "Sin fecha";
+	        }
+	        item.setEstado(estado);
+
+	        return item;
+	    }).toList();
+
+	    return pdfEventosService.generarReporteEventos(items);
 	}
 
 }

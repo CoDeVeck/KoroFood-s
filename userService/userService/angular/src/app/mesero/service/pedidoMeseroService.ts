@@ -8,7 +8,7 @@ import { PedidoRequestoDto } from '../../shared/dto/PedidoRequestDto';
 import { Pedido } from '../../shared/model/pedido.model';
 import { DetallePedidoPagar } from '../../shared/response/detallePedidoPagar.model';
 import { PlatoMasVendidoDto } from '../../shared/dto/PlatoMasVendidoDto';
-import { VentasPorFechaMesaDto } from '../../shared/dto/VentasPorFechaMesaDTO';
+import { VentasPorFechaMesaDto } from '../../shared/dto/VentasPorFechaMesaDto';
 
 @Injectable({
   providedIn: 'root',

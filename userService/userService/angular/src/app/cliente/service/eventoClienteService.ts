@@ -76,4 +76,6 @@ export class EventoClienteService {
       `${this.baseUrl}/dashboard/hoy`,
     );
   }
+
+  
 }
