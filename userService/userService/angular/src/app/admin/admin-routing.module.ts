@@ -10,6 +10,7 @@ import { PlatoListComponent } from './crudMenus/menu-list/plato-list.component';
 import { PlatoFormComponent } from './crudMenus/menu-form/plato-form.component';
 import { MesaListComponent } from './crudMesas/mesa-list/mesa-list.component';
 import { MesaFormComponent } from './crudMesas/mesa-form/mesa-form.component';
+import { ReporteReservasComponent } from './reportes/reporte-reservas/reporte-reservas.component';
 
 
 const routes: Routes = [
@@ -38,8 +39,11 @@ const routes: Routes = [
       { path: 'mesas/editar/:id', component: MesaFormComponent },
       {
         path:'empleado', component:CrudEmpleadosComponent
+      },
+      {
+        path: 'admin/reportes/reservas',
+        component: ReporteReservasComponent
       }
-
     ]
   }
 ];

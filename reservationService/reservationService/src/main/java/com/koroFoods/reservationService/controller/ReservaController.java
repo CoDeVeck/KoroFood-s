@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,9 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.koroFoods.reservationService.dto.ReporteReservaItem;
+import com.koroFoods.reservationService.dto.ReporteReservasRequest;
 import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ReservaResponse;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
+import com.koroFoods.reservationService.service.PdfReservaService;
 import com.koroFoods.reservationService.service.ReservaService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReservaController {
 	private final ReservaService reservaService;
+	private final PdfReservaService pdfReservasService;
 
 	// cuando el usuario ya escogio una hora
 	@GetMapping("/ocupada")
@@ -61,6 +68,21 @@ public class ReservaController {
 
 	@PatchMapping("/cancelar/{idReserva}")
 	public ResultadoResponse<Integer> cancelarReserva(@PathVariable Integer idReserva) {
-	    return reservaService.cancelarReservaPagada(idReserva);
+		return reservaService.cancelarReservaPagada(idReserva);
+	}
+
+	@PostMapping("/reportes/reservas")
+	public ResponseEntity<byte[]> generarReporteReservas(@RequestBody ReporteReservasRequest request) {
+
+		List<ReporteReservaItem> datos = reservaService.obtenerDatosReporteReservas(request);
+
+		byte[] pdfBytes = pdfReservasService.generarReporteReservas(datos, request.getFechaInicio(),
+				request.getFechaFin());
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_PDF);
+		headers.setContentDispositionFormData("attachment", "reporte-reservas.pdf");
+
+		return ResponseEntity.ok().headers(headers).body(pdfBytes);
 	}
 }

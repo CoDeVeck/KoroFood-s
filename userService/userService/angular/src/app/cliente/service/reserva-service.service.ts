@@ -1,12 +1,19 @@
 import { Injectable } from '@angular/core';
 import { enviroment } from '../../../enviroments/enviroment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ReservaRequest } from '../../shared/request/ReservaRequest';
 import { Observable } from 'rxjs';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 import { Reserva } from '../../shared/model/reserva.model';
 import { ReservaResponseDTO } from '../../shared/dto/ReservaResponseDTO';
 
+
+export interface ReporteReservasRequest {
+  fechaInicio: string; // formato: YYYY-MM-DD
+  fechaFin: string;
+  estado?: string; // PENDIENTE, CONFIRMADA, CANCELADA, COMPLETADA
+  zona?: string; // Z1, Z2, Z3, Z4
+}
 
 
 @Injectable({
@@ -78,5 +85,15 @@ export class ReservaServiceService {
       `${this.baseUrl}/cancelar/${idReserva}`,
       {}, // PATCH necesita body, aunque esté vacío
     );
+  }
+
+  // NUEVO: Generar reporte de reservas en PDF
+  generarReporteReservas(request: ReporteReservasRequest): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}/reportes/reservas`, request, {
+      responseType: 'blob',
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    });
   }
 }

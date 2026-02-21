@@ -1,5 +1,7 @@
 package com.koroFoods.reservationService.service;
 
+import com.koroFoods.reservationService.dto.ReporteReservaItem;
+import com.koroFoods.reservationService.dto.ReporteReservasRequest;
 import com.koroFoods.reservationService.dto.ReservaDtoFeing;
 import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ReservaResponse;
@@ -20,6 +22,7 @@ import com.koroFoods.reservationService.repository.IReservaRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -357,5 +361,65 @@ public class ReservaService {
     }
 
 
+    @Transactional(readOnly = true)
+    public List<ReporteReservaItem> obtenerDatosReporteReservas(ReporteReservasRequest request) {
+        
+        LocalDateTime fechaInicio = request.getFechaInicio().atStartOfDay();
+        LocalDateTime fechaFin = request.getFechaFin().atTime(23, 59, 59);
+
+        // Query personalizada (crear en el repositorio)
+        List<Reserva> reservas = reservaRepository.findReservasParaReporte(
+            fechaInicio, 
+            fechaFin, 
+            request.getEstado(), 
+            request.getZona()
+        );
+
+        return reservas.stream()
+            .map(this::mapearAReporteItem)
+            .collect(Collectors.toList());
+    }
+
+    private ReporteReservaItem mapearAReporteItem(Reserva reserva) {
+        // Obtener datos del cliente via Feign
+    	ResultadoResponse<UsuarioFeign> clienteResponse = usuarioFeignClient.getUsuarioById(reserva.getIdUsuario());
+        UsuarioFeign cliente = clienteResponse.getData();
+        
+        // Obtener datos de la mesa via Feign
+        ResultadoResponse<MesaFeign> mesaResponse = mesaFeignClient.obtenerMesaPorId(reserva.getIdMesa());
+        MesaFeign mesa = mesaResponse.getData();
+        // Obtener datos del pago (si existe)
+        BigDecimal montoDeposito = null;
+        String metodoPago = null;
+        if (reserva.getIdReserva() != null) {
+            // Aquí podrías llamar al servicio de pago para obtener el depósito
+            // O tener esa info en la reserva directamente
+        }
+
+        return ReporteReservaItem.builder()
+                .idReserva(reserva.getIdReserva())
+                .nombreCliente(cliente.getNombreCompleto()) // ✅ Usa el método del DTO
+                .emailCliente(cliente.getCorreo()) // ✅ correo, no email
+                .telefonoCliente(cliente.getTelefono())
+                .numeroMesa(mesa.getNumeroMesa())
+                .zona(mesa.getTipo()) // ✅ tipo contiene la zona (Z1, Z2, etc)
+                .fechaHora(reserva.getFechaHora())
+                .estado(reserva.getEstado().name())
+                .estadoDescripcion(obtenerDescripcionEstado(reserva.getEstado()))
+                .metodoPago(metodoPago)
+                .montoDeposito(montoDeposito)
+                .build();
+    }
+
+    private String obtenerDescripcionEstado(EstadoReserva estado) {
+        return switch (estado) {
+            case PENDIENTE -> "Pendiente";
+            case PAGADA -> "Pagada";
+            case CANCELADA -> "Cancelada";
+            case ASISTIDA -> "Asistida";
+            case VENCIDA -> "Vencida";
+        };
+    }
+    
 
 }
