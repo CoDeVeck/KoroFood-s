@@ -50,11 +50,12 @@ public class EventoService {
 
 	private final IMesaFeignClient mesaClient;
 	private final IReservaFeignClient reservaFeignClient;
+	private final CloudinaryService cloudinaryService;
 	
 	@Autowired
 	private PdfEventosService pdfEventosService; 
 
-	@Transactional
+		@Transactional
 	public EventResponse crear(EventResquest request) {
 		validarFechaFutura(request.getFechaInicio());
 
@@ -64,17 +65,28 @@ public class EventoService {
 		evento.setFechaInicio(request.getFechaInicio());
 		evento.setFechaFin(request.getFechaFin());
 		evento.setCosto(request.getCosto());
-		evento.setImagen(request.getImagen());
 		evento.setActivo(true);
 
+		if (request.getImagenBase64() != null && !request.getImagenBase64().isEmpty()) {
+			try {
+				String url = cloudinaryService.subirImagen(
+					request.getImagenBase64(),
+					"korofood/eventos",
+					"evento_" + System.currentTimeMillis()
+				);
+				evento.setImagen(url);
+			} catch (IOException e) {
+				throw new RuntimeException("Error al subir imagen: " + e.getMessage());
+			}
+		}
+
 		if (request.getIdTematica() != null) {
-			Tematica tematica = tematicaRepository.findByIdTematicaAndActivoTrue(request.getIdTematica()).orElseThrow(
-					() -> new ResourceNotFoundException("Temática no encontrada con ID: " + request.getIdTematica()));
+			Tematica tematica = tematicaRepository.findByIdTematicaAndActivoTrue(request.getIdTematica())
+				.orElseThrow(() -> new ResourceNotFoundException("Temática no encontrada"));
 			evento.setTematica(tematica);
 		}
 
-		Evento guardado = eventoRepository.save(evento);
-		return mapearAResponse(guardado);
+		return mapearAResponse(eventoRepository.save(evento));
 	}
 
 	@Transactional(readOnly = true)

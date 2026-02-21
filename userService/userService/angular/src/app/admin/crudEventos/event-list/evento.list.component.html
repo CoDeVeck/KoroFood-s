@@ -49,8 +49,8 @@
                     *ngIf="evento.imagen" 
                     [src]="evento.imagen" 
                     [alt]="evento.nombre"
-                    class="evento-imagen-thumbnail"
-                    (error)="onImageError($event)">
+                    class="evento-imagen-thumbnail w-100"
+                    (error)="onImageError($event)" >
                   <div *ngIf="!evento.imagen" class="evento-sin-imagen">
                     <i class="bi bi-image"></i>
                   </div>
