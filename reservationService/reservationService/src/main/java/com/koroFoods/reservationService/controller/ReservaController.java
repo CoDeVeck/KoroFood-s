@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,6 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.koroFoods.reservationService.dto.ReporteReservaItem;
 import com.koroFoods.reservationService.dto.ReporteReservasRequest;
+
+import com.koroFoods.reservationService.dto.RecepcionistaCountsDTO;
+import com.koroFoods.reservationService.dto.ReservaAsistidaDTO;
+
 import com.koroFoods.reservationService.dto.ReservaRequest;
 import com.koroFoods.reservationService.dto.ReservaResponse;
 import com.koroFoods.reservationService.dto.ResultadoResponse;
@@ -84,5 +90,15 @@ public class ReservaController {
 		headers.setContentDispositionFormData("attachment", "reporte-reservas.pdf");
 
 		return ResponseEntity.ok().headers(headers).body(pdfBytes);
+	}
+
+	@GetMapping("/dashboard/recepcionista/counts")
+	public ResponseEntity<RecepcionistaCountsDTO> obtenerCounts() {
+		return ResponseEntity.ok(reservaService.obtenerCounts());
+	}
+
+	@GetMapping("/dashboard/recepcionista/asistidas/hoy")
+	public ResponseEntity<ResultadoResponse<List<ReservaAsistidaDTO>>> listarReservasAsistidasPorDia() {
+		return ResponseEntity.ok(reservaService.listarReservasAsistidasPorDia());
 	}
 }

@@ -3,6 +3,7 @@ package com.koroFoods.orderService.controller;
 import com.koroFoods.orderService.dto.ResultadoResponse;
 import com.koroFoods.orderService.dto.request.DetallePedidoRequest;
 import com.koroFoods.orderService.dto.response.DetallePedidoMeseroResponse;
+import com.koroFoods.orderService.dto.response.DetallePedidoPagar;
 import com.koroFoods.orderService.dto.response.DetallePedidoResponse;
 import com.koroFoods.orderService.dto.response.DetallePedidoUsuarioResponse;
 import com.koroFoods.orderService.model.DetallePedido;
@@ -194,4 +195,76 @@ public class SocketController {
         }
     }
 
+    @MessageMapping("/pedido/{idPedido}/pagar")
+    public void pagarPedido(
+            @DestinationVariable Integer idPedido
+    ) {
+        try {
+            ResultadoResponse<DetallePedidoPagar>response =
+                    detallePedidoService.procederAlPago(idPedido);
+
+            if (response.isValor()) {
+                messagingTemplate.convertAndSend(
+                        "/topic/pedido/" + idPedido + "/mesero",
+                        Map.of("inicioPago", true, "pago", response.getData())
+                );
+                messagingTemplate.convertAndSend(
+                        "/topic/pedido/" + idPedido + "/cliente",
+                        Map.of("inicioPago", true, "pago", response.getData())
+                );
+            }
+        } catch (Exception e) {
+            messagingTemplate.convertAndSend(
+                    "/topic/pedido/" + idPedido + "/error",
+                    Map.of("mensaje", e.getMessage())
+            );
+        }
+
+    }
+
+
+    @MessageMapping("/pedido/{idPedido}/elegirMetodo")
+    public void elegirMetodo(
+            @DestinationVariable Integer idPedido,
+            @Payload String metodoPago
+    ) {
+        try {
+            String metodoLimpio = metodoPago.replace("\"", "").trim();
+
+            messagingTemplate.convertAndSend(
+                    "/topic/pedido/" + idPedido + "/mesero",
+                    Map.of("metodoPago", metodoLimpio)
+            );
+        } catch (Exception e) {
+            messagingTemplate.convertAndSend(
+                    "/topic/pedido/" + idPedido + "/error",
+                    Map.of("mensaje", e.getMessage())
+            );
+        }
+    }
+
+
+    @MessageMapping("/pedido/{idPedido}/confirmarPago")
+    public void confirmarPago(
+            @DestinationVariable Integer idPedido,
+            @Payload String metodoPago
+    ) {
+        try {
+            String metodoLimpio = metodoPago.replace("\"", "").trim();
+
+            messagingTemplate.convertAndSend(
+                    "/topic/pedido/" + idPedido + "/mesero",
+                    Map.of("pagoConfirmado", true, "metodoPago", metodoLimpio)
+            );
+            messagingTemplate.convertAndSend(
+                    "/topic/pedido/" + idPedido + "/cliente",
+                    Map.of("pagoConfirmado", true, "metodoPago", metodoLimpio)
+            );
+        } catch (Exception e) {
+            messagingTemplate.convertAndSend(
+                    "/topic/pedido/" + idPedido + "/error",
+                    Map.of("mensaje", e.getMessage())
+            );
+        }
+    }
 }

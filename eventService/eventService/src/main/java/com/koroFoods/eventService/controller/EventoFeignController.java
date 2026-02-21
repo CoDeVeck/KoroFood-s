@@ -73,4 +73,9 @@ public class EventoFeignController {
 		return ResponseEntity.ok(resultado);
 	}
 
+	@GetMapping("/dashboard/hoy")
+	public ResponseEntity<ResultadoResponse<List<EventoFeignReserva>>> listarEventosDelDia() {
+	    return ResponseEntity.ok(eventoService.listarEventosDelDia());
+	}
+	
 }

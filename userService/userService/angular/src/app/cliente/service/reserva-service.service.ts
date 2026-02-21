@@ -6,7 +6,8 @@ import { Observable } from 'rxjs';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 import { Reserva } from '../../shared/model/reserva.model';
 import { ReservaResponseDTO } from '../../shared/dto/ReservaResponseDTO';
-
+import { RecepcionistaCountsDTO } from '../../shared/dto/RecepcionistaCountsDTO';
+import { ReservaAsistidaDTO } from '../../shared/dto/ReservaAsistidaDTO';
 
 export interface ReporteReservasRequest {
   fechaInicio: string; // formato: YYYY-MM-DD
@@ -14,7 +15,6 @@ export interface ReporteReservasRequest {
   estado?: string; // PENDIENTE, CONFIRMADA, CANCELADA, COMPLETADA
   zona?: string; // Z1, Z2, Z3, Z4
 }
-
 
 @Injectable({
   providedIn: 'root',
@@ -92,8 +92,23 @@ export class ReservaServiceService {
     return this.http.post(`${this.baseUrl}/reportes/reservas`, request, {
       responseType: 'blob',
       headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
+        'Content-Type': 'application/json',
+      }),
     });
+  }
+  // GET /reserva/dashboard/recepcionista/counts
+  obtenerCountsRecepcionista(): Observable<RecepcionistaCountsDTO> {
+    return this.http.get<RecepcionistaCountsDTO>(
+      `${this.baseUrl}/dashboard/recepcionista/counts`,
+    );
+  }
+
+  // GET /reserva/dashboard/recepcionista/asistidas/hoy
+  listarReservasAsistidasHoy(): Observable<
+    ResultadoResponse<ReservaAsistidaDTO[]>
+  > {
+    return this.http.get<ResultadoResponse<ReservaAsistidaDTO[]>>(
+      `${this.baseUrl}/dashboard/recepcionista/asistidas/hoy`,
+    );
   }
 }

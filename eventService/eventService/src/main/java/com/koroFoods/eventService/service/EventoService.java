@@ -1,7 +1,5 @@
 package com.koroFoods.eventService.service;
 
-
-
 import com.koroFoods.eventService.dtos.EventResponse;
 import com.koroFoods.eventService.dtos.EventResquest;
 import com.koroFoods.eventService.dtos.EventoDtoFeign;
@@ -20,9 +18,13 @@ import com.koroFoods.eventService.repository.IEventoMesaRepository;
 import com.koroFoods.eventService.repository.IEventoRepository;
 import com.koroFoods.eventService.repository.ITematicaRepository;
 
+import feign.Response;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
+
+import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -37,284 +39,213 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class EventoService {
 
-    private final IEventoRepository eventoRepository;
-    
-    private final ITematicaRepository tematicaRepository;
-    
-    private final IEventoMesaRepository eventoMesaRepository;
-    
-    private final IMesaFeignClient mesaClient;
-    private final IReservaFeignClient reservaFeignClient;
-    
-    private final CloudinaryService cloudinaryService;
-    
-    
-    @Transactional
-    public EventResponse crear(EventResquest request) {
-        validarFechaFutura(request.getFechaInicio());
+	private final IEventoRepository eventoRepository;
 
-        Evento evento = new Evento();
-        evento.setNombre(request.getNombre());
-        evento.setDescripcion(request.getDescripcion());
-        evento.setFechaInicio(request.getFechaInicio());
-        evento.setFechaFin(request.getFechaFin());
-        evento.setCosto(request.getCosto());
-        evento.setActivo(true);
+	private final ITematicaRepository tematicaRepository;
 
-        if (request.getIdTematica() != null) {
-            Tematica tematica = tematicaRepository.findByIdTematicaAndActivoTrue(request.getIdTematica())
-                    .orElseThrow(() -> new ResourceNotFoundException("Temática no encontrada con ID: " + request.getIdTematica()));
-            evento.setTematica(tematica);
-        }
+	private final IEventoMesaRepository eventoMesaRepository;
 
-        // ✅ SUBIR IMAGEN A CLOUDINARY SI SE PROPORCIONÓ
-        if (request.getImagenBase64() != null && !request.getImagenBase64().isBlank()) {
-            try {
-                String publicId = "evento_" + System.currentTimeMillis();
-                String urlImagen = cloudinaryService.subirImagen(
-                    request.getImagenBase64(),
-                    "korofood/eventos",
-                    publicId
-                );
-                evento.setImagen(urlImagen);
-                log.info("✅ Imagen subida para nuevo evento: {}", urlImagen);
-            } catch (IOException e) {
-                log.error("❌ Error al subir imagen", e);
-                throw new BusinessException("Error al subir la imagen: " + e.getMessage());
-            }
-        } else if (request.getImagen() != null) {
-            // Si viene una URL directa (para compatibilidad)
-            evento.setImagen(request.getImagen());
-        }
+	private final IMesaFeignClient mesaClient;
+	private final IReservaFeignClient reservaFeignClient;
 
-        Evento guardado = eventoRepository.save(evento);
-        return mapearAResponse(guardado);
-    }
+	@Transactional
+	public EventResponse crear(EventResquest request) {
+		validarFechaFutura(request.getFechaInicio());
 
-    @Transactional(readOnly = true)
-    public List<EventResponse> listarTodos() {
-        return eventoRepository.findAll().stream()
-                .map(this::mapearAResponse)
-                .collect(Collectors.toList());
-    }
+		Evento evento = new Evento();
+		evento.setNombre(request.getNombre());
+		evento.setDescripcion(request.getDescripcion());
+		evento.setFechaInicio(request.getFechaInicio());
+		evento.setFechaFin(request.getFechaFin());
+		evento.setCosto(request.getCosto());
+		evento.setImagen(request.getImagen());
+		evento.setActivo(true);
 
-    @Transactional(readOnly = true)
-    public List<EventResponse> listarActivos() {
-        return eventoRepository.findByActivoTrue().stream()
-                .map(this::mapearAResponse)
-                .collect(Collectors.toList());
-    }
+		if (request.getIdTematica() != null) {
+			Tematica tematica = tematicaRepository.findByIdTematicaAndActivoTrue(request.getIdTematica()).orElseThrow(
+					() -> new ResourceNotFoundException("Temática no encontrada con ID: " + request.getIdTematica()));
+			evento.setTematica(tematica);
+		}
 
-    @Transactional(readOnly = true)
-    public List<EventResponse> listarEventosFuturos() {
-        return eventoRepository.findEventosFuturos(LocalDateTime.now()).stream()
-                .map(this::mapearAResponse)
-                .collect(Collectors.toList());
-    }
+		Evento guardado = eventoRepository.save(evento);
+		return mapearAResponse(guardado);
+	}
 
-    @Transactional(readOnly = true)
-    public List<EventResponse> listarPorTematica(Integer idTematica) {
-        return eventoRepository.findByTematica_IdTematicaAndActivoTrue(idTematica).stream()
-                .map(this::mapearAResponse)
-                .collect(Collectors.toList());
-    }
+	@Transactional(readOnly = true)
+	public List<EventResponse> listarTodos() {
+		return eventoRepository.findAll().stream().map(this::mapearAResponse).collect(Collectors.toList());
+	}
 
-    @Transactional(readOnly = true)
-    public EventResponse buscarPorId(Integer id) {
-        Evento evento = eventoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
-        return mapearAResponse(evento);
-    }
+	@Transactional(readOnly = true)
+	public List<EventResponse> listarActivos() {
+		return eventoRepository.findByActivoTrue().stream().map(this::mapearAResponse).collect(Collectors.toList());
+	}
 
-    @Transactional
-    public EventResponse actualizar(Integer id, EventResquest request) {
-        Evento evento = eventoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
+	@Transactional(readOnly = true)
+	public List<EventResponse> listarEventosFuturos() {
+		return eventoRepository.findEventosFuturos(LocalDateTime.now()).stream().map(this::mapearAResponse)
+				.collect(Collectors.toList());
+	}
 
-        validarFechaFutura(request.getFechaInicio());
+	@Transactional(readOnly = true)
+	public List<EventResponse> listarPorTematica(Integer idTematica) {
+		return eventoRepository.findByTematica_IdTematicaAndActivoTrue(idTematica).stream().map(this::mapearAResponse)
+				.collect(Collectors.toList());
+	}
 
-        evento.setNombre(request.getNombre());
-        evento.setDescripcion(request.getDescripcion());
-        evento.setFechaInicio(request.getFechaInicio());
-        evento.setFechaFin(request.getFechaFin());
-        evento.setCosto(request.getCosto());
+	@Transactional(readOnly = true)
+	public EventResponse buscarPorId(Integer id) {
+		Evento evento = eventoRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
+		return mapearAResponse(evento);
+	}
 
-        if (request.getIdTematica() != null) {
-            Tematica tematica = tematicaRepository.findByIdTematicaAndActivoTrue(request.getIdTematica())
-                    .orElseThrow(() -> new ResourceNotFoundException("Temática no encontrada con ID: " + request.getIdTematica()));
-            evento.setTematica(tematica);
-        } else {
-            evento.setTematica(null);
-        }
+	@Transactional
+	public EventResponse actualizar(Integer id, EventResquest request) {
+		Evento evento = eventoRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
 
-        // ✅ ACTUALIZAR IMAGEN SI CAMBIÓ
-        if (request.getImagenBase64() != null && !request.getImagenBase64().isBlank()) {
-            try {
-                // Eliminar imagen anterior si existe
-                if (evento.getImagen() != null && evento.getImagen().contains("cloudinary.com")) {
-                    String oldPublicId = cloudinaryService.extraerPublicId(evento.getImagen());
-                    if (oldPublicId != null) {
-                        cloudinaryService.eliminarImagen(oldPublicId);
-                    }
-                }
+		validarFechaFutura(request.getFechaInicio());
 
-                // Subir nueva imagen
-                String publicId = "evento_" + id;
-                String urlImagen = cloudinaryService.subirImagen(
-                    request.getImagenBase64(),
-                    "korofood/eventos",
-                    publicId
-                );
-                evento.setImagen(urlImagen);
-                log.info("✅ Imagen actualizada para evento {}: {}", id, urlImagen);
-            } catch (IOException e) {
-                log.error("❌ Error al actualizar imagen", e);
-                throw new BusinessException("Error al actualizar la imagen: " + e.getMessage());
-            }
-        } else if (request.getImagen() != null && !request.getImagen().equals(evento.getImagen())) {
-            // Si viene una URL diferente
-            evento.setImagen(request.getImagen());
-        }
+		evento.setNombre(request.getNombre());
+		evento.setDescripcion(request.getDescripcion());
+		evento.setFechaInicio(request.getFechaInicio());
+		evento.setFechaFin(request.getFechaFin());
+		evento.setCosto(request.getCosto());
+		evento.setImagen(request.getImagen());
 
-        Evento actualizado = eventoRepository.save(evento);
-        return mapearAResponse(actualizado);
-    }
+		if (request.getIdTematica() != null) {
+			Tematica tematica = tematicaRepository.findByIdTematicaAndActivoTrue(request.getIdTematica()).orElseThrow(
+					() -> new ResourceNotFoundException("Temática no encontrada con ID: " + request.getIdTematica()));
+			evento.setTematica(tematica);
+		} else {
+			evento.setTematica(null);
+		}
 
-    @Transactional
-    public void eliminar(Integer id) {
-        Evento evento = eventoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
+		Evento actualizado = eventoRepository.save(evento);
+		return mapearAResponse(actualizado);
+	}
 
-        // ✅ OPCIONAL: Eliminar imagen de Cloudinary
-        if (evento.getImagen() != null && evento.getImagen().contains("cloudinary.com")) {
-            try {
-                String publicId = cloudinaryService.extraerPublicId(evento.getImagen());
-                if (publicId != null) {
-                    cloudinaryService.eliminarImagen(publicId);
-                }
-            } catch (IOException e) {
-                log.warn("No se pudo eliminar imagen de Cloudinary", e);
-            }
-        }
-        
-        evento.setActivo(false);
-        eventoRepository.save(evento);
-    }
+	@Transactional
+	public void eliminar(Integer id) {
+		Evento evento = eventoRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
 
-    private void validarFechaFutura(LocalDateTime fecha) {
-        if (fecha.isBefore(LocalDateTime.now())) {
-            throw new BusinessException("La fecha del evento debe ser futura");
-        }
-    }
+		evento.setActivo(false);
+		eventoRepository.save(evento);
+	}
 
-    private EventResponse mapearAResponse(Evento evento) {
-        TematicResponse tematicaResponse = null;
-        if (evento.getTematica() != null) {
-            tematicaResponse = TematicResponse.builder()
-                    .idTematica(evento.getTematica().getIdTematica())
-                    .nombre(evento.getTematica().getNombre())
-                    .activo(evento.getTematica().getActivo())
-                    .build();
-        }
+	private void validarFechaFutura(LocalDateTime fecha) {
+		if (fecha.isBefore(LocalDateTime.now())) {
+			throw new BusinessException("La fecha del evento debe ser futura");
+		}
+	}
 
-        return EventResponse.builder()
-                .idEvento(evento.getIdEvento())
-                .nombre(evento.getNombre())
-                .descripcion(evento.getDescripcion())
-                .tematica(tematicaResponse)
-                .fechaInicio(evento.getFechaInicio())
-                .fechaFin(evento.getFechaFin())
-                .costo(evento.getCosto())
-                .imagen(evento.getImagen())
-                .activo(evento.getActivo())
-                .build();
-    }
-    
-    public ResultadoResponse<List<EventoDtoFeign>> getAllEvents() {
-        List<Evento> eventos = eventoRepository.findAll(); 
-        List<EventoDtoFeign> dtos = eventos.stream().map(evento -> {
-            EventoDtoFeign dto = new EventoDtoFeign();
-            dto.setIdEvento(evento.getIdEvento());
-            dto.setDescripcion(evento.getDescripcion());
-            dto.setNombre(evento.getNombre());
-            dto.setImagen(evento.getImagen());
-            return dto;
-        }).toList();
-        return ResultadoResponse.success("Listado de Eventos", dtos);
-    }
+	private EventResponse mapearAResponse(Evento evento) {
+		TematicResponse tematicaResponse = null;
+		if (evento.getTematica() != null) {
+			tematicaResponse = TematicResponse.builder().idTematica(evento.getTematica().getIdTematica())
+					.nombre(evento.getTematica().getNombre()).activo(evento.getTematica().getActivo()).build();
+		}
+
+		return EventResponse.builder().idEvento(evento.getIdEvento()).nombre(evento.getNombre())
+				.descripcion(evento.getDescripcion()).tematica(tematicaResponse).fechaInicio(evento.getFechaInicio())
+				.fechaFin(evento.getFechaFin()).costo(evento.getCosto()).imagen(evento.getImagen())
+				.activo(evento.getActivo()).build();
+	}
+
+	public ResultadoResponse<List<EventoDtoFeign>> getAllEvents() {
+		List<Evento> eventos = eventoRepository.findAll();
+		List<EventoDtoFeign> dtos = eventos.stream().map(evento -> {
+			EventoDtoFeign dto = new EventoDtoFeign();
+			dto.setIdEvento(evento.getIdEvento());
+			dto.setDescripcion(evento.getDescripcion());
+			dto.setNombre(evento.getNombre());
+			dto.setImagen(evento.getImagen());
+			return dto;
+		}).toList();
+		return ResultadoResponse.success("Listado de Eventos", dtos);
+	}
 
 	// Método para el feign de la reseña
-    public ResultadoResponse<EventoDtoFeign> getEventById(Integer id){
-    	Evento evento = eventoRepository.findById(id).orElseThrow(()-> new RuntimeException("Evento no encontrado"));
-    	
-    	EventoDtoFeign dto = new EventoDtoFeign();
-    	dto.setIdEvento(evento.getIdEvento());
-    	dto.setDescripcion(evento.getDescripcion());
-    	dto.setNombre(evento.getNombre());
-    	dto.setImagen(evento.getImagen());
-    	
-    	return ResultadoResponse.success("Evento encontrado", dto);
+	public ResultadoResponse<EventoDtoFeign> getEventById(Integer id) {
+		Evento evento = eventoRepository.findById(id).orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
-    }
-    
-    
-    // Para la reserva
-    
-    @Transactional(readOnly = true)
-    public ResultadoResponse<EventoFeignReserva> buscarEventoParaReserva(Integer id) {
-        Evento evento = eventoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
-        
-        EventoFeignReserva dto = mapearAEventoFeignReserva(evento);
-        
-        return ResultadoResponse.success("Evento encontrado exitosamente", dto);
-    }
+		EventoDtoFeign dto = new EventoDtoFeign();
+		dto.setIdEvento(evento.getIdEvento());
+		dto.setDescripcion(evento.getDescripcion());
+		dto.setNombre(evento.getNombre());
+		dto.setImagen(evento.getImagen());
 
-    private EventoFeignReserva mapearAEventoFeignReserva(Evento evento) {
-        EventoFeignReserva dto = new EventoFeignReserva();
-        dto.setIdEvento(evento.getIdEvento());
-        dto.setNombre(evento.getNombre());
-        dto.setDescripcion(evento.getDescripcion());
-        dto.setTematica(evento.getTematica() != null ? evento.getTematica().getNombre() : null);
-        dto.setFechaInicio(evento.getFechaInicio());
-        dto.setFechaFin(evento.getFechaFin());
-        dto.setAforo(calcularAforoEvento(evento.getIdEvento()));
-        dto.setImagen(evento.getImagen());
+		return ResultadoResponse.success("Evento encontrado", dto);
 
-        return dto;
-    }
-    
-    public Integer calcularAforoEvento(Integer idEvento) {
-        List<EventoMesa> eventoMesas = eventoMesaRepository
-            .findByEvento_IdEventoAndActivoTrue(idEvento);
+	}
 
-        if (eventoMesas.isEmpty()) return 0;
+	// Para la reserva
 
-        LocalDateTime inicio = eventoMesas.get(0).getFechaDesde();
-        LocalDateTime fin = eventoMesas.get(0).getFechaHasta();
+	@Transactional(readOnly = true)
+	public ResultadoResponse<EventoFeignReserva> buscarEventoParaReserva(Integer id) {
+		Evento evento = eventoRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado con ID: " + id));
 
-        List<Integer> idsMesas = eventoMesas.stream()
-            .map(EventoMesa::getIdMesa)
-            .collect(Collectors.toList());
+		EventoFeignReserva dto = mapearAEventoFeignReserva(evento);
 
-        ResultadoResponse<List<MesaFeign>> mesasResponse = mesaClient.obtenerMesasPorIds(idsMesas);
-        if (!mesasResponse.isValor() || mesasResponse.getData() == null) {
-            throw new BusinessException("No se pudo obtener información de las mesas");
-        }
+		return ResultadoResponse.success("Evento encontrado exitosamente", dto);
+	}
 
-        ResultadoResponse<List<Integer>> ocupadasResponse = reservaFeignClient
-            .obtenerMesasOcupadas(idsMesas, inicio, fin);
+	public ResultadoResponse<List<EventoFeignReserva>> listarEventosDelDia() {
 
-        List<Integer> mesasOcupadas = (ocupadasResponse != null && ocupadasResponse.getData() != null)
-            ? ocupadasResponse.getData()
-            : List.of();
+		LocalDateTime inicioHoy = LocalDate.now().atStartOfDay();
+		LocalDateTime finHoy = inicioHoy.plusDays(1);
 
-        Set<Integer> ocupadasSet = new HashSet<>(mesasOcupadas);
+		List<EventoFeignReserva> lst = eventoRepository.findEventosDelDia(inicioHoy, finHoy).stream()
+				.map(this::mapearAEventoFeignReserva).collect(Collectors.toList());
+		;
 
-        return mesasResponse.getData().stream()
-            .filter(mesa -> !ocupadasSet.contains(mesa.getIdMesa()))
-            .mapToInt(MesaFeign::getCapacidad)
-            .sum();
-    }
-    
+		return ResultadoResponse.success("Se listaron los eventos del dia", lst);
+	}
+
+	private EventoFeignReserva mapearAEventoFeignReserva(Evento evento) {
+		EventoFeignReserva dto = new EventoFeignReserva();
+		dto.setIdEvento(evento.getIdEvento());
+		dto.setNombre(evento.getNombre());
+		dto.setDescripcion(evento.getDescripcion());
+		dto.setTematica(evento.getTematica() != null ? evento.getTematica().getNombre() : null);
+		dto.setFechaInicio(evento.getFechaInicio());
+		dto.setFechaFin(evento.getFechaFin());
+		dto.setAforo(calcularAforoEvento(evento.getIdEvento()));
+		dto.setImagen(evento.getImagen());
+
+		return dto;
+	}
+
+	public Integer calcularAforoEvento(Integer idEvento) {
+		List<EventoMesa> eventoMesas = eventoMesaRepository.findByEvento_IdEventoAndActivoTrue(idEvento);
+
+		if (eventoMesas.isEmpty())
+			return 0;
+
+		LocalDateTime inicio = eventoMesas.get(0).getFechaDesde();
+		LocalDateTime fin = eventoMesas.get(0).getFechaHasta();
+
+		List<Integer> idsMesas = eventoMesas.stream().map(EventoMesa::getIdMesa).collect(Collectors.toList());
+
+		ResultadoResponse<List<MesaFeign>> mesasResponse = mesaClient.obtenerMesasPorIds(idsMesas);
+		if (!mesasResponse.isValor() || mesasResponse.getData() == null) {
+			throw new BusinessException("No se pudo obtener información de las mesas");
+		}
+
+		ResultadoResponse<List<Integer>> ocupadasResponse = reservaFeignClient.obtenerMesasOcupadas(idsMesas, inicio,
+				fin);
+
+		List<Integer> mesasOcupadas = (ocupadasResponse != null && ocupadasResponse.getData() != null)
+				? ocupadasResponse.getData()
+				: List.of();
+
+		Set<Integer> ocupadasSet = new HashSet<>(mesasOcupadas);
+
+		return mesasResponse.getData().stream().filter(mesa -> !ocupadasSet.contains(mesa.getIdMesa()))
+				.mapToInt(MesaFeign::getCapacidad).sum();
+	}
+
 }
