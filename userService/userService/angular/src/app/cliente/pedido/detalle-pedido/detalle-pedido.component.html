@@ -8,13 +8,36 @@
   <!-- Header con estado de conexión -->
   <div class="header">
     <h1>🍽️ Detalle del Pedido #{{ idPedido }}</h1>
-    <div
-      class="connection-status"
-      [ngClass]="wsConnected ? 'connected' : 'disconnected'"
-    >
-      <span class="status-icon">{{ wsConnected ? "✅" : "❌" }}</span>
-      <span>{{ wsConnected ? "Conectado" : "Desconectado" }}</span>
-    </div>
+
+    <button class="animated-button" onclick="info.showModal()">
+      <svg viewBox="0 0 24 24" class="arr-2" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"
+        ></path>
+      </svg>
+      <span class="text">Informacion de los platos</span>
+      <span class="circle"></span>
+      <svg viewBox="0 0 24 24" class="arr-1" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"
+        ></path>
+      </svg>
+    </button>
+
+    <dialog id="info" closedBy="any">
+      <h6>La empresa KoroFoods cumple con</h6>
+      <p>
+        Con el
+        <a
+          href="https://lpderecho.pe/codigo-de-proteccion-y-defensa-del-consumidor-ley-29571/?utm_source=chatgpt.com"
+          target="_blank"
+          >Código de Protección y Defensa del Consumidor (Ley N° 29571).</a
+        >
+        Las imágenes son <strong style="color: red">referenciales</strong> y no
+        reemplazan la realidad del producto.
+      </p>
+      <button onclick="info.close()" class="cerrar">Cerrar</button>
+    </dialog>
   </div>
 
   <!-- Mensaje de error -->
