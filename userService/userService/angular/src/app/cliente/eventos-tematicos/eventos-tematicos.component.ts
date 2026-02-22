@@ -62,6 +62,11 @@ export class EventosTematicosComponent implements OnInit {
   usuarioAutenticado = false;
   idUsuario: number | null = null;
 
+  // ─────────────────────────────────────────────────────────────────
+  // ZONA HORARIA: Perú es UTC-5 (sin cambio de horario de verano)
+  // ─────────────────────────────────────────────────────────────────
+  private readonly PERU_OFFSET_HOURS = -5;
+
   constructor(
     private eventoService: EventoClienteService,
     private reservaService: ReservaServiceService,
@@ -71,9 +76,78 @@ export class EventosTematicosComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.imprimirInfoZonaHoraria();
     this.cargarEventos();
     this.verificarSesion();
   }
+
+  // ─────────────────────────────────────────────────────────────────
+  // 🕐 ZONA HORARIA — diagnóstico y hora actual en Perú
+  // ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Retorna la fecha/hora actual ajustada a UTC-5 (Lima, Perú).
+   * Funciona aunque el servidor/navegador esté en cualquier zona horaria.
+   */
+  getNowPeru(): Date {
+    const nowUtc = new Date(); // hora real en UTC
+    const utcMs = nowUtc.getTime() + nowUtc.getTimezoneOffset() * 60_000;
+    return new Date(utcMs + this.PERU_OFFSET_HOURS * 3_600_000);
+  }
+
+  /**
+   * Imprime en consola la hora del servidor (local) y la hora equivalente
+   * en la zona horaria de Lima/Perú para diagnóstico.
+   */
+  private imprimirInfoZonaHoraria(): void {
+    const ahora = new Date();
+    const offsetMin = ahora.getTimezoneOffset(); // minutos detrás de UTC
+    const offsetHoras = -(offsetMin / 60); // p.ej. -5, +8, etc.
+    const zonaNombre = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    const ahoraPeru = this.getNowPeru();
+
+    console.group('🌐 Diagnóstico de Zona Horaria');
+    console.log(
+      `🖥️  Hora del SERVIDOR/NAVEGADOR : ${ahora.toLocaleString()} (${zonaNombre}, UTC${offsetHoras >= 0 ? '+' : ''}${offsetHoras})`,
+    );
+    console.log(
+      `🇵🇪  Hora en LIMA / PERÚ (UTC-5): ${ahoraPeru.toLocaleString('es-PE')}`,
+    );
+    console.log(
+      `⏱️  Diferencia respecto a Perú  : ${offsetHoras - this.PERU_OFFSET_HOURS >= 0 ? '+' : ''}${offsetHoras - this.PERU_OFFSET_HOURS} horas`,
+    );
+    console.groupEnd();
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // 🚫 FILTRO DE EVENTOS VENCIDOS (evaluado en hora peruana)
+  // ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Devuelve true si el evento ya terminó según la hora actual de Lima/Perú.
+   * Usa fechaFin del evento; si no existe, usa fechaInicio.
+   */
+  eventoVencido(evento: EventoFeignReserva): boolean {
+    const isoFin = evento.fechaFin ?? evento.fechaInicio;
+    const fechaFin = this.parseFecha(isoFin);
+    if (!fechaFin) return false;
+
+    // parseFecha construye la Date interpretando el ISO como hora local del backend.
+    // Convertimos esa misma Date a milisegundos UTC y luego a hora peruana.
+    const fechaFinUtcMs =
+      fechaFin.getTime() - fechaFin.getTimezoneOffset() * 60_000;
+    const fechaFinPeru = new Date(
+      fechaFinUtcMs + this.PERU_OFFSET_HOURS * 3_600_000,
+    );
+
+    const ahoraPeru = this.getNowPeru();
+    return fechaFinPeru <= ahoraPeru;
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // AUTENTICACIÓN
+  // ─────────────────────────────────────────────────────────────────
 
   verificarSesion(): void {
     this.usuarioAutenticado = this.authService.isLoggedIn();
@@ -94,6 +168,10 @@ export class EventosTematicosComponent implements OnInit {
       this.idUsuario = null;
     }
   }
+
+  // ─────────────────────────────────────────────────────────────────
+  // CARGA Y FILTRADO DE EVENTOS
+  // ─────────────────────────────────────────────────────────────────
 
   cargarEventos(): void {
     this.cargando = true;
@@ -131,11 +209,25 @@ export class EventosTematicosComponent implements OnInit {
   }
 
   private finalizarCarga(): void {
+    // Ordenar por fecha de inicio
     this.eventos.sort(
       (a, b) =>
         (this.parseFecha(a.fechaInicio)?.getTime() ?? 0) -
         (this.parseFecha(b.fechaInicio)?.getTime() ?? 0),
     );
+
+    // ✅ Descartar eventos cuya fechaFin ya pasó en hora peruana
+    const vencidos = this.eventos.filter((e) => this.eventoVencido(e));
+    if (vencidos.length) {
+      console.info(
+        `🇵🇪 Se filtraron ${vencidos.length} evento(s) vencido(s) según hora de Lima/Perú:`,
+        vencidos.map(
+          (e) => `${e.nombre} (fin: ${e.fechaFin ?? e.fechaInicio})`,
+        ),
+      );
+    }
+
+    this.eventos = this.eventos.filter((e) => !this.eventoVencido(e));
     this.eventosFiltrados = [...this.eventos];
     this.cargando = false;
   }
@@ -168,7 +260,9 @@ export class EventosTematicosComponent implements OnInit {
     }
     if (this.filtroAforo !== null && this.filtroAforo > 0)
       r = r.filter((e) => (e.aforo ?? 0) >= this.filtroAforo!);
-    this.eventosFiltrados = r;
+
+    // ✅ Reaplica el filtro de vencidos por si se usa después de la carga
+    this.eventosFiltrados = r.filter((e) => !this.eventoVencido(e));
   }
 
   seleccionarMetodoPago(metodo: 'TARJETA' | 'YAPE' | 'PLIN'): void {
@@ -213,10 +307,8 @@ export class EventosTematicosComponent implements OnInit {
   }
 
   irAPago(): void {
-    // Verificar autenticación antes de ir al pago
     if (!this.usuarioAutenticado || !this.idUsuario) {
       alert('Debe iniciar sesión para completar la reserva');
-      // Guardar reserva temporal
       const reservaTemp = {
         evento: this.eventoDetalle,
         personas: this.cantidadPersonas,
@@ -296,7 +388,7 @@ export class EventosTematicosComponent implements OnInit {
             this.mesaOcupadaMap[mesa.idEventoMesa] = res.data === true;
           },
           error: () => {
-            this.mesaOcupadaMap[mesa.idEventoMesa] = false;
+            this.mesaOcupadaMap[mesa.idEventoMesa] = true;
           },
         });
     });
@@ -312,11 +404,7 @@ export class EventosTematicosComponent implements OnInit {
   }
 
   puedeConfirmarPago(): boolean {
-    // Verificar que esté autenticado
-    if (!this.usuarioAutenticado || !this.idUsuario) {
-      return false;
-    }
-
+    if (!this.usuarioAutenticado || !this.idUsuario) return false;
     if (this.metodoPago === 'TARJETA')
       return !!(
         this.datosTarjeta.numero &&
@@ -360,7 +448,6 @@ export class EventosTematicosComponent implements OnInit {
         if (response.valor && response.data) {
           const idReserva = response.data;
 
-          // Solo llamar a crearPago si es YAPE o PLIN
           if (this.metodoPago === 'YAPE' || this.metodoPago === 'PLIN') {
             const pagoRequest: CrearPagoRequest = {
               idReserva: idReserva,
@@ -396,7 +483,6 @@ export class EventosTematicosComponent implements OnInit {
               },
             });
           } else {
-            // TARJETA: solo reserva, sin pago adicional
             this.procesandoPago = false;
             this.mostrarAlertaExito();
             localStorage.removeItem('reserva_evento_temporal');
@@ -474,6 +560,15 @@ export class EventosTematicosComponent implements OnInit {
     return Array.from({ length: capacidad }, (_, i) => i + 1);
   }
 
+  // ─────────────────────────────────────────────────────────────────
+  // HELPERS DE FECHA
+  // ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Convierte un ISO "YYYY-MM-DDTHH:mm:ss" del backend en un Date local.
+   * El backend envía la fecha sin información de zona horaria, así que
+   * la tratamos como si fuera la hora tal cual viene del servidor.
+   */
   parseFecha(iso: string | null | undefined): Date | null {
     if (!iso) return null;
     const [datePart, timePart = '00:00:00'] = iso.split('T');
@@ -549,9 +644,9 @@ export class EventosTematicosComponent implements OnInit {
     return `${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
   }
 
-  // ═══════════════════════════════════════════════════════════════════
-  // MÉTODOS PARA ALERTAS MEJORADAS
-  // ═══════════════════════════════════════════════════════════════════
+  // ─────────────────────────────────────────────────────────────────
+  // ALERTAS
+  // ─────────────────────────────────────────────────────────────────
 
   private mostrarAlertaExito(): void {
     this.alertaTipo = 'exito';
@@ -564,7 +659,6 @@ export class EventosTematicosComponent implements OnInit {
     this.alertaDatos = { mensaje: mensaje };
     this.mostrarAlerta = true;
 
-    // Ocultar alerta de error después de 4 segundos
     setTimeout(() => {
       this.mostrarAlerta = false;
     }, 4000);

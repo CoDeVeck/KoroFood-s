@@ -2,6 +2,8 @@ package com.koroFoods.eventService.repository;
 
 import com.koroFoods.eventService.model.Evento;
 
+import feign.Param;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +24,11 @@ public interface IEventoRepository extends JpaRepository<Evento, Integer> {
 	@Query("SELECT e FROM Evento e WHERE e.fechaInicio >= :fechaActual AND e.activo = true")
 	List<Evento> findEventosFuturos(LocalDateTime fechaActual);
 
+	@Query("""
+			    SELECT e FROM Evento e
+			    WHERE e.activo = true
+			    AND e.fechaInicio >= :inicio
+			    AND e.fechaFin < :fin
+			""")
+	List<Evento> findEventosDelDia(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
 }

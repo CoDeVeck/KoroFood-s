@@ -69,4 +69,13 @@ export class EventoClienteService {
       { params },
     );
   }
+
+  // GET /evento/feign/dashboard/hoy
+  listarEventosDelDia(): Observable<ResultadoResponse<EventoFeignReserva[]>> {
+    return this.http.get<ResultadoResponse<EventoFeignReserva[]>>(
+      `${this.baseUrl}/dashboard/hoy`,
+    );
+  }
+
+  
 }

@@ -1,13 +1,20 @@
 import { Injectable } from '@angular/core';
 import { enviroment } from '../../../enviroments/enviroment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { ReservaRequest } from '../../shared/request/ReservaRequest';
 import { Observable } from 'rxjs';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 import { Reserva } from '../../shared/model/reserva.model';
 import { ReservaResponseDTO } from '../../shared/dto/ReservaResponseDTO';
+import { RecepcionistaCountsDTO } from '../../shared/dto/RecepcionistaCountsDTO';
+import { ReservaAsistidaDTO } from '../../shared/dto/ReservaAsistidaDTO';
 
-
+export interface ReporteReservasRequest {
+  fechaInicio: string; // formato: YYYY-MM-DD
+  fechaFin: string;
+  estado?: string; // PENDIENTE, CONFIRMADA, CANCELADA, COMPLETADA
+  zona?: string; // Z1, Z2, Z3, Z4
+}
 
 @Injectable({
   providedIn: 'root',
@@ -77,6 +84,33 @@ export class ReservaServiceService {
     return this.http.patch<ResultadoResponse<number>>(
       `${this.baseUrl}/cancelar/${idReserva}`,
       {}, // PATCH necesita body, aunque esté vacío
+    );
+  }
+
+  // NUEVO: Generar reporte de reservas en PDF
+  generarReporteReservas(request: ReporteReservasRequest): Observable<Blob> {
+    const params = new HttpParams()
+      .set('fechaInicio', request.fechaInicio)
+      .set('fechaFin', request.fechaFin);
+
+    return this.http.get(`${this.baseUrl}/reportes/reservas/todas`, {
+      params,
+      responseType: 'blob',
+    });
+  }
+  // GET /reserva/dashboard/recepcionista/counts
+  obtenerCountsRecepcionista(): Observable<RecepcionistaCountsDTO> {
+    return this.http.get<RecepcionistaCountsDTO>(
+      `${this.baseUrl}/dashboard/recepcionista/counts`,
+    );
+  }
+
+  // GET /reserva/dashboard/recepcionista/asistidas/hoy
+  listarReservasAsistidasHoy(): Observable<
+    ResultadoResponse<ReservaAsistidaDTO[]>
+  > {
+    return this.http.get<ResultadoResponse<ReservaAsistidaDTO[]>>(
+      `${this.baseUrl}/dashboard/recepcionista/asistidas/hoy`,
     );
   }
 }

@@ -267,6 +267,9 @@ export class DetalleOrdenesComponent implements OnInit, OnDestroy {
             next: (response) => {
               console.log('Cambiadno de estado');
               this.pagoConfirmado = true;
+              setTimeout(() => {
+                this.router.navigate(['/mesero/ordenes']);
+              }, 2000);
             },
             error: (error) => {
               console.error('Sucedio un problema con el pago');
@@ -287,11 +290,13 @@ export class DetalleOrdenesComponent implements OnInit, OnDestroy {
   }
 
   procederAlPago(): void {
-    if (this.detalles) {
-      this.detalles.find((x) => x.estado === 'PEN');
+    const hayPendientes = this.detalles.some((x) => x.estado === 'PED');
+
+    if (hayPendientes) {
       AlertService.info(
         'Tienes q entregar todos los platos o cancelar para proceder al pago',
       );
+      return;
     }
 
     this.wsPedidoService.iniciarPago(this.idPedido!);

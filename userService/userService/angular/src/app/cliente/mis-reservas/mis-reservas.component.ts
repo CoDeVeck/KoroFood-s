@@ -12,8 +12,6 @@ import { UserService } from '../service/user.service';
 import { ResultadoResponse } from '../../shared/dto/ResultadoResponse';
 import { EnviarCodigoRequest } from '../../shared/dto/EnviarCodigoRequest';
 
-
-
 @Component({
   selector: 'app-mis-reservas',
   standalone: true,
@@ -21,7 +19,6 @@ import { EnviarCodigoRequest } from '../../shared/dto/EnviarCodigoRequest';
   templateUrl: './mis-reservas.component.html',
   styleUrls: ['./mis-reservas.component.css'],
 })
-
 export class MisReservasComponent implements OnInit {
   reservas: ReservaResponseDTO[] = [];
   reservasFiltradas: ReservaResponseDTO[] = [];
@@ -49,6 +46,11 @@ export class MisReservasComponent implements OnInit {
   EstadoReserva = EstadoReserva;
   TipoReserva = TipoReserva;
 
+  // ─────────────────────────────────────────────────────────────────
+  // ZONA HORARIA: Perú es UTC-5 (sin cambio de horario de verano)
+  // ─────────────────────────────────────────────────────────────────
+  private readonly PERU_OFFSET_HOURS = -5;
+
   constructor(
     private reservaService: ReservaServiceService,
     private codigoService: CodigoVerificacionService,
@@ -60,6 +62,75 @@ export class MisReservasComponent implements OnInit {
   ngOnInit(): void {
     this.verificarSesion();
   }
+
+  // ─────────────────────────────────────────────────────────────────
+  // 🕐 ZONA HORARIA
+  // ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Parsea un ISO "YYYY-MM-DDTHH:mm:ss" del backend SIN dejar que
+   * el navegador aplique su zona horaria local. Lo trata como si
+   * el backend enviara la hora tal cual (hora del servidor).
+   *
+   * Esto evita el bug donde "2025-02-19T20:00:00" pasa a ser
+   * "2025-02-20" al construir con `new Date(iso)` en UTC.
+   */
+  private parseFechaISO(iso: string | null | undefined): Date | null {
+    if (!iso) return null;
+    const [datePart, timePart = '00:00:00'] = iso.split('T');
+    const [anio, mes, dia] = datePart.split('-').map(Number);
+    const [hh, mm, ss] = timePart.split(':').map(Number);
+    if (!anio || isNaN(anio)) return null;
+    // Construye la Date en hora LOCAL del navegador (evita conversión UTC)
+    return new Date(anio, mes - 1, dia, hh ?? 0, mm ?? 0, ss ?? 0);
+  }
+
+  /**
+   * Retorna la hora actual ajustada a UTC-5 (Lima, Perú).
+   */
+  getNowPeru(): Date {
+    const now = new Date();
+    const utcMs = now.getTime() + now.getTimezoneOffset() * 60_000;
+    return new Date(utcMs + this.PERU_OFFSET_HOURS * 3_600_000);
+  }
+
+  /**
+   * Convierte una fecha parseada del backend a su equivalente en hora peruana.
+   * Asume que el ISO del backend está en la zona horaria del servidor
+   * y necesita ajustarse a UTC-5.
+   *
+   * Uso: para comparar fechas de reserva con la fecha elegida en el filtro.
+   */
+  private fechaEnPeru(iso: string | null | undefined): Date | null {
+    const parsed = this.parseFechaISO(iso);
+    if (!parsed) return null;
+
+    // Convertir la fecha "local del servidor" a UTC real
+    const utcMs = parsed.getTime() - parsed.getTimezoneOffset() * 60_000;
+    // Luego aplicar offset de Perú (UTC-5)
+    return new Date(utcMs + this.PERU_OFFSET_HOURS * 3_600_000);
+  }
+
+  /**
+   * Extrae solo la parte "YYYY-MM-DD" de una fecha de reserva
+   * ajustada a la zona horaria de Lima/Perú.
+   *
+   * Ejemplo: "2025-02-19T22:00:00" (servidor en UTC) → "2025-02-19" en Perú
+   * Con new Date() nativo daría "2025-02-20" → BUG del filtro que se corrige aquí.
+   */
+  private getFechaLocalPeru(iso: string): string {
+    const fechaPeru = this.fechaEnPeru(iso);
+    if (!fechaPeru) return '';
+
+    const anio = fechaPeru.getFullYear();
+    const mes = String(fechaPeru.getMonth() + 1).padStart(2, '0');
+    const dia = String(fechaPeru.getDate()).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // SESIÓN Y CARGA
+  // ─────────────────────────────────────────────────────────────────
 
   verificarSesion(): void {
     if (!this.authService.isLoggedIn()) {
@@ -73,7 +144,6 @@ export class MisReservasComponent implements OnInit {
           this.idUsuario = user.idUsuario;
           this.cargarReservas();
         } else {
-          // Si no hay usuario en el servicio, obtenerlo
           this.authService.getUsuario().subscribe({
             next: (userData) => {
               this.idUsuario = userData.idUsuario;
@@ -114,16 +184,22 @@ export class MisReservasComponent implements OnInit {
     });
   }
 
+  // ─────────────────────────────────────────────────────────────────
+  // FILTROS — con comparación de fecha en hora peruana
+  // ─────────────────────────────────────────────────────────────────
+
   aplicarFiltros(): void {
     this.reservasFiltradas = this.reservas.filter((reserva) => {
       let cumpleFecha = true;
       let cumpleEstado = true;
 
       if (this.filtroFecha) {
-        const fechaReserva = new Date(reserva.fechaHora)
-          .toISOString()
-          .split('T')[0];
-        cumpleFecha = fechaReserva === this.filtroFecha;
+        // ✅ Comparamos la fecha de la reserva convertida a hora peruana
+        // contra la fecha elegida en el filtro (que viene como "YYYY-MM-DD").
+        // Antes se usaba new Date(reserva.fechaHora).toISOString().split('T')[0]
+        // lo que podía dar un día distinto al del servidor por la conversión UTC.
+        const fechaReservaEnPeru = this.getFechaLocalPeru(reserva.fechaHora);
+        cumpleFecha = fechaReservaEnPeru === this.filtroFecha;
       }
 
       if (this.filtroEstado) {
@@ -147,6 +223,10 @@ export class MisReservasComponent implements OnInit {
     this.filtroEstado = '';
     this.aplicarFiltros();
   }
+
+  // ─────────────────────────────────────────────────────────────────
+  // MODALES Y ACCIONES
+  // ─────────────────────────────────────────────────────────────────
 
   verDetalle(reserva: ReservaResponseDTO): void {
     this.reservaSeleccionada = reserva;
@@ -182,7 +262,7 @@ export class MisReservasComponent implements OnInit {
     };
 
     this.codigoService.enviarCodigo(request).subscribe({
-      next: (response) => {
+      next: () => {
         this.mostrarModalEnviarCodigo = false;
         this.mostrarMensajeExito(
           `Código de verificación enviado por ${tipoEnvio} exitosamente`,
@@ -206,10 +286,10 @@ export class MisReservasComponent implements OnInit {
     this.reservaService
       .cancelarReserva(this.reservaSeleccionada.idReserva)
       .subscribe({
-        next: (response) => {
+        next: () => {
           this.mostrarModalCancelar = false;
           this.mostrarMensajeExito('Reserva cancelada exitosamente');
-          this.cargarReservas(); // Recargar la lista
+          this.cargarReservas();
         },
         error: (err) => {
           console.error('Error al cancelar reserva:', err);
@@ -228,30 +308,35 @@ export class MisReservasComponent implements OnInit {
     this.reservaSeleccionada = null;
   }
 
+  // ─────────────────────────────────────────────────────────────────
+  // MENSAJES TOAST
+  // ─────────────────────────────────────────────────────────────────
+
   mostrarMensajeExito(mensaje: string): void {
     this.mensaje = mensaje;
     this.tipoMensaje = 'success';
     this.mostrarMensaje = true;
-    setTimeout(() => {
-      this.mostrarMensaje = false;
-    }, 4000);
+    setTimeout(() => (this.mostrarMensaje = false), 4000);
   }
 
   mostrarMensajeError(mensaje: string): void {
     this.mensaje = mensaje;
     this.tipoMensaje = 'error';
     this.mostrarMensaje = true;
-    setTimeout(() => {
-      this.mostrarMensaje = false;
-    }, 4000);
+    setTimeout(() => (this.mostrarMensaje = false), 4000);
   }
 
   cerrarMensaje(): void {
     this.mostrarMensaje = false;
   }
 
+  // ─────────────────────────────────────────────────────────────────
+  // FORMATEO DE FECHAS — usando parseFechaISO (sin bug de UTC)
+  // ─────────────────────────────────────────────────────────────────
+
   formatearFecha(fecha: string): string {
-    const date = new Date(fecha);
+    const date = this.parseFechaISO(fecha);
+    if (!date) return '—';
     const opciones: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
@@ -263,7 +348,8 @@ export class MisReservasComponent implements OnInit {
   }
 
   formatearFechaCorta(fecha: string): string {
-    const date = new Date(fecha);
+    const date = this.parseFechaISO(fecha);
+    if (!date) return '—';
     return date.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
@@ -272,12 +358,17 @@ export class MisReservasComponent implements OnInit {
   }
 
   formatearHora(fecha: string): string {
-    const date = new Date(fecha);
+    const date = this.parseFechaISO(fecha);
+    if (!date) return '—';
     return date.toLocaleTimeString('es-ES', {
       hour: '2-digit',
       minute: '2-digit',
     });
   }
+
+  // ─────────────────────────────────────────────────────────────────
+  // CLASES CSS
+  // ─────────────────────────────────────────────────────────────────
 
   getEstadoClass(estado: EstadoReserva): string {
     const clases: { [key in EstadoReserva]: string } = {

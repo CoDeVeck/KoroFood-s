@@ -198,12 +198,11 @@
 }
 
 .avatar-ring {
-  width: 90px;
-  height: 90px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
-  padding: 3px;
-  background: linear-gradient(135deg, var(--orange), var(--red));
-  box-shadow: 0 0 0 4px var(--orange-pale);
+  padding: 3px; 
+  background: orange; 
 }
 
 .avatar-img,

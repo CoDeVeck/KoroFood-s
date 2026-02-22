@@ -22,6 +22,10 @@ export class PlatoFormComponent implements OnInit {
   loading: boolean = false;
   error: string = '';
 
+  imagenPreview: string | null = null;
+  imagenBase64: string | null = null;
+  archivoSeleccionado: File | null = null;
+
   constructor(
     private fb: FormBuilder,
     private platoService: PlatoService,
@@ -33,7 +37,7 @@ export class PlatoFormComponent implements OnInit {
       precio: [0, [Validators.required, Validators.min(0.01)]],
       stock: [0, [Validators.required, Validators.min(0)]],
       tipoPlato: ['', [Validators.required]],
-      imagen: ['']
+      
     });
   }
 
@@ -71,6 +75,11 @@ export class PlatoFormComponent implements OnInit {
           tipoPlato: plato.tipoPlato,
           imagen: plato.imagen
         });
+
+        if (plato.imagen) {
+          this.imagenPreview = plato.imagen;
+        }
+
         this.loading = false;
       },
       error: (err) => {
@@ -78,6 +87,40 @@ export class PlatoFormComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      this.error = 'Solo se permiten imágenes';
+      return;
+    }
+
+    // Validar tamaño (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      this.error = 'La imagen no puede superar 5MB';
+      return;
+    }
+
+    this.archivoSeleccionado = file;
+    this.error = '';
+
+    // Leer archivo y crear preview
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.imagenPreview = e.target.result;
+      this.imagenBase64 = e.target.result; // Incluye data:image/...
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removerImagen(): void {
+    this.imagenPreview = null;
+    this.imagenBase64 = null;
+    this.archivoSeleccionado = null;
   }
 
   onSubmit(): void {
@@ -89,7 +132,15 @@ export class PlatoFormComponent implements OnInit {
     this.loading = true;
     this.error = '';
 
-    const platoData: PlatoRequest = this.platoForm.value;
+    const platoData: PlatoRequest = {
+      ...this.platoForm.value,
+      imagenBase64: this.imagenBase64 || undefined // Solo si hay imagen nueva
+    };
+
+    console.log('📤 Enviando plato:', {
+      nombre: platoData.nombre,
+      tieneImagen: !!platoData.imagenBase64
+    });
 
     const request = this.isEditMode
       ? this.platoService.actualizar(this.platoId!, platoData)

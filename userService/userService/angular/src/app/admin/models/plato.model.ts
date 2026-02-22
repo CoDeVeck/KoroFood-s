@@ -17,6 +17,7 @@ export interface PlatoRequest {
   stock: number;
   tipoPlato: string;
   imagen: string | null;
+  imagenBase64?: string;
 }
 
 export interface PlatoResponse {

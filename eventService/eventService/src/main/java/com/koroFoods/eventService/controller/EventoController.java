@@ -2,7 +2,9 @@ package com.koroFoods.eventService.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,5 +76,14 @@ public class EventoController {
 	public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
 		eventoService.eliminar(id);
 		return ResponseEntity.noContent().build();
+	}
+	
+	@GetMapping("/reporte/eventos")
+	public ResponseEntity<byte[]> reporteEventos() {
+	    byte[] pdf = eventoService.generarReporteEventos();
+	    return ResponseEntity.ok()
+	            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte-eventos.pdf")
+	            .contentType(MediaType.APPLICATION_PDF)
+	            .body(pdf);
 	}
 }
