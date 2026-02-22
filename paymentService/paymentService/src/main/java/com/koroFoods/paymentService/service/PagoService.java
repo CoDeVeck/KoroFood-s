@@ -75,19 +75,26 @@ public class PagoService {
         pago.setIdUsuario(request.getIdUsuario());
         pago.setTipoPago(TipoPago.valueOf(request.getTipoPago()));
         pago.setMonto(request.getMonto());
-        pago.setMetodoPago((request.getMetodoPago()));
+        pago.setMetodoPago(request.getMetodoPago());
         pago.setObservaciones(request.getObservaciones());
-        pago.setEstado(EstadoPago.PEN);
 
-        // Generar referencia única
+        if (request.getMetodoPago() == MetodoPago.EFECTIVO || 
+            request.getMetodoPago() == MetodoPago.TARJETA) {
+            pago.setEstado(EstadoPago.PAG);
+            pago.setFechaPago(LocalDateTime.now());
+        } else {
+            pago.setEstado(EstadoPago.PEN);
+        }
+
         pago.setReferenciaPago(generarReferencia());
-
         Pago guardado = pagoRepository.save(pago);
 
+        if (guardado.getEstado() == EstadoPago.PAG) {
+            publicarEventoPagoConfirmado(guardado);
+        }
 
         dashboardNotificator.notificarGraficoTres(LocalDate.now().getMonthValue());
 
-        // Retornar datos para generar QR en frontend
         return generarQRData(guardado);
     }
 
@@ -201,42 +208,54 @@ public class PagoService {
         return "KORO-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
-    private QRDataResponse generarQRData(Pago pago) {
-        String numeroDestino;
-        if (pago.getMetodoPago() == MetodoPago.YAPE) {
-            numeroDestino = NUMERO_YAPE;
-        } else if (pago.getMetodoPago() == MetodoPago.PLIN) {
-            numeroDestino = NUMERO_PLIN;
-        } else {
-            throw new BusinessException("El método de pago " + pago.getMetodoPago() + " no soporta QR");
-        }
+   private QRDataResponse generarQRData(Pago pago) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-        String concepto = String.format("KoroFood - Ref: %s", pago.getReferenciaPago());
-
-        // Datos para el QR (formato que entiende Yape/Plin)
-        // Formato: yape://pago?numero=XXX&monto=YYY&concepto=ZZZ
-        String qrData = String.format(
-                "%s://pago?numero=%s&monto=%.2f&concepto=%s",
-                pago.getMetodoPago().name().toLowerCase(),
-                numeroDestino,
-                pago.getMonto(),
-                concepto
-        );
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
+    if (pago.getMetodoPago() == MetodoPago.EFECTIVO || 
+        pago.getMetodoPago() == MetodoPago.TARJETA) {
         return QRDataResponse.builder()
                 .idPago(pago.getIdPago())
                 .referenciaPago(pago.getReferenciaPago())
                 .monto(pago.getMonto())
                 .metodoPago(pago.getMetodoPago())
-                .numeroDestino(numeroDestino)
+                .numeroDestino(null)
                 .nombreDestino(NOMBRE_NEGOCIO)
-                .concepto(concepto)
-                .qrData(qrData)
-                .fechaExpiracion(pago.getFechaExpiracion().format(formatter))
+                .concepto("Pago en " + obtenerDescripcionMetodoPago(pago.getMetodoPago()))
+                .qrData(null) 
+                .fechaExpiracion(pago.getFechaExpiracion() != null 
+                    ? pago.getFechaExpiracion().format(formatter) : null)
                 .build();
     }
+
+    // YAPE / PLIN → generan QR como antes
+    String numeroDestino;
+    if (pago.getMetodoPago() == MetodoPago.YAPE) {
+        numeroDestino = NUMERO_YAPE;
+    } else {
+        numeroDestino = NUMERO_PLIN;
+    }
+
+    String concepto = String.format("KoroFood - Ref: %s", pago.getReferenciaPago());
+    String qrData = String.format(
+            "%s://pago?numero=%s&monto=%.2f&concepto=%s",
+            pago.getMetodoPago().name().toLowerCase(),
+            numeroDestino,
+            pago.getMonto(),
+            concepto
+    );
+
+    return QRDataResponse.builder()
+            .idPago(pago.getIdPago())
+            .referenciaPago(pago.getReferenciaPago())
+            .monto(pago.getMonto())
+            .metodoPago(pago.getMetodoPago())
+            .numeroDestino(numeroDestino)
+            .nombreDestino(NOMBRE_NEGOCIO)
+            .concepto(concepto)
+            .qrData(qrData)
+            .fechaExpiracion(pago.getFechaExpiracion().format(formatter))
+            .build();
+}
 
     private void publicarEventoPagoConfirmado(Pago pago) {
         PagoConfirmadoEvent event = PagoConfirmadoEvent.builder()
