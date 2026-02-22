@@ -9,7 +9,7 @@ SET CLIENT_ENCODING TO 'UTF8';
 INSERT INTO TB_PLATO (NOMBRE, PRECIO, STOCK, TIPO_PLATO, IMAGEN) VALUES
 -- Entradas (E)
 ('Tarta de la Abuela (Ratatouille)', 28.00, 50, 'E', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771720383/KoroFoods/Menu/nhzddmqkgz953xezujb8.png'),
-('Gyozas del Dragon (Dragon Ball)', 25.00, 60, 'E', NULL), --AQUI
+('Gyozas del Dragon (Dragon Ball)', 25.00, 60, 'E', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771784389/gyozas-goku_luvblw.png'),
 ('Tequeños Galácticos (Star Wars)', 22.00, 45, 'E', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771720269/KoroFoods/Menu/wnfvbhphsk5nwga6dtas.png'),
 -- Entradas Peruanas (E)
 ('Causa Limeña Rellena', 18.00, 55, 'E', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771741027/causa_qeupwq.jpg'),
@@ -24,7 +24,7 @@ INSERT INTO TB_PLATO (NOMBRE, PRECIO, STOCK, TIPO_PLATO, IMAGEN) VALUES
 ('Onigiri de Pescado (One Piece)', 20.00, 55, 'S', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771720506/KoroFoods/Menu/z4trykmma2uz5i225akc.png'),
 ('Tacos de la Araña (Spiderman)', 28.00, 50, 'S', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771720476/KoroFoods/Menu/ms5adwvgakvvuv4kzcwh.png'),
 ('Fideos de la Alegría (Intensamente)', 23.00, 60, 'S', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771720536/KoroFoods/Menu/zlkoja3uzp5ceaypufru.png'),
-('Empanadas del Ogro (Shrek)', 25.00, 45, 'S', NULL), --AQUI
+('Empanadas del Ogro (Shrek)', 25.00, 45, 'S', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771784449/empanadas-sherk_oe9rok.png'),
 ('Bento del Asesino (Death Note)', 45.00, 35, 'S', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771720578/KoroFoods/Menu/lwcq25odswxiui7ntetq.png'),
 ('Ramen de la Aldea (Naruto)', 35.00, 50, 'S', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771720602/KoroFoods/Menu/sncdsmkqwnkffqbriebm.png'),
 ('Hamburguesa del Tiempo (Interstellar)', 48.00, 30, 'S', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771720620/KoroFoods/Menu/mctcrd3y0eui94lk06ks.png'),
@@ -52,7 +52,18 @@ INSERT INTO TB_PLATO (NOMBRE, PRECIO, STOCK, TIPO_PLATO, IMAGEN) VALUES
 ('Juane Selvático', 26.00, 42, 'S', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771741010/juane_t6tu1h.png'),
 ('Escabeche de Pescado', 32.00, 38, 'S', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771741008/escbache-pescado_uxdysa.png'),
 
--- AGREGAR POSTRES POR CREACION PROPIA // OJETOOOOOOOO
+-- Postres (P)
+('Tarta Nocturna de Tinta Negra', 22.00, 40, 'P', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771788534/tarta-nocturna_mkg4p7.png'),
+('Red Velvet Obsesión', 20.00, 35, 'P', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771788535/red-velvet-obsesion_mctm5z.png'),
+('Cheesecake Doble Identidad', 18.00, 30, 'P', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771788537/cheesecake-doble-identidad_em55qe.png'),
+('Brownie Impacto Final', 19.00, 25, 'P', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771788536/brownie-impacto-final_bcar9d.png'),
+('Perla de Coco Prohibida', 23.00, 20, 'P', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771788537/perla-coco_qxiehn.png'),
+('Tiramisú Ilusión Mental', 21.00, 28, 'P', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771788536/tiramisu-ilusion-mental_zck6cf.png'),
+('Milhojas Tentación Nocturna', 17.00, 32, 'P', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771788537/milhojas-tentacion-nocturna_nhwwvj.png'),
+('Macarons Alfa & Omega', 24.00, 18, 'P', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771788535/macaron-alfa-omega_rtjm8c.png'),
+('Parfait Flor de Cerezo', 16.00, 45, 'P', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771788538/parfait-flor-cerezo_lip2id.png'),
+('Soufflé Silencio Dulce', 22.00, 22, 'P', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771788534/souffle-silencio-dulce_ai4iei.png'),
+
 -- Postres Peruanos (P)
 ('Suspiro a la Limeña', 14.00, 60, 'P', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771740976/suspiro-de-limennia_ts5gbn.jpg'),
 ('Mazamorra Morada con Arroz con Leche', 12.00, 65, 'P', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771740971/mazamorra-morada-con-leche_rgpn9h.jpg'),
