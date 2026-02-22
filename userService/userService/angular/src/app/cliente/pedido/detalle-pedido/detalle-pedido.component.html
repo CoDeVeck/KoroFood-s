@@ -25,7 +25,7 @@
     </button>
 
     <dialog id="info" closedBy="any">
-      <h6>La empresa KoroFoods cumple con</h6>
+      <h6>La empresa KoroFoods cumple</h6>
       <p>
         Con el
         <a
@@ -36,7 +36,7 @@
         Las imágenes son <strong style="color: red">referenciales</strong> y no
         reemplazan la realidad del producto.
       </p>
-      <button onclick="info.close()" class="cerrar">Cerrar</button>
+      <button (click)="cerrarDialog()" class="cerrar">Cerrar</button>
     </dialog>
   </div>
 
