@@ -413,4 +413,15 @@ export class DetallePedidoComponent implements OnInit, OnDestroy {
   volver(): void {
     this.router.navigate(['/cliente/pedido']);
   }
+
+  cerrarDialog(): void {
+    const info = document.getElementById('info') as HTMLDialogElement;
+
+    info.classList.add('saliendo');
+
+    setTimeout(() => {
+      info.close();
+      info.classList.remove('saliendo');
+    }, 250);
+  }
 }
