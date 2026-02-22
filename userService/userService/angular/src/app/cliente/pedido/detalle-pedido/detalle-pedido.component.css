@@ -1298,10 +1298,10 @@
   border: none;
   border-radius: 12px;
   padding: 20px;
-  transform: scale(0.8);
-  transition: all 0.25s ease-in-out;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease, opacity 0.25s ease;
   box-shadow: 0 10px 25px rgba(0,0,0,.3);
-  width: 40%;
+  width: 30%;
 }
 
 #info a{
@@ -1312,28 +1312,19 @@
 
 #info a:hover{
   color: #333;
-  
   transform: scale(0.1);
 
 }
 
-.cerrar{
-  border-radius: 2em;
-  flex-direction: center;
-  width: 50%;
-  transition: all 0.25s ease-in;
-}
-
-.cerrar:hover{
-  background: #f44336;
-  color: white;
-  transform: scale(1.1);
-}
-
 #info[open]{
   opacity: 1;
-  transform: scale(1);
+  transform: translateX(0);
 }
+
+#info.saliendo{
+  opacity: 0;
+  transform: translateX(100%);
+} 
 
 #info::backdrop {
   background: rgba(0,0,0,0);
@@ -1342,6 +1333,25 @@
 
 #info[open]::backdrop {
   background: rgba(0,0,0,0.4);
+}
+
+#info[close]{
+  transform: translateX(100%);
+}
+
+.cerrar{
+  border-radius: 2em;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  
+  transition: all 0.25s ease-in;
+}
+
+.cerrar:hover{
+  background: #f44336;
+  color: white;
+  transform: scale(1.1);
 }
 
 /* From Uiverse.io by gharsh11032000 */ 

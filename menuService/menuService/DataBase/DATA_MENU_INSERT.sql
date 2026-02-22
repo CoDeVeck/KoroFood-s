@@ -5,7 +5,6 @@ SHOW CLIENT_ENCODING;
 */
 SET CLIENT_ENCODING TO 'UTF8';
 
--- FALTAN DOS PLATOS
 INSERT INTO TB_PLATO (NOMBRE, PRECIO, STOCK, TIPO_PLATO, IMAGEN) VALUES
 -- Entradas (E)
 ('Tarta de la Abuela (Ratatouille)', 28.00, 50, 'E', 'https://res.cloudinary.com/dvacublsz/image/upload/v1771720383/KoroFoods/Menu/nhzddmqkgz953xezujb8.png'),
