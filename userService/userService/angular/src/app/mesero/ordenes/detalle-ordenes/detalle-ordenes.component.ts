@@ -208,7 +208,7 @@ export class DetalleOrdenesComponent implements OnInit, OnDestroy {
 
     if (dtObtenido) {
       AlertService.confirm(
-        `cancelar este pedido ${dtObtenido.nombre.split(' ')[0]}`,
+        `Entregar este pedido ${dtObtenido.nombre.split(' ')[0]}`,
       ).then((result: any) => {
         if (result.isConfirmed || result === true) {
           this.wsPedidoService.entregarPlato(this.idPedido!, idDetalle);

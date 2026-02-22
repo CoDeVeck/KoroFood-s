@@ -119,30 +119,18 @@ export class EventosTematicosComponent implements OnInit {
     );
     console.groupEnd();
   }
-
-  // ─────────────────────────────────────────────────────────────────
-  // 🚫 FILTRO DE EVENTOS VENCIDOS (evaluado en hora peruana)
-  // ─────────────────────────────────────────────────────────────────
-
-  /**
-   * Devuelve true si el evento ya terminó según la hora actual de Lima/Perú.
-   * Usa fechaFin del evento; si no existe, usa fechaInicio.
-   */
+  
   eventoVencido(evento: EventoFeignReserva): boolean {
     const isoFin = evento.fechaFin ?? evento.fechaInicio;
-    const fechaFin = this.parseFecha(isoFin);
-    if (!fechaFin) return false;
+    if (!isoFin) return false;
 
-    // parseFecha construye la Date interpretando el ISO como hora local del backend.
-    // Convertimos esa misma Date a milisegundos UTC y luego a hora peruana.
-    const fechaFinUtcMs =
-      fechaFin.getTime() - fechaFin.getTimezoneOffset() * 60_000;
-    const fechaFinPeru = new Date(
-      fechaFinUtcMs + this.PERU_OFFSET_HOURS * 3_600_000,
-    );
+    // Parsea el ISO del backend como si fuera hora peruana (UTC-5)
+    // añadiendo el offset explícitamente para que getTime() sea correcto en UTC real
+    const fechaFinPeru = new Date(isoFin + '-05:00'); // fuerza interpretación UTC-5
 
-    const ahoraPeru = this.getNowPeru();
-    return fechaFinPeru <= ahoraPeru;
+    const ahoraUtc = new Date();
+
+    return fechaFinPeru <= ahoraUtc; // compara en UTC real, sin magia
   }
 
   // ─────────────────────────────────────────────────────────────────

@@ -65,4 +65,6 @@ INSERT INTO TB_USUARIO (NOMBRES, APE_PATERNO, APE_MATERNO, CORREO, CLAVE, TIPO_D
 ('Juan', 'Rodríguez', 'Silva', 'juan.mesero@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '45678912', 'Direccion 3', '923456789', 3, 3),
 
 --cliente
-('María', 'López', 'Martínez', 'maria.cliente@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '87654321', 'Direccion 2', '912345678', 2, 4);
+('María', 'López', 'Martínez', 'maria.cliente@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '87654321', 'Direccion 2', '912345678', 2, 4),
+('Rebeca', 'Yllanes', 'Chávez', 'rebeca2506km@gmail.com', '$2a$12$S4yymkfK617aCMbt1axzwOZAJF.n0FRiA6zVIwGKExPfN2kBGbc2a', 'DNI', '60770958', 'Centro de Lima 666', '908955357', 10, 4);
+
