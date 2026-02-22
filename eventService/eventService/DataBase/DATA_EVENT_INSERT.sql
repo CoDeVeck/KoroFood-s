@@ -25,7 +25,9 @@ INSERT INTO TB_EVENTO (NOMBRE, DESCRIPCION, ID_TEMATICA, FECHA_INICIO, FECHA_FIN
 ('Noche BL', 'Celebración de los mejores Manwhas BL del momento.', 3, '2026-02-20 20:00:00', '2026-02-20 22:00:00', 55.00),
 ('Maratón de Series', 'Disfruta de las series más aclamadas.', 6, '2026-03-28 16:00:00', '2026-03-28 18:00:00', 40.00),
 ('Gaming Night', 'Torneo de videojuegos con premios especiales.', 7, '2026-04-18 19:00:00', '2026-04-18 21:00:00', 65.00),
-('Noche Cultural', 'Celebración de la cultura peruana y mundial.', 8, '2026-05-22 18:30:00', '2026-05-22 20:30:00', 35.00);
+('Noche Cultural', 'Celebración de la cultura peruana y mundial.', 8, '2026-05-22 18:30:00', '2026-05-22 20:30:00', 35.00),
+('God of War Trilogy Remake', 'Celebración de la remasterización de la trilogía original de PS2/PS3.', 7, '2026-02-23 20:30:00', '2026-02-23 23:00:00', 35.00);
+
 
 INSERT INTO TB_EVENTO_MESA (ID_EVENTO, ID_MESA, FECHA_DESDE, FECHA_HASTA) VALUES 
 (1, 13, '2026-02-25 19:00:00', '2026-02-25 23:00:00'),
@@ -35,4 +37,12 @@ INSERT INTO TB_EVENTO_MESA (ID_EVENTO, ID_MESA, FECHA_DESDE, FECHA_HASTA) VALUES
 (2, 17, '2026-03-15 17:30:00', '2026-03-15 21:00:00'),
 (3, 18, '2026-04-05 16:30:00', '2026-04-05 20:00:00'),
 (4, 19, '2026-05-10 14:30:00', '2026-05-10 18:00:00'),
-(4, 20, '2026-05-10 14:30:00', '2026-05-10 18:00:00');
+(4, 20, '2026-05-10 14:30:00', '2026-05-10 18:00:00'),
+(9, 13, '2026-02-23 20:30:00', '2026-02-23 23:00:00'),
+(9, 14, '2026-02-23 20:30:00', '2026-02-23 23:00:00'),
+(9, 15, '2026-02-23 20:30:00', '2026-02-23 23:00:00'),
+(9, 16, '2026-02-23 20:30:00', '2026-02-23 23:00:00'),
+(9, 17, '2026-02-23 20:30:00', '2026-02-23 23:00:00'),
+(9, 18, '2026-02-23 20:30:00', '2026-02-23 23:00:00'),
+(9, 19, '2026-02-23 20:30:00', '2026-02-23 23:00:00'),
+(9, 20, '2026-02-23 20:30:00', '2026-02-23 23:00:00');
