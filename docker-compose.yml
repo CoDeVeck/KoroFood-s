@@ -32,6 +32,7 @@ services:
       - ./reservationService/reservationService/DataBase/TABLAS_RESERVATION_INSERT.sql:/docker-entrypoint-initdb.d/scripts/reservation-tablas.sql
       - ./reservationService/reservationService/DataBase/DATA_RESERVATION_INSERT.sql:/docker-entrypoint-initdb.d/scripts/reservation-inserts.sql
       - ./qualificationService/qualificationService/DataBase/TABLAS_QUALIFICATION_INSERT.sql:/docker-entrypoint-initdb.d/scripts/qualification-tablas.sql
+      - ./qualificationService/qualificationService/DataBase/DATA_QUALIFICATION_INSERT.sql:/docker-entrypoint-initdb.d/scripts/qualification-inserts.sql
       - ./paymentService/paymentService/DataBase/TABLAS_PAYMENT_INSERT.sql:/docker-entrypoint-initdb.d/scripts/payment-tablas.sql
       - ./paymentService/paymentService/DataBase/DATA_PAYMENT_INSERT.sql:/docker-entrypoint-initdb.d/scripts/payment-inserts.sql
       - ./orderService/orderService/DataBase/TABLAS_ORDER_INSERT.sql:/docker-entrypoint-initdb.d/scripts/order-tablas.sql

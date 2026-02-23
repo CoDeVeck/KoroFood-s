@@ -22,6 +22,7 @@ psql --username "$POSTGRES_USER" --dbname="DB_RESERVATION_SERVICE" -f /docker-en
 psql --username "$POSTGRES_USER" --dbname="DB_RESERVATION_SERVICE" -f /docker-entrypoint-initdb.d/scripts/reservation-inserts.sql
 
 psql --username "$POSTGRES_USER" --dbname="DB_QUALIFICATION_SERVICE" -f /docker-entrypoint-initdb.d/scripts/qualification-tablas.sql
+psql --username "$POSTGRES_USER" --dbname="DB_QUALIFICATION_SERVICE" -f /docker-entrypoint-initdb.d/scripts/qualification-inserts.sql
 
 psql --username "$POSTGRES_USER" --dbname="DB_PAYMENT_SERVICE" -f /docker-entrypoint-initdb.d/scripts/payment-tablas.sql
 psql --username "$POSTGRES_USER" --dbname="DB_PAYMENT_SERVICE" -f /docker-entrypoint-initdb.d/scripts/payment-inserts.sql

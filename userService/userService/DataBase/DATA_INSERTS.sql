@@ -62,16 +62,14 @@ INSERT INTO TB_USUARIO (NOMBRES, APE_PATERNO, APE_MATERNO, CORREO, CLAVE, TIPO_D
 ('Briggite', 'Zapata', 'Inglesias', 'briggite.recepcionista@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '78940012', 'Direccion 4', '909567890', 1, 2),
 
 --mozo
-('Juan', 'Rodríguez', 'Silva', 'juan.mesero@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '45678912', 'Direccion 3', '923456789', 3, 3),
-
+('Juan', 'Rodríguez', 'Silva', 'juan.mesero@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '45666912', 'Direccion 3', '923456789', 3, 3),
 
 --cliente
 ('María', 'López', 'Martínez', 'maria.cliente@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '87654321', 'Direccion 2', '912345678', 2, 4),
 ('Rebeca', 'Yllanes', 'Chávez', 'rebeca2506km@gmail.com', '$2a$12$S4yymkfK617aCMbt1axzwOZAJF.n0FRiA6zVIwGKExPfN2kBGbc2a', 'DNI', '60770958', 'Centro de Lima 666', '908955357', 10, 4),
 
 --MOZO NUEVOS
-('Pepe', 'Lucho', 'Silva', 'juan.mesero@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '45679912', 'Direccion 3', '923456089', 3, 3),
-('Enrique', 'Rodríguez', 'Silvado', 'enrique.mesero@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '45679912', 'Direccion 3', '923056789', 3, 3),
-('Pedro', 'Manchado', 'Casas', 'enrique.mesero@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '45672912', 'Direccion 3', '920056789', 3, 3),
-('Luisa', 'Hermegelinda', 'Hector', 'enrique.mesero@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '45618912', 'Direccion 3', '903456789', 3, 3),
-
+('Pepe', 'Lucho', 'Silva', 'pepe.mesero@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '45609911', 'Direccion 3', '923456089', 3, 3),
+('Enrique', 'Rodríguez', 'Silvado', 'enrique.mesero@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '09679912', 'Direccion 3', '923056789', 3, 3),
+('Pedro', 'Manchado', 'Casas', 'pedro.mesero@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '91672912', 'Direccion 3', '920056789', 3, 3),
+('Luisa', 'Hermegelinda', 'Hector', 'luisa.mesero@gmail.com', '$2a$12$LcqfCHJmnXIeglxKPqxeseYP2YwELUVFqAscddldDmw1ggnBdSmbC', 'DNI', '75618912', 'Direccion 3', '903456789', 3, 3)
