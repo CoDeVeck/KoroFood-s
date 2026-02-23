@@ -407,7 +407,9 @@ export class DetallePedidoComponent implements OnInit, OnDestroy {
   }
 
   calcularTotal(): number {
-    return this.detalles.reduce((sum, detalle) => sum + detalle.subTotal, 0);
+    return this.detalles
+      .filter((detalle) => detalle.estado === 'ENT')
+      .reduce((sum, detalle) => sum + detalle.subTotal, 0);
   }
 
   volver(): void {
