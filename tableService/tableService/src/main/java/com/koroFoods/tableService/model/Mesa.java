@@ -1,7 +1,8 @@
 package com.koroFoods.tableService.model;
 
 import com.koroFoods.tableService.enums.EstadoMesa;
-import com.koroFoods.tableService.enums.TipoMesa;
+import com.koroFoods.tableService.enums.Zona;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,16 +23,19 @@ public class Mesa {
     private Integer idMesa;
 
     @Column(name = "NUMERO_MESA")
-    private int numeroMesa;
+    private Integer numeroMesa;
 
     @Column(name = "CAPACIDAD")
-    private int capacidad;
+    private Integer capacidad;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "TIPO")
-    private TipoMesa tipo;
+    @Column(name = "ZONA")
+    private Zona zona;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ESTADO")
     private EstadoMesa estado;
+    
+    @Column(name = "ACTIVO")
+    private Boolean activo;
 }

@@ -1,13 +1,14 @@
 package com.koroFoods.reservationService.model;
 
 import com.koroFoods.reservationService.enums.EstadoReserva;
+import com.koroFoods.reservationService.enums.TipoReserva;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -28,17 +29,33 @@ public class Reserva {
 
     @Column(name = "ID_MESA")
     private Integer idMesa;
+    
+    @Column(name = "ID_EVENTO")
+    private Integer idEvento;
 
-    @Column(name = "FECHA_HORA")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TIPO_RESERVA")
+    private TipoReserva tipoReserva;
+    
+    @Column(name = "FECHA_RESERVA")
     private LocalDateTime fechaHora;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ESTADO")
     private EstadoReserva estado;
 
-    @Column(name = "MONTO")
-    private BigDecimal monto;
-
     @Column(name = "FECHA_REGISTRO")
     private LocalDateTime fechaRegistro;
+    
+    @Column(name = "OBSERVACIONES")
+    private String observaciones;
+    
+    @Column(name = "CODIGO_VERIFICACION")
+    private String codigoVerificacion;
+    
+    @Column(name = "FECHA_EXPIRACION_CODIGO")
+    private LocalDateTime fechaExpCod;
+    
+    @Column(name = "VERIFICADO")
+    private Boolean verificado;
 }

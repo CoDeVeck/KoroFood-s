@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -22,15 +22,19 @@ public class EventoMesa {
     @Column(name = "ID_EVENTO_MESA")
     private Integer idEventoMesa;
 
-    @Column(name = "ID_EVENTO")
-    private Integer idEvento;
+    @ManyToOne
+    @JoinColumn(name = "ID_EVENTO", nullable = false)
+    private Evento evento;
 
     @Column(name = "ID_MESA")
     private Integer idMesa;
 
     @Column(name = "FECHA_DESDE")
-    private LocalDate fechaDesde;
+    private LocalDateTime fechaDesde;
 
     @Column(name = "FECHA_HASTA")
-    private LocalDate fechaHasta;
+    private LocalDateTime fechaHasta;
+    
+    @Column(name="ACTIVO")
+    private Boolean activo;
 }

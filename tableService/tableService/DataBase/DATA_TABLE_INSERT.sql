@@ -1,12 +1,27 @@
--- INSERTS TABLE SERVICE
-INSERT INTO TB_MESA (NUMERO_MESA, CAPACIDAD, TIPO, ESTADO) VALUES 
-(1, 4, 'SAL', 'LIB'),
-(2, 2, 'SAL', 'LIB'),
-(3, 6, 'SAL', 'OCU'),
-(4, 4, 'SAL', 'LIB'),
-(5, 8, 'EVE', 'LIB'),
-(6, 8, 'EVE', 'LIB'),
-(7, 10, 'EVE', 'RES'),
-(8, 6, 'SAL', 'LIB'),
-(9, 4, 'SAL', 'OCU'),
-(10, 12, 'EVE', 'LIB');
+INSERT INTO TB_MESA (NUMERO_MESA, CAPACIDAD, ZONA, ESTADO) VALUES
+-- Zona 1 (12 mesas)
+(101, 4, 'Z1', 'LIBRE'),
+(102, 2, 'Z1', 'LIBRE'),
+(103, 6, 'Z1', 'LIBRE'),
+(104, 4, 'Z1', 'LIBRE'),
+(105, 8, 'Z1', 'LIBRE'),
+(106, 2, 'Z1', 'LIBRE'),
+(107, 4, 'Z1', 'LIBRE'),
+(108, 6, 'Z1', 'LIBRE'),
+(109, 4, 'Z1', 'LIBRE'),
+(110, 2, 'Z1', 'LIBRE'),
+(111, 4, 'Z1', 'LIBRE'),
+(112, 6, 'Z1', 'LIBRE'),
+-- Zona 2 (12 mesas)
+(201, 4, 'Z2', 'LIBRE'),
+(202, 2, 'Z2', 'LIBRE'),
+(203, 6, 'Z2', 'LIBRE'),
+(204, 4, 'Z2', 'LIBRE'),
+(205, 8, 'Z2', 'LIBRE'),
+(206, 2, 'Z2', 'LIBRE'),
+(207, 4, 'Z2', 'LIBRE'),
+(208, 6, 'Z2', 'LIBRE'),
+(209, 4, 'Z2', 'LIBRE'),
+(210, 2, 'Z2', 'LIBRE'),
+(211, 4, 'Z2', 'LIBRE'),
+(212, 6, 'Z2', 'LIBRE');

@@ -1,8 +1,9 @@
 package com.koroFoods.reservationService.enums;
 
 public enum EstadoReserva {
-    PEN,
-    PAG,
-    ASI,
-    CAN
+	PENDIENTE,
+	PAGADA,
+	ASISTIDA,
+	CANCELADA,
+	VENCIDA
 }

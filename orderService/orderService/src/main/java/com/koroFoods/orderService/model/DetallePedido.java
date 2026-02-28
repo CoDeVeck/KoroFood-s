@@ -1,5 +1,6 @@
 package com.koroFoods.orderService.model;
 
+import com.koroFoods.orderService.enums.EstadoDetallePedido;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,6 +31,10 @@ public class DetallePedido {
 
     @Column(name = "CANTIDAD")
     private Integer cantidad;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ESTADO")
+    private EstadoDetallePedido estado;
 
     @Column(name = "PRECIO_UNITARIO")
     private BigDecimal precioUnitario;

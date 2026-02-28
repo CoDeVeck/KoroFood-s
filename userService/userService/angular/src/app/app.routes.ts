@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
+import { authRoutes } from './auth/auth.route';
 
 export const routes: Routes = [
   {
     path: 'auth',
-    loadChildren: () => import('./auth/auth.module').then((m) => m.AuthModule),
+    children: authRoutes,
   },
   {
     path: 'cliente',
@@ -27,6 +28,6 @@ export const routes: Routes = [
         (m) => m.RecepcionistaModule,
       ),
   },
-  { path: '', redirectTo: 'cliente/index', pathMatch: 'full' },
+  { path: '', redirectTo: 'cliente/inicio', pathMatch: 'full' },
   { path: '**', redirectTo: 'auth/login' },
 ];

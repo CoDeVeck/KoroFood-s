@@ -1,9 +1,9 @@
 package com.koroFoods.menuService.enums;
 
 public enum TipoPlato {
-    ENT, //entrada
-    SEG, //segundo
-    POS, //postre
-    BEB  //bebida
+    E, //entrada
+    S, //segundo - plato principal
+    P, //postre
+    B  //bebida
 }
 

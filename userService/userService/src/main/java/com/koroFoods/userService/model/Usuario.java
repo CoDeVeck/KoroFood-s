@@ -1,6 +1,7 @@
 package com.koroFoods.userService.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.koroFoods.userService.enums.TipoDocumento;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,8 +40,9 @@ public class Usuario {
     @Column(name = "CLAVE")
     private String clave;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "TIPO_DOC")
-    private String tipoDoc;
+    private TipoDocumento tipoDoc;
 
     @Column(name = "NRO_DOC")
     private String nroDoc;
@@ -58,15 +60,15 @@ public class Usuario {
     @JoinColumn(name = "ID_DISTRITO")
     private Distrito distrito;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_ROL")
     private Rol rol;
 
     @Column(name = "FECHA_REGISTRO")
     private LocalDateTime fechaRegistro;
 
-    @Column(name = "ESTADO")
-    private Boolean estado;
+    @Column(name = "ACTIVO")
+    private Boolean activo;
 
     @JsonIgnore
     @Transient
