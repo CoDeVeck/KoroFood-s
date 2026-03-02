@@ -12,7 +12,7 @@ A reservation management system for restaurants, event organizers, and anime fan
 
 
 
-## ✨ Características
+## ✨ Characteristics
 <ul>
   <li>📅 24/7 digital bookings for regular and special service</li>
   <li>🔒 Reservation validation using QR codes</li>
@@ -23,7 +23,7 @@ A reservation management system for restaurants, event organizers, and anime fan
   <li>📈 Panel of graphs with real-time data</li>
 </ul>
 
-## 🛠️ Tecnologías
+## 🛠️ Technologies
 
 Back-End
 | Technology| Use |
@@ -123,7 +123,7 @@ cd frontend
 npm install
 ng serve --ssl true
 ```
-La aplicación estará disponible en http://localhost:4200 
+The app will be available in http://localhost:4200 
 </br>
 
 ## 👥 Contributors 
